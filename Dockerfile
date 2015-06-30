@@ -1,6 +1,4 @@
-#FROM ubuntu:12.04
 FROM debian:wheezy
-#FROM debian:jessie
 
 MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
 
@@ -10,54 +8,44 @@ RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/pol
 # Enabling additional repos
 RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list
 
-# Add Dotdeb PHP5.6 repo
-RUN echo 'deb http://packages.dotdeb.org wheezy-php56 all' >> /etc/apt/sources.list && \
-    echo 'deb-src http://packages.dotdeb.org wheezy-php56 all' >> /etc/apt/sources.list && \
-    # Dotdeb repo key
-    #wget http://www.dotdeb.org/dotdeb.gpg && apt-key add dotdeb.gpg
-    gpg --keyserver keys.gnupg.net --recv-key 89DF5277 && \
-    gpg -a --export 89DF5277 | apt-key add -
-
 # Basic packages
 RUN \
-    # Update system
     DEBIAN_FRONTEND=noninteractive apt-get update && \
-    #DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y && \
-    # Install packages
-    DEBIAN_FRONTEND=noninteractive \
-    apt-get -y install \
-    pv curl wget zip git mysql-client locales supervisor ca-certificates \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install \
+    supervisor curl wget zip git mysql-client pv \
+    ca-certificates apt-transport-https locales \
     --no-install-recommends && \
     # Cleanup
     DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Add Dotdeb PHP5.6 repo
+RUN curl -s http://www.dotdeb.org/dotdeb.gpg | apt-key add - && \
+    echo 'deb http://packages.dotdeb.org wheezy-php56 all' > /etc/apt/sources.list.d/dotdeb.list && \
+    echo 'deb-src http://packages.dotdeb.org wheezy-php56 all' >> /etc/apt/sources.list.d/dotdeb.list
 
 # PHP packages
 RUN \
-    # Update system
     DEBIAN_FRONTEND=noninteractive apt-get update && \
-    #DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y && \
-    # Install packages
-    DEBIAN_FRONTEND=noninteractive \
-    apt-get -y install \
-    pv curl wget zip git mysql-client locales supervisor \
-    php5-fpm php5-mysql php5-imagick imagemagick \
-    php5-mcrypt php5-curl php5-gd php5-sqlite php5-common \
-    php-pear php5-json php5-memcache php5-xdebug php5-intl \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install \
+    php5-fpm php5-common php5-cli php-pear php5-mysql php5-imagick php5-mcrypt \
+    php5-curl php5-gd php5-sqlite php5-json php5-memcache php5-intl \
     --no-install-recommends && \
     # Cleanup
     DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Adding NodeJS repo (for up-to-date versions)
+# This command is a stripped down version of "curl --silent --location https://deb.nodesource.com/setup_0.12 | bash -"
+RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
+    echo 'deb https://deb.nodesource.com/node_0.12 wheezy main' > /etc/apt/sources.list.d/nodesource.list && \
+    echo 'deb-src https://deb.nodesource.com/node_0.12 wheezy main' >> /etc/apt/sources.list.d/nodesource.list
+
 # Other language packages and dependencies
 RUN \
-    # Update system
     DEBIAN_FRONTEND=noninteractive apt-get update && \
-    #DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y && \
-    # Install packages
-    DEBIAN_FRONTEND=noninteractive \
-    apt-get -y install \
-    ruby-full rlwrap \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install \
+    ruby1.9.1-full rlwrap nodejs \
     --no-install-recommends && \
     # Cleanup
     DEBIAN_FRONTEND=noninteractive apt-get clean && \
@@ -71,11 +59,6 @@ ENV LC_ALL C.UTF-8
 
 # Bundler
 RUN gem install bundler
-
-# Node JS 0.12.0
-RUN curl https://deb.nodesource.com/node012/pool/main/n/nodejs/nodejs_0.12.0-1nodesource1~wheezy1_amd64.deb > node.deb \
-    && dpkg -i node.deb \
-    && rm node.deb
 
 # Grunt, Bower
 RUN npm install -g grunt-cli bower
