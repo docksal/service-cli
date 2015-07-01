@@ -89,21 +89,11 @@ ENV PATH /root/.composer/vendor/bin:$PATH
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-# SSH settigns
+# Copy configs and scripts
 COPY config/.ssh /root/.ssh
-# Drush settings
 COPY config/.drush /root/.drush
-
-# Startup script
-COPY ./startup.sh /opt/startup.sh
-RUN chmod +x /opt/startup.sh
-
-# Startup script
-COPY ./startup-local.sh /opt/startup-local.sh
-RUN chmod +x /opt/startup-local.sh
-
-# supervisord config
-COPY ./config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY startup.sh /opt/startup.sh
 
 EXPOSE 9000
 
