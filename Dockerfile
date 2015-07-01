@@ -11,10 +11,9 @@ RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list
 # Basic packages
 RUN \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
     supervisor curl wget zip git mysql-client pv \
-    ca-certificates apt-transport-https locales \
-    --no-install-recommends && \
+    ca-certificates apt-transport-https locales && \
     # Cleanup
     DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -27,10 +26,9 @@ RUN curl -s http://www.dotdeb.org/dotdeb.gpg | apt-key add - && \
 # PHP packages
 RUN \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
     php5-fpm php5-common php5-cli php-pear php5-mysql php5-imagick php5-mcrypt \
-    php5-curl php5-gd php5-sqlite php5-json php5-memcache php5-intl \
-    --no-install-recommends && \
+    php5-curl php5-gd php5-sqlite php5-json php5-memcache php5-intl && \
     # Cleanup
     DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -44,9 +42,8 @@ RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
 # Other language packages and dependencies
 RUN \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes install \
-    ruby1.9.1-full rlwrap nodejs \
-    --no-install-recommends && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+    ruby1.9.1-full rlwrap nodejs && \
     # Cleanup
     DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
