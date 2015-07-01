@@ -18,21 +18,6 @@ RUN \
     DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Add Dotdeb PHP5.6 repo
-RUN curl -s http://www.dotdeb.org/dotdeb.gpg | apt-key add - && \
-    echo 'deb http://packages.dotdeb.org wheezy-php56 all' > /etc/apt/sources.list.d/dotdeb.list && \
-    echo 'deb-src http://packages.dotdeb.org wheezy-php56 all' >> /etc/apt/sources.list.d/dotdeb.list
-
-# PHP packages
-RUN \
-    DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    php5-fpm php5-common php5-cli php-pear php5-mysql php5-imagick php5-mcrypt \
-    php5-curl php5-gd php5-sqlite php5-json php5-memcache php5-intl && \
-    # Cleanup
-    DEBIAN_FRONTEND=noninteractive apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 # Adding NodeJS repo (for up-to-date versions)
 # This command is a stripped down version of "curl --silent --location https://deb.nodesource.com/setup_0.12 | bash -"
 RUN curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
@@ -60,6 +45,21 @@ RUN gem install bundler
 # Grunt, Bower
 RUN npm install -g grunt-cli bower
 
+# Add Dotdeb PHP5.6 repo
+RUN curl -s http://www.dotdeb.org/dotdeb.gpg | apt-key add - && \
+    echo 'deb http://packages.dotdeb.org wheezy-php56 all' > /etc/apt/sources.list.d/dotdeb.list && \
+    echo 'deb-src http://packages.dotdeb.org wheezy-php56 all' >> /etc/apt/sources.list.d/dotdeb.list
+
+# PHP packages
+RUN \
+    DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+    php5-fpm php5-common php5-cli php-pear php5-mysql php5-imagick php5-mcrypt \
+    php5-curl php5-gd php5-sqlite php5-json php5-memcache php5-intl php5-xdebug && \
+    # Cleanup
+    DEBIAN_FRONTEND=noninteractive apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 # Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -70,16 +70,24 @@ RUN composer global require drush/drush:7.* && \
 
 RUN \
     # PHP settings changes
-    sed -i 's/memory_limit = .*/memory_limit = 512M/' /etc/php5/cli/php.ini && \
+    sed -i 's/memory_limit = .*/memory_limit = 256M/' /etc/php5/fpm/php.ini && \
     sed -i 's/max_execution_time = .*/max_execution_time = 300/' /etc/php5/cli/php.ini && \
     sed -i 's/upload_max_filesize = .*/upload_max_filesize = 500M/' /etc/php5/fpm/php.ini && \
     sed -i 's/post_max_size = .*/post_max_size = 500M/' /etc/php5/fpm/php.ini && \
-    sed -i "/error_log = php_errors.log/c\error_log = \/dev\/stdout/" /etc/php5/fpm/php.ini && \
+    sed -i '/error_log = php_errors.log/c\error_log = \/dev\/stdout/' /etc/php5/fpm/php.ini && \
+    # PHP CLI settings changes
+    sed -i 's/memory_limit = .*/memory_limit = 512M/' /etc/php5/cli/php.ini && \
+    sed -i 's/max_execution_time = .*/max_execution_time = 600/' /etc/php5/cli/php.ini && \
+    sed -i '/error_log = php_errors.log/c\error_log = \/dev\/stdout/' /etc/php5/cli/php.ini && \
     # PHP FPM config changes
     sed -i '/listen = /c\listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
     sed -i '/listen.allowed_clients/c\;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i "/;daemonize = yes/c\daemonize = no" /etc/php5/fpm/php-fpm.conf && \
-    sed -i '/;catch_workers_output/c\catch_workers_output = yes' /etc/php5/fpm/php-fpm.conf
+    sed -i '/;daemonize = yes/c\daemonize = no' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/;catch_workers_output/c\catch_workers_output = yes' /etc/php5/fpm/php-fpm.conf && \
+    # PHP module settings
+    echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini
+
+COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 WORKDIR /var/www
 
