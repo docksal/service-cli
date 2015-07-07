@@ -12,7 +12,7 @@ RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list
 RUN \
     DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    supervisor curl wget zip git mysql-client pv \
+    supervisor curl wget zip git mysql-client pv openssh-client rsync \
     ca-certificates apt-transport-https locales && \
     # Cleanup
     DEBIAN_FRONTEND=noninteractive apt-get clean && \
