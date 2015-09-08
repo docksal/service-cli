@@ -105,6 +105,9 @@ COPY startup.sh /opt/startup.sh
 
 EXPOSE 9000
 
+# Default SSH key name
+ENV SSH_KEY_NAME id_rsa
+
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
 
