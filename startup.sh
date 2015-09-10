@@ -28,6 +28,17 @@ copy_dot_acquia ()
   fi
 }
 
+# Copy Drush settings from host
+# @param $1 path to the home directory (parent of the .drush directory)
+copy_dot_drush ()
+{
+  local path="$1/.drush"
+  if [ -d $path ]; then
+    echo "Copying Drush settigns in $path from host..."
+    cp -r $path ~
+  fi
+}
+
 # Copy SSH keys from host if available
 copy_ssh_key '/.home/.ssh' # Generic
 copy_ssh_key '/.home-linux/.ssh' # Linux (docker-compose)
@@ -37,6 +48,11 @@ copy_ssh_key '/.home-b2d/.ssh' # boot2docker (docker-compose)
 copy_dot_acquia '/.home' # Generic
 copy_dot_acquia '/.home-linux' # Linux (docker-compose)
 copy_dot_acquia '/.home-b2d' # boot2docker (docker-compose)
+
+# Copy Drush settings from host if available
+copy_dot_drush '/.home' # Generic
+copy_dot_drush '/.home-linux' # Linux (docker-compose)
+copy_dot_drush '/.home-b2d' # boot2docker (docker-compose)
 
 echo "PHP5-FPM with environment variables"
 # Update php5-fpm with access to Docker environment variables
