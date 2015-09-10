@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default SSH key name
-if [ -z $SSH_KEY_NAME ]; then $SSH_KEY_NAME='id_rsa'; fi
+if [ -z $SSH_KEY_NAME ]; then SSH_KEY_NAME='id_rsa'; fi
 echo "Using SSH key name: $SSH_KEY_NAME"
 
 # Copy SSH key pairs.
@@ -11,8 +11,8 @@ copy_ssh_key ()
   local path="$1/$SSH_KEY_NAME"
   if [ -f $path ]; then
     echo "Copying SSH key $path from host..."
-    cp $path* ~/.ssh/
-    chmod 600 ~/.ssh/$SSH_KEY_NAME*
+    cp $path ~/.ssh/id_rsa
+    chmod 600 ~/.ssh/id_rsa
   fi
 }
 
@@ -29,14 +29,14 @@ copy_dot_acquia ()
 }
 
 # Copy SSH keys from host if available
-copy_ssh_key '/.home-linux/.ssh' # Linux (current)
-copy_ssh_key '/.home-b2d/.ssh' # boot2docker (current)
-copy_ssh_key '/.ssh' # Linux (legacy)
-copy_ssh_key '/.ssh-b2d' # boot2docker (current)
+copy_ssh_key '/.home/.ssh' # Generic
+copy_ssh_key '/.home-linux/.ssh' # Linux (docker-compose)
+copy_ssh_key '/.home-b2d/.ssh' # boot2docker (docker-compose)
 
 # Copy Acquia Cloud API credentials from host if available
-copy_dot_acquia '/.home-linux' # Linux
-copy_dot_acquia '/.home-b2d' # boot2docker
+copy_dot_acquia '/.home' # Generic
+copy_dot_acquia '/.home-linux' # Linux (docker-compose)
+copy_dot_acquia '/.home-b2d' # boot2docker (docker-compose)
 
 echo "PHP5-FPM with environment variables"
 # Update php5-fpm with access to Docker environment variables
