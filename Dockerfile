@@ -23,6 +23,7 @@ RUN \
     ca-certificates \
     apt-transport-https \
     locales \
+    mc \
     supervisor \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean \
