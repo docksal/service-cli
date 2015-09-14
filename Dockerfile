@@ -135,6 +135,9 @@ COPY startup.sh /opt/startup.sh
 
 EXPOSE 9000
 
+# Set TERM so text editors/etc. can be used
+ENV TERM xterm
+
 # Default SSH key name
 ENV SSH_KEY_NAME id_rsa
 
