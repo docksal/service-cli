@@ -61,18 +61,22 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Drush and Drupal Console
-RUN composer global require drush/drush:7.* \
-    && curl -LSs http://drupalconsole.com/installer | php \
-    && mv console.phar /usr/local/bin/drupal
-
-# Add Composer bin directory to PATH
+RUN curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 ENV PATH /root/.composer/vendor/bin:$PATH
 
-# Drush modules
-RUN drush dl registry_rebuild
+RUN \
+    # Drush 6,7 (default),8
+    composer global require drush/drush:7.* && \
+    mkdir /root/drush6 && cd /root/drush6 && composer require drush/drush:6.* && \
+    mkdir /root/drush8 && cd /root/drush8 && composer require drush/drush:dev-master --prefer-dist && \
+    echo "alias drush6='/root/drush6/vendor/bin/drush'" >> /root/.bashrc && \
+    echo "alias drush7='/root/.composer/vendor/bin/drush'" >> /root/.bashrc && \
+    echo "alias drush8='/root/drush8/vendor/bin/drush'" >> /root/.bashrc && \
+    # Drupal Console
+    curl -sSL http://drupalconsole.com/installer | php && \
+    mv console.phar /usr/local/bin/drupal && \
+    # Drush modules
+    drush dl registry_rebuild
 
 ## PHP settings
 RUN mkdir -p /var/www/docroot && \
