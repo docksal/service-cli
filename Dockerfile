@@ -73,11 +73,15 @@ RUN \
     echo "alias drush6='/root/drush6/vendor/bin/drush'" >> /root/.bashrc && \
     echo "alias drush7='/root/.composer/vendor/bin/drush'" >> /root/.bashrc && \
     echo "alias drush8='/root/drush8/vendor/bin/drush'" >> /root/.bashrc && \
+    # Drush modules
+    drush dl registry_rebuild && \
     # Drupal Console
     curl -sSL http://drupalconsole.com/installer | php && \
     mv console.phar /usr/local/bin/drupal && \
-    # Drush modules
-    drush dl registry_rebuild
+    # Drupal Coder (8.x) => matching version of PHP_CodeSniffer
+    composer global require drupal/coder && \
+    drush dl coder-8.x-2.3 --destination=/root/.drush && \
+    phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
 
 ## PHP settings
 RUN mkdir -p /var/www/docroot && \
