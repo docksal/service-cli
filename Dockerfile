@@ -13,7 +13,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
     curl \
     wget \
-    zip \
+    zip unzip \
     git \
     mysql-client \
     pv \
