@@ -16,6 +16,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     zip unzip \
     git \
     mysql-client \
+    imagemagick \
     pv \
     openssh-client \
     rsync \
