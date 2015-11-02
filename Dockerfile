@@ -36,8 +36,8 @@ RUN dpkg-reconfigure locales && \
     /usr/sbin/update-locale LANG=C.UTF-8
 ENV LC_ALL C.UTF-8
 
-# Create a non-root user with access to sudo
-RUN useradd -m -s /bin/bash -G sudo -p docker docker && \
+# Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
+RUN useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Add Dotdeb PHP5.6 repo
