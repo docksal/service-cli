@@ -30,7 +30,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Set timezone and locale.
+# Set timezone and locale
 RUN dpkg-reconfigure locales && \
     locale-gen C.UTF-8 && \
     /usr/sbin/update-locale LANG=C.UTF-8
@@ -73,16 +73,16 @@ RUN mkdir -p /var/www/docroot && \
     sed -i 's/max_execution_time = .*/max_execution_time = 300/' /etc/php5/fpm/php.ini && \
     sed -i 's/upload_max_filesize = .*/upload_max_filesize = 500M/' /etc/php5/fpm/php.ini && \
     sed -i 's/post_max_size = .*/post_max_size = 500M/' /etc/php5/fpm/php.ini && \
-    sed -i '/error_log = php_errors.log/c\error_log = \/dev\/stdout/' /etc/php5/fpm/php.ini && \
-    sed -i '/listen = /c\listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/listen.allowed_clients/c\;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/;daemonize = yes/c\daemonize = no' /etc/php5/fpm/php-fpm.conf && \
-    sed -i '/;catch_workers_output/c\catch_workers_output = yes' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout/' /etc/php5/fpm/php.ini && \
     sed -i '/user = /c user = docker' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/listen = /c listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/;daemonize = yes/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/;catch_workers_output/c catch_workers_output = yes' /etc/php5/fpm/php-fpm.conf && \
     # PHP CLI settings
     sed -i 's/memory_limit = .*/memory_limit = 512M/' /etc/php5/cli/php.ini && \
     sed -i 's/max_execution_time = .*/max_execution_time = 600/' /etc/php5/cli/php.ini && \
-    sed -i '/error_log = php_errors.log/c\error_log = \/dev\/stdout/' /etc/php5/cli/php.ini && \
+    sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout/' /etc/php5/cli/php.ini && \
     # PHP module settings
     echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini
 
@@ -108,14 +108,12 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 
 # Bundler
 RUN gem install bundler
-
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
 # Grunt, Bower
 RUN npm install -g grunt-cli bower
 
-WORKDIR /var/www
 RUN \
     # Composer
     curl -sSL https://getcomposer.org/installer | php && \
@@ -151,9 +149,10 @@ COPY startup.sh /opt/startup.sh
 
 EXPOSE 9000
 
+WORKDIR /var/www
+
 # Set TERM so text editors/etc. can be used
 ENV TERM xterm
-
 # Default SSH key name
 ENV SSH_KEY_NAME id_rsa
 
