@@ -147,6 +147,9 @@ COPY config/.drush /home/docker/.drush
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
+# Fix permissions after COPY
+RUN sudo chown -R docker:users /home/docker
+
 EXPOSE 9000
 
 WORKDIR /var/www
