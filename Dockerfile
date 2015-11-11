@@ -74,6 +74,7 @@ RUN mkdir -p /var/www/docroot && \
     sed -i 's/upload_max_filesize = .*/upload_max_filesize = 500M/' /etc/php5/fpm/php.ini && \
     sed -i 's/post_max_size = .*/post_max_size = 500M/' /etc/php5/fpm/php.ini && \
     sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout/' /etc/php5/fpm/php.ini && \
+    sed -i '/;always_populate_raw_post_data/c always_populate_raw_post_data = -1/' /etc/php5/fpm/php.ini
     sed -i '/user = /c user = docker' /etc/php5/fpm/pool.d/www.conf && \
     sed -i '/listen = /c listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
     sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
