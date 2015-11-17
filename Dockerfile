@@ -37,9 +37,14 @@ RUN dpkg-reconfigure locales && \
     /usr/sbin/update-locale LANG=C.UTF-8
 ENV LC_ALL C.UTF-8
 
-# Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
-RUN useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
-    echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+RUN \
+    # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
+    useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
+    echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
+    # Install gosu and give access to it for the users group. gosu will be used to run services as a different user.
+    curl -sSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
+    chown root:users /usr/local/bin/gosu && \
+    chmod +sx /usr/local/bin/gosu
 
 # Add Dotdeb PHP5.6 repo
 RUN curl -sSL http://www.dotdeb.org/dotdeb.gpg | apt-key add - && \
@@ -165,4 +170,4 @@ ENV SSH_KEY_NAME id_rsa
 ENTRYPOINT ["/opt/startup.sh"]
 
 # By default, launch supervisord to keep the container running.
-CMD ["sudo", "supervisord"]
+CMD ["gosu", "root", "supervisord"]
