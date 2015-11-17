@@ -124,10 +124,10 @@ RUN npm install -g grunt-cli bower
 RUN \
     # Composer
     curl -sSL https://getcomposer.org/installer | php && \
-    sudo mv composer.phar /usr/local/bin/composer && \
+    mv composer.phar /usr/local/bin/composer && \
     # Drupal Console
     curl -sSL http://drupalconsole.com/installer | php && \
-    sudo mv console.phar /usr/local/bin/drupal
+    mv console.phar /usr/local/bin/drupal
 ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
 # All further RUN commands will run as the "docker" user
