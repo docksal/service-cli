@@ -96,10 +96,10 @@ RUN mkdir -p /var/www/docroot && \
 COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 # Adding NodeJS repo (for up-to-date versions)
-# This command is a stripped down version of "curl --silent --location https://deb.nodesource.com/setup_0.12 | bash -"
+# This is a stripped down version of the official nodejs install script (https://deb.nodesource.com/setup_4.x)
 RUN curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo 'deb https://deb.nodesource.com/node_0.12 wheezy main' > /etc/apt/sources.list.d/nodesource.list && \
-    echo 'deb-src https://deb.nodesource.com/node_0.12 wheezy main' >> /etc/apt/sources.list.d/nodesource.list
+    echo 'deb https://deb.nodesource.com/node_4.x wheezy main' > /etc/apt/sources.list.d/nodesource.list && \
+    echo 'deb-src https://deb.nodesource.com/node_4.x wheezy main' >> /etc/apt/sources.list.d/nodesource.list
 
 # Other language packages and dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
