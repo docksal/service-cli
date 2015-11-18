@@ -106,8 +106,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
     ruby1.9.1-full \
     rlwrap \
-    make \
-    gcc \
+    build-essential \
     nodejs \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean &&\
