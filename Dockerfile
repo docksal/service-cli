@@ -97,9 +97,9 @@ COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 # Adding NodeJS repo (for up-to-date versions)
 # This is a stripped down version of the official nodejs install script (https://deb.nodesource.com/setup_4.x)
-RUN curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo 'deb https://deb.nodesource.com/node_4.x wheezy main' > /etc/apt/sources.list.d/nodesource.list && \
-    echo 'deb-src https://deb.nodesource.com/node_4.x wheezy main' >> /etc/apt/sources.list.d/nodesource.list
+# RUN curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
+#     echo 'deb https://deb.nodesource.com/node_4.x wheezy main' > /etc/apt/sources.list.d/nodesource.list && \
+#     echo 'deb-src https://deb.nodesource.com/node_4.x wheezy main' >> /etc/apt/sources.list.d/nodesource.list
 
 # Other language packages and dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -107,7 +107,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     ruby1.9.1-full \
     rlwrap \
     build-essential \
-    nodejs \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -116,11 +115,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
-
-# Latest npm, grunt, bower, gulp
-RUN \
-    npm install -g npm && \
-    npm install -g grunt-cli bower gulp
 
 RUN \
     # Composer
@@ -133,6 +127,18 @@ ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
 # All further RUN commands will run as the "docker" user
 USER docker
+
+# Install nvm and a default node version
+ENV NODE_VERSION 4.2.2
+ENV NVM_DIR /home/docker/.nvm
+RUN \
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.29.0/install.sh | bash && \
+    . $NVM_DIR/nvm.sh && \
+    nvm install $NODE_VERSION && \
+    nvm alias default $NODE_VERSION && \
+    # Install global node packages
+    npm install -g npm && \
+    npm install -g bower
 
 RUN \
     # Drush 6,7 (default),8
