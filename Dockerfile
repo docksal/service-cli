@@ -127,8 +127,8 @@ RUN \
     curl -sSL https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer && \
     # Drupal Console
-    curl -sSL http://drupalconsole.com/installer | php && \
-    mv console.phar /usr/local/bin/drupal
+    curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/0.9.7/console.phar -o /usr/local/bin/drupal && \
+    chmod +x /usr/local/bin/drupal
 ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
 # All further RUN commands will run as the "docker" user
