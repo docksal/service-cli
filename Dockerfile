@@ -112,13 +112,15 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     && DEBIAN_FRONTEND=noninteractive apt-get clean &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Bundler
+# bundler
 RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-# Grunt, Bower
-RUN npm install -g grunt-cli bower
+# Latest npm, grunt, bower, gulp
+RUN \
+    npm install -g npm && \
+    npm install -g grunt-cli bower gulp
 
 RUN \
     # Composer
