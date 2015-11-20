@@ -1,4 +1,4 @@
-FROM blinkreaction/drupal-base:wheezy
+FROM blinkreaction/drupal-base:jessie
 
 MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
 
@@ -22,11 +22,6 @@ RUN \
     # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
     useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# Add Dotdeb PHP5.6 repo
-RUN curl -sSL http://www.dotdeb.org/dotdeb.gpg | apt-key add - && \
-    echo 'deb http://packages.dotdeb.org wheezy-php56 all' > /etc/apt/sources.list.d/dotdeb.list && \
-    echo 'deb-src http://packages.dotdeb.org wheezy-php56 all' >> /etc/apt/sources.list.d/dotdeb.list
 
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -74,14 +69,14 @@ COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 # Adding NodeJS repo (for up-to-date versions)
 # This is a stripped down version of the official nodejs install script (https://deb.nodesource.com/setup_4.x)
-# RUN curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-#     echo 'deb https://deb.nodesource.com/node_4.x wheezy main' > /etc/apt/sources.list.d/nodesource.list && \
-#     echo 'deb-src https://deb.nodesource.com/node_4.x wheezy main' >> /etc/apt/sources.list.d/nodesource.list
+RUN curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
+    echo 'deb https://deb.nodesource.com/node_4.x jessie main' > /etc/apt/sources.list.d/nodesource.list && \
+    echo 'deb-src https://deb.nodesource.com/node_4.x jessie main' >> /etc/apt/sources.list.d/nodesource.list
 
 # Other language packages and dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    ruby1.9.1-full \
+    ruby-full \
     rlwrap \
     build-essential \
     # Cleanup
