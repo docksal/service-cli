@@ -1,18 +1,10 @@
-FROM debian:wheezy
+FROM blinkreaction/drupal-base:wheezy
 
 MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
-
-# Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
-RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
-
-# Enabling additional repos
-RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list
 
 # Basic packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    curl \
-    wget \
     zip unzip \
     git \
     mysql-client \
@@ -20,31 +12,16 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     pv \
     openssh-client \
     rsync \
-    ca-certificates \
     apt-transport-https \
-    locales \
-    mc \
-    supervisor \
     sudo \
-    procps \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Set timezone and locale
-RUN dpkg-reconfigure locales && \
-    locale-gen C.UTF-8 && \
-    /usr/sbin/update-locale LANG=C.UTF-8
-ENV LC_ALL C.UTF-8
-
 RUN \
     # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
     useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
-    echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
-    # Install gosu and give access to it for the users group. gosu will be used to run services as a different user.
-    curl -sSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
-    chown root:users /usr/local/bin/gosu && \
-    chmod +sx /usr/local/bin/gosu
+    echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Add Dotdeb PHP5.6 repo
 RUN curl -sSL http://www.dotdeb.org/dotdeb.gpg | apt-key add - && \
