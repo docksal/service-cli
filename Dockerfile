@@ -140,8 +140,6 @@ EXPOSE 9000
 
 WORKDIR /var/www
 
-# Set TERM so text editors/etc. can be used
-ENV TERM xterm
 # Default SSH key name
 ENV SSH_KEY_NAME id_rsa
 
