@@ -58,10 +58,12 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
     sed -i '/;daemonize/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
     sed -i '/;catch_workers_output/c catch_workers_output = yes' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/fpm/php-fpm.conf && \
     # PHP CLI settings
     sed -i '/memory_limit = /c memory_limit = 512M' /etc/php5/cli/php.ini && \
     sed -i '/max_execution_time = /c max_execution_time = 600' /etc/php5/cli/php.ini && \
     sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
+    sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
     # PHP module settings
     echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini
 
