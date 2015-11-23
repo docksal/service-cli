@@ -109,7 +109,7 @@ USER docker
 ENV NODE_VERSION 4.2.2
 ENV NVM_DIR /home/docker/.nvm
 RUN \
-    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.29.0/install.sh | bash && \
+    curl -sSL https://raw.githubusercontent.com/creationix/nvm/v0.29.0/install.sh | bash && \
     . $NVM_DIR/nvm.sh && \
     nvm install $NODE_VERSION && \
     nvm alias default $NODE_VERSION && \
