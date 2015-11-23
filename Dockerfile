@@ -123,6 +123,7 @@ RUN \
     mkdir /home/docker/drush7 && cd /home/docker/drush7 && composer require drush/drush:7.* && \
     echo "alias drush6='/home/docker/drush6/vendor/bin/drush'" >> /home/docker/.bashrc && \
     echo "alias drush7='/home/docker/drush7/vendor/bin/drush'" >> /home/docker/.bashrc && \
+    echo "alias drush8='/usr/local/bin/drush'" >> /home/docker/.bashrc && \
     # Drush modules
     drush dl registry_rebuild-7.x-2.2 && \
     drush dl coder --destination=/home/docker/.drush && \
