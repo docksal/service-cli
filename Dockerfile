@@ -94,6 +94,9 @@ RUN \
     # Composer
     curl -sSL https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer && \
+    # Drush 8 (default)
+    curl -sSL https://github.com/drush-ops/drush/releases/download/8.0.0/drush.phar -o /usr/local/bin/drush && \
+    chmod +x /usr/local/bin/drush && \
     # Drupal Console
     curl -sSL http://drupalconsole.com/installer | php && \
     mv console.phar /usr/local/bin/drupal
@@ -115,18 +118,17 @@ RUN \
     npm install -g bower
 
 RUN \
-    # Drush 6,7 (default),8
-    composer global require drush/drush:7.* && \
+    # Legacy Drush versions (6 and 7)
     mkdir /home/docker/drush6 && cd /home/docker/drush6 && composer require drush/drush:6.* && \
-    mkdir /home/docker/drush8 && cd /home/docker/drush8 && composer require drush/drush:dev-master --prefer-dist && \
+    mkdir /home/docker/drush7 && cd /home/docker/drush7 && composer require drush/drush:7.* && \
     echo "alias drush6='/home/docker/drush6/vendor/bin/drush'" >> /home/docker/.bashrc && \
-    echo "alias drush7='/home/docker/.composer/vendor/bin/drush'" >> /home/docker/.bashrc && \
-    echo "alias drush8='/home/docker/drush8/vendor/bin/drush'" >> /home/docker/.bashrc && \
+    echo "alias drush7='/home/docker/drush7/vendor/bin/drush'" >> /home/docker/.bashrc && \
     # Drush modules
-    drush dl registry_rebuild && \
-    # Drupal Coder (8.x) => matching version of PHP_CodeSniffer
+    drush dl registry_rebuild-7.x-2.2 && \
+    drush dl coder --destination=/home/docker/.drush && \
+    drush cc drush && \
+    # Drupal Coder w/ a matching version of PHP_CodeSniffer
     composer global require drupal/coder && \
-    drush dl coder-8.x-2.3 --destination=/home/docker/.drush && \
     phpcs --config-set installed_paths /home/docker/.composer/vendor/drupal/coder/coder_sniffer
 
 # Copy configs and scripts
