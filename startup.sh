@@ -11,8 +11,8 @@ copy_ssh_key ()
   local path="$1/$SSH_KEY_NAME"
   if [ -f $path ]; then
     echo "Copying SSH key $path from host..."
-    cp $path ~/.ssh/id_rsa
-    chmod 600 ~/.ssh/id_rsa
+    sudo cp $path ~/.ssh/id_rsa
+    sudo chmod 600 ~/.ssh/id_rsa
   fi
 }
 
