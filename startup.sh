@@ -54,6 +54,9 @@ copy_dot_drush '/.home' # Generic
 copy_dot_drush '/.home-linux' # Linux (docker-compose)
 copy_dot_drush '/.home-b2d' # boot2docker (docker-compose)
 
+# Reset home directory ownership
+sudo chown $(id -u):$(id -g) -R ~
+
 echo "PHP5-FPM with environment variables"
 # Update php5-fpm with access to Docker environment variables
 ENV_CONF=/etc/php5/fpm/pool.d/env.conf
