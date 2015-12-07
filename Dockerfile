@@ -95,7 +95,7 @@ RUN \
     curl -sSL https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer && \
     # Drush 8 (default)
-    curl -sSL https://github.com/drush-ops/drush/releases/download/8.0.0/drush.phar -o /usr/local/bin/drush && \
+    curl -sSL https://github.com/drush-ops/drush/releases/download/8.0.1/drush.phar -o /usr/local/bin/drush && \
     chmod +x /usr/local/bin/drush && \
     # Drupal Console
     curl -sSL http://drupalconsole.com/installer | php && \
