@@ -98,8 +98,8 @@ RUN \
     curl -sSL https://github.com/drush-ops/drush/releases/download/8.0.1/drush.phar -o /usr/local/bin/drush && \
     chmod +x /usr/local/bin/drush && \
     # Drupal Console
-    curl -sSL http://drupalconsole.com/installer | php && \
-    mv console.phar /usr/local/bin/drupal
+    curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/0.9.9/drupal.phar -o /usr/local/bin/drupal && \
+    chmod +x /usr/local/bin/drupal
 ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
 # All further RUN commands will run as the "docker" user
