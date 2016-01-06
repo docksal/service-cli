@@ -90,15 +90,17 @@ RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
+ENV DRUSH_VERSION 8.0.1
+ENV DRUPAL_CONSOLE_VERSION 0.10.1
 RUN \
     # Composer
     curl -sSL https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer && \
     # Drush 8 (default)
-    curl -sSL https://github.com/drush-ops/drush/releases/download/8.0.1/drush.phar -o /usr/local/bin/drush && \
+    curl -sSL https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar -o /usr/local/bin/drush && \
     chmod +x /usr/local/bin/drush && \
     # Drupal Console
-    curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/0.9.9/drupal.phar -o /usr/local/bin/drupal && \
+    curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/$DRUPAL_CONSOLE_VERSION/drupal.phar -o /usr/local/bin/drupal && \
     chmod +x /usr/local/bin/drupal
 ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
@@ -106,10 +108,11 @@ ENV PATH /home/docker/.composer/vendor/bin:$PATH
 USER docker
 
 # Install nvm and a default node version
-ENV NODE_VERSION 4.2.2
+ENV NVM_VERSION 0.30.1
+ENV NODE_VERSION 4.2.4
 ENV NVM_DIR /home/docker/.nvm
 RUN \
-    curl -sSL https://raw.githubusercontent.com/creationix/nvm/v0.29.0/install.sh | bash && \
+    curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
     . $NVM_DIR/nvm.sh && \
     nvm install $NODE_VERSION && \
     nvm alias default $NODE_VERSION && \
