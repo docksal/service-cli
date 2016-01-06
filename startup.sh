@@ -11,8 +11,8 @@ copy_ssh_key ()
   local path="$1/$SSH_KEY_NAME"
   if [ -f $path ]; then
     echo "Copying SSH key $path from host..."
-    cp $path ~/.ssh/id_rsa
-    chmod 600 ~/.ssh/id_rsa
+    sudo cp $path ~/.ssh/id_rsa
+    sudo chmod 600 ~/.ssh/id_rsa
   fi
 }
 
@@ -54,17 +54,20 @@ copy_dot_drush '/.home' # Generic
 copy_dot_drush '/.home-linux' # Linux (docker-compose)
 copy_dot_drush '/.home-b2d' # boot2docker (docker-compose)
 
+# Reset home directory ownership
+sudo chown $(id -u):$(id -g) -R ~
+
 echo "PHP5-FPM with environment variables"
 # Update php5-fpm with access to Docker environment variables
 ENV_CONF=/etc/php5/fpm/pool.d/env.conf
-echo '[www]' > $ENV_CONF
+echo '[www]' | sudo tee $ENV_CONF > /dev/null 2>&1
 for var in $(env | awk -F = '{print $1}'); do
   # Skip empty/bad variables as this will blow up PHP FPM.
   if [[ ${!var} == '' || ${var} == '_' ]]; then
     echo "Skipping empty/bad variable: '"${var}"'"
   else
     echo "Adding variable: '"${var}"' = '"${!var}"'"
-    echo "env['"${var}"'] = '"${!var}"'" >> $ENV_CONF
+    echo "env['"${var}"'] = '"${!var}"'" | sudo tee -a $ENV_CONF > /dev/null 2>&1
   fi
 done
 

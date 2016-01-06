@@ -1,18 +1,10 @@
-FROM debian:wheezy
+FROM blinkreaction/drupal-base:jessie
 
 MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
-
-# Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
-RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
-
-# Enabling additional repos
-RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list
 
 # Basic packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    curl \
-    wget \
     zip unzip \
     git \
     mysql-client \
@@ -20,25 +12,16 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     pv \
     openssh-client \
     rsync \
-    ca-certificates \
     apt-transport-https \
-    locales \
-    mc \
-    supervisor \
+    sudo \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Set timezone and locale.
-RUN dpkg-reconfigure locales && \
-    locale-gen C.UTF-8 && \
-    /usr/sbin/update-locale LANG=C.UTF-8
-ENV LC_ALL C.UTF-8
-
-# Add Dotdeb PHP5.6 repo
-RUN curl -sSL http://www.dotdeb.org/dotdeb.gpg | apt-key add - && \
-    echo 'deb http://packages.dotdeb.org wheezy-php56 all' > /etc/apt/sources.list.d/dotdeb.list && \
-    echo 'deb-src http://packages.dotdeb.org wheezy-php56 all' >> /etc/apt/sources.list.d/dotdeb.list
+RUN \
+    # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
+    useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
+    echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -61,88 +44,109 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Composer
-RUN curl -sSL https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-ENV PATH /root/.composer/vendor/bin:$PATH
-
-RUN \
-    # Drush 6,7 (default),8
-    composer global require drush/drush:7.* && \
-    mkdir /root/drush6 && cd /root/drush6 && composer require drush/drush:6.* && \
-    mkdir /root/drush8 && cd /root/drush8 && composer require drush/drush:dev-master --prefer-dist && \
-    echo "alias drush6='/root/drush6/vendor/bin/drush'" >> /root/.bashrc && \
-    echo "alias drush7='/root/.composer/vendor/bin/drush'" >> /root/.bashrc && \
-    echo "alias drush8='/root/drush8/vendor/bin/drush'" >> /root/.bashrc && \
-    # Drush modules
-    drush dl registry_rebuild && \
-    # Drupal Console
-    curl -sSL http://drupalconsole.com/installer | php && \
-    mv console.phar /usr/local/bin/drupal && \
-    # Drupal Coder (8.x) => matching version of PHP_CodeSniffer
-    composer global require drupal/coder && \
-    drush dl coder-8.x-2.3 --destination=/root/.drush && \
-    phpcs --config-set installed_paths ~/.composer/vendor/drupal/coder/coder_sniffer
-
 ## PHP settings
 RUN mkdir -p /var/www/docroot && \
     # PHP-FPM settings
-    sed -i 's/memory_limit = .*/memory_limit = 256M/' /etc/php5/fpm/php.ini && \
-    sed -i 's/max_execution_time = .*/max_execution_time = 300/' /etc/php5/fpm/php.ini && \
-    sed -i 's/upload_max_filesize = .*/upload_max_filesize = 500M/' /etc/php5/fpm/php.ini && \
-    sed -i 's/post_max_size = .*/post_max_size = 500M/' /etc/php5/fpm/php.ini && \
-    sed -i '/error_log = php_errors.log/c\error_log = \/dev\/stdout/' /etc/php5/fpm/php.ini && \
-    sed -i '/listen = /c\listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/listen.allowed_clients/c\;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/;daemonize = yes/c\daemonize = no' /etc/php5/fpm/php-fpm.conf && \
-    sed -i '/;catch_workers_output/c\catch_workers_output = yes' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/memory_limit = /c memory_limit = 256M' /etc/php5/fpm/php.ini && \
+    sed -i '/max_execution_time = /c max_execution_time = 300' /etc/php5/fpm/php.ini && \
+    sed -i '/upload_max_filesize = /c upload_max_filesize = 500M' /etc/php5/fpm/php.ini && \
+    sed -i '/post_max_size = /c post_max_size = 500M' /etc/php5/fpm/php.ini && \
+    sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout' /etc/php5/fpm/php.ini && \
+    sed -i '/;always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php5/fpm/php.ini && \
+    sed -i '/user = /c user = docker' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/listen = /c listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/;daemonize/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/;catch_workers_output/c catch_workers_output = yes' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/fpm/php-fpm.conf && \
     # PHP CLI settings
-    sed -i 's/memory_limit = .*/memory_limit = 512M/' /etc/php5/cli/php.ini && \
-    sed -i 's/max_execution_time = .*/max_execution_time = 600/' /etc/php5/cli/php.ini && \
-    sed -i '/error_log = php_errors.log/c\error_log = \/dev\/stdout/' /etc/php5/cli/php.ini && \
+    sed -i '/memory_limit = /c memory_limit = 512M' /etc/php5/cli/php.ini && \
+    sed -i '/max_execution_time = /c max_execution_time = 600' /etc/php5/cli/php.ini && \
+    sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
+    sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
     # PHP module settings
     echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini
 
 COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 # Adding NodeJS repo (for up-to-date versions)
-# This command is a stripped down version of "curl --silent --location https://deb.nodesource.com/setup_0.12 | bash -"
+# This is a stripped down version of the official nodejs install script (https://deb.nodesource.com/setup_4.x)
 RUN curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo 'deb https://deb.nodesource.com/node_0.12 wheezy main' > /etc/apt/sources.list.d/nodesource.list && \
-    echo 'deb-src https://deb.nodesource.com/node_0.12 wheezy main' >> /etc/apt/sources.list.d/nodesource.list
+    echo 'deb https://deb.nodesource.com/node_4.x jessie main' > /etc/apt/sources.list.d/nodesource.list && \
+    echo 'deb-src https://deb.nodesource.com/node_4.x jessie main' >> /etc/apt/sources.list.d/nodesource.list
 
 # Other language packages and dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    ruby1.9.1-full \
+    ruby-full \
     rlwrap \
-    make \
-    gcc \
-    nodejs \
+    build-essential \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Bundler
+# bundler
 RUN gem install bundler
-
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-# Grunt, Bower
-RUN npm install -g grunt-cli bower
+ENV DRUSH_VERSION 8.0.1
+ENV DRUPAL_CONSOLE_VERSION 0.10.1
+RUN \
+    # Composer
+    curl -sSL https://getcomposer.org/installer | php && \
+    mv composer.phar /usr/local/bin/composer && \
+    # Drush 8 (default)
+    curl -sSL https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar -o /usr/local/bin/drush && \
+    chmod +x /usr/local/bin/drush && \
+    # Drupal Console
+    curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/$DRUPAL_CONSOLE_VERSION/drupal.phar -o /usr/local/bin/drupal && \
+    chmod +x /usr/local/bin/drupal
+ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
-WORKDIR /var/www
+# All further RUN commands will run as the "docker" user
+USER docker
+
+# Install nvm and a default node version
+ENV NVM_VERSION 0.30.1
+ENV NODE_VERSION 4.2.4
+ENV NVM_DIR /home/docker/.nvm
+RUN \
+    curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
+    . $NVM_DIR/nvm.sh && \
+    nvm install $NODE_VERSION && \
+    nvm alias default $NODE_VERSION && \
+    # Install global node packages
+    npm install -g npm && \
+    npm install -g bower
+
+RUN \
+    # Legacy Drush versions (6 and 7)
+    mkdir /home/docker/drush6 && cd /home/docker/drush6 && composer require drush/drush:6.* && \
+    mkdir /home/docker/drush7 && cd /home/docker/drush7 && composer require drush/drush:7.* && \
+    echo "alias drush6='/home/docker/drush6/vendor/bin/drush'" >> /home/docker/.bashrc && \
+    echo "alias drush7='/home/docker/drush7/vendor/bin/drush'" >> /home/docker/.bashrc && \
+    echo "alias drush8='/usr/local/bin/drush'" >> /home/docker/.bashrc && \
+    # Drush modules
+    drush dl registry_rebuild-7.x-2.2 && \
+    drush dl coder --destination=/home/docker/.drush && \
+    drush cc drush && \
+    # Drupal Coder w/ a matching version of PHP_CodeSniffer
+    composer global require drupal/coder && \
+    phpcs --config-set installed_paths /home/docker/.composer/vendor/drupal/coder/coder_sniffer
 
 # Copy configs and scripts
-COPY config/.ssh /root/.ssh
-COPY config/.drush /root/.drush
+COPY config/.ssh /home/docker/.ssh
+COPY config/.drush /home/docker/.drush
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
+# Fix permissions after COPY
+RUN sudo chown -R docker:users /home/docker
+
 EXPOSE 9000
 
-# Set TERM so text editors/etc. can be used
-ENV TERM xterm
+WORKDIR /var/www
 
 # Default SSH key name
 ENV SSH_KEY_NAME id_rsa
@@ -151,4 +155,4 @@ ENV SSH_KEY_NAME id_rsa
 ENTRYPOINT ["/opt/startup.sh"]
 
 # By default, launch supervisord to keep the container running.
-CMD /usr/bin/supervisord -n
+CMD ["gosu", "root", "supervisord"]
