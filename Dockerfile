@@ -61,6 +61,7 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/;daemonize/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
     sed -i '/;catch_workers_output/c catch_workers_output = yes' /etc/php5/fpm/php-fpm.conf && \
     sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/;clear_env = /c clear_env = no' /etc/php5/fpm/pool.d/www.conf && \
     # PHP CLI settings
     sed -i '/memory_limit = /c memory_limit = 512M' /etc/php5/cli/php.ini && \
     sed -i '/max_execution_time = /c max_execution_time = 600' /etc/php5/cli/php.ini && \
