@@ -57,19 +57,5 @@ copy_dot_drush '/.home-b2d' # boot2docker (docker-compose)
 # Reset home directory ownership
 sudo chown $(id -u):$(id -g) -R ~
 
-echo "PHP5-FPM with environment variables"
-# Update php5-fpm with access to Docker environment variables
-ENV_CONF=/etc/php5/fpm/pool.d/env.conf
-echo '[www]' | sudo tee $ENV_CONF > /dev/null 2>&1
-for var in $(env | awk -F = '{print $1}'); do
-  # Skip empty/bad variables as this will blow up PHP FPM.
-  if [[ ${!var} == '' || ${var} == '_' ]]; then
-    echo "Skipping empty/bad variable: '"${var}"'"
-  else
-    echo "Adding variable: '"${var}"' = '"${!var}"'"
-    echo "env['"${var}"'] = '"${!var}"'" | sudo tee -a $ENV_CONF > /dev/null 2>&1
-  fi
-done
-
 # Execute passed CMD arguments
 exec "$@"
