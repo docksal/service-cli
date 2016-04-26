@@ -97,8 +97,8 @@ RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-ENV DRUSH_VERSION 8.0.1
-ENV DRUPAL_CONSOLE_VERSION 0.10.1
+ENV DRUSH_VERSION 8.0.5
+ENV DRUPAL_CONSOLE_VERSION 1.0.0-alpha1
 RUN \
     # Composer
     curl -sSL https://getcomposer.org/installer | php && \
@@ -115,8 +115,8 @@ ENV PATH /home/docker/.composer/vendor/bin:$PATH
 USER docker
 
 # Install nvm and a default node version
-ENV NVM_VERSION 0.30.1
-ENV NODE_VERSION 4.2.4
+ENV NVM_VERSION 0.31.0
+ENV NODE_VERSION 4.4.3
 ENV NVM_DIR /home/docker/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
