@@ -135,8 +135,8 @@ RUN \
     echo "alias drush7='/home/docker/drush7/vendor/bin/drush'" >> /home/docker/.bashrc && \
     echo "alias drush8='/usr/local/bin/drush'" >> /home/docker/.bashrc && \
     # Drush modules
-    drush dl registry_rebuild-7.x-2.2 && \
-    drush dl coder --destination=/home/docker/.drush && \
+    drush dl registry_rebuild --default-major=7 --destination=/home/docker/.drush && \
+    drush dl coder --default-major=8 --destination=/home/docker/.drush && \
     drush cc drush && \
     # Drupal Coder w/ a matching version of PHP_CodeSniffer
     composer global require drupal/coder && \
