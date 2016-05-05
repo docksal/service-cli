@@ -11,6 +11,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     imagemagick \
     pv \
     openssh-client \
+    openssh-server \
     rsync \
     apt-transport-https \
     sudo \
@@ -22,6 +23,16 @@ RUN \
     # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
     useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
+# http://docs.docker.com/examples/running_ssh_service/
+RUN mkdir /var/run/sshd & \
+    echo 'root:drude' | chpasswd && \
+    sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    # SSH login fix. Otherwise user is kicked off after login
+    sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd && \
+    echo "export VISIBLE=now" >> /etc/profile
+ENV NOTVISIBLE "in users profile"
 
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -152,6 +163,7 @@ COPY startup.sh /opt/startup.sh
 RUN sudo chown -R docker:users /home/docker
 
 EXPOSE 9000
+EXPOSE 22
 
 WORKDIR /var/www
 
