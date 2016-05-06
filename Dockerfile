@@ -27,7 +27,7 @@ RUN \
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
 # http://docs.docker.com/examples/running_ssh_service/
 RUN mkdir /var/run/sshd & \
-    echo 'root:drude' | chpasswd && \
+    echo 'docker:docker' | chpasswd && \
     sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     # SSH login fix. Otherwise user is kicked off after login
     sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd && \
@@ -120,15 +120,15 @@ RUN \
     # Drupal Console
     curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/$DRUPAL_CONSOLE_VERSION/drupal.phar -o /usr/local/bin/drupal && \
     chmod +x /usr/local/bin/drupal
-ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
 # All further RUN commands will run as the "docker" user
 USER docker
+ENV HOME /home/docker
 
 # Install nvm and a default node version
 ENV NVM_VERSION 0.31.0
 ENV NODE_VERSION 4.4.3
-ENV NVM_DIR /home/docker/.nvm
+ENV NVM_DIR $HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
     . $NVM_DIR/nvm.sh && \
@@ -138,29 +138,31 @@ RUN \
     npm install -g npm && \
     npm install -g bower
 
+ENV PATH $PATH:$HOME/.composer/vendor/bin
 RUN \
+    # Add composer bin directory to PATH
+    echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile && \
     # Legacy Drush versions (6 and 7)
-    mkdir /home/docker/drush6 && cd /home/docker/drush6 && composer require drush/drush:6.* && \
-    mkdir /home/docker/drush7 && cd /home/docker/drush7 && composer require drush/drush:7.* && \
-    echo "alias drush6='/home/docker/drush6/vendor/bin/drush'" >> /home/docker/.bashrc && \
-    echo "alias drush7='/home/docker/drush7/vendor/bin/drush'" >> /home/docker/.bashrc && \
-    echo "alias drush8='/usr/local/bin/drush'" >> /home/docker/.bashrc && \
+    mkdir $HOME/drush6 && cd $HOME/drush6 && composer require drush/drush:6.* && \
+    mkdir $HOME/drush7 && cd $HOME/drush7 && composer require drush/drush:7.* && \
+    echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bashrc && \
+    echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bashrc && \
+    echo "alias drush8='/usr/local/bin/drush'" >> $HOME/.bashrc && \
     # Drush modules
-    drush dl registry_rebuild --default-major=7 --destination=/home/docker/.drush && \
-    drush dl coder --default-major=8 --destination=/home/docker/.drush && \
+    drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush && \
     drush cc drush && \
     # Drupal Coder w/ a matching version of PHP_CodeSniffer
     composer global require drupal/coder && \
-    phpcs --config-set installed_paths /home/docker/.composer/vendor/drupal/coder/coder_sniffer
+    phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer
 
 # Copy configs and scripts
-COPY config/.ssh /home/docker/.ssh
-COPY config/.drush /home/docker/.drush
+COPY config/.ssh $HOME/.ssh
+COPY config/.drush $HOME/.drush
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
 # Fix permissions after COPY
-RUN sudo chown -R docker:users /home/docker
+RUN sudo chown -R docker:users $HOME
 
 EXPOSE 9000
 EXPOSE 22
