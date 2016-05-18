@@ -78,28 +78,34 @@ RUN mkdir /var/run/sshd & \
     echo "export VISIBLE=now" >> /etc/profile
 ENV NOTVISIBLE "in users profile"
 
+# Add Dotdeb PHP7.0 repo
+RUN curl -sSL https://www.dotdeb.org/dotdeb.gpg | apt-key add - && \
+	echo 'deb https://packages.dotdeb.org jessie all' > /etc/apt/sources.list.d/php7.list && \
+    echo 'deb-src https://packages.dotdeb.org jessie all' >> /etc/apt/sources.list.d/php7.list
+
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
     blackfire-php \
     php-pear \
-    php5-curl \
-    php5-cli \
-    php5-common \
-    php5-fpm \
-    php5-gd \
-    php5-gnupg \
-    php5-imagick \
-    php5-intl \
-    php5-json \
-    php5-ldap \
-    php5-mcrypt \
-    php5-memcache \
-    php5-mysql \
-    php5-sqlite \
-    php5-ssh2 \
-    php5-xdebug \
-    php5-xsl \
+    php7.0-bcmath \
+    php7.0-cli \
+    php7.0-common \
+    php7.0-curl \
+    php7.0-fpm \
+    php7.0-gd \
+    php7.0-imagick \
+    php7.0-intl \
+    php7.0-json \
+    php7.0-ldap \
+    php7.0-mbstring \
+    php7.0-mcrypt \
+    php7.0-memcache \
+    php7.0-mysql \
+    php7.0-sqlite3 \
+    php7.0-xdebug \
+    php7.0-xml \
+    php7.0-zip \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -107,48 +113,49 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 ## PHP settings
 RUN mkdir -p /var/www/docroot && \
     # PHP-FPM settings
-    ## /etc/php5/fpm/php.ini
-    sed -i '/memory_limit =/c memory_limit = 256M' /etc/php5/fpm/php.ini && \
-    sed -i '/max_execution_time =/c max_execution_time = 300' /etc/php5/fpm/php.ini && \
-    sed -i '/upload_max_filesize =/c upload_max_filesize = 500M' /etc/php5/fpm/php.ini && \
-    sed -i '/post_max_size =/c post_max_size = 500M' /etc/php5/fpm/php.ini && \
-    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php.ini && \
-    sed -i '/always_populate_raw_post_data =/c always_populate_raw_post_data = -1' /etc/php5/fpm/php.ini && \
-    sed -i '/sendmail_path =/c sendmail_path = /bin/true' /etc/php5/fpm/php.ini && \
-    sed -i '/date.timezone =/c date.timezone = UTC' /etc/php5/fpm/php.ini && \
-    sed -i '/display_errors =/c display_errors = On' /etc/php5/fpm/php.ini && \
-    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php5/fpm/php.ini && \
-    ## /etc/php5/fpm/pool.d/www.conf
-    sed -i '/user =/c user = docker' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/catch_workers_output =/c catch_workers_output = yes' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/listen =/c listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/clear_env =/c clear_env = no' /etc/php5/fpm/pool.d/www.conf && \
-    ## /etc/php5/fpm/php-fpm.conf
-    sed -i '/daemonize =/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
-    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php-fpm.conf && \
+    ## /etc/php/7.0/fpm/php.ini
+    sed -i '/memory_limit =/c memory_limit = 256M' /etc/php/7.0/fpm/php.ini && \
+    sed -i '/max_execution_time =/c max_execution_time = 300' /etc/php/7.0/fpm/php.ini && \
+    sed -i '/upload_max_filesize =/c upload_max_filesize = 500M' /etc/php/7.0/fpm/php.ini && \
+    sed -i '/post_max_size =/c post_max_size = 500M' /etc/php/7.0/fpm/php.ini && \
+    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php/7.0/fpm/php.ini && \
+    sed -i '/always_populate_raw_post_data =/c always_populate_raw_post_data = -1' /etc/php/7.0/fpm/php.ini && \
+    sed -i '/sendmail_path =/c sendmail_path = /bin/true' /etc/php/7.0/fpm/php.ini && \
+    sed -i '/date.timezone =/c date.timezone = UTC' /etc/php/7.0/fpm/php.ini && \
+    sed -i '/display_errors =/c display_errors = On' /etc/php/7.0/fpm/php.ini && \
+    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php/7.0/fpm/php.ini && \
+    ## /etc/php/7.0/fpm/pool.d/www.conf
+    sed -i '/user =/c user = docker' /etc/php/7.0/fpm/pool.d/www.conf && \
+    sed -i '/catch_workers_output =/c catch_workers_output = yes' /etc/php/7.0/fpm/pool.d/www.conf && \
+    sed -i '/listen =/c listen = 0.0.0.0:9000' /etc/php/7.0/fpm/pool.d/www.conf && \
+    sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /etc/php/7.0/fpm/pool.d/www.conf && \
+    sed -i '/clear_env =/c clear_env = no' /etc/php/7.0/fpm/pool.d/www.conf && \
+    ## /etc/php/7.0/fpm/php-fpm.conf
+    sed -i '/daemonize =/c daemonize = no' /etc/php/7.0/fpm/php-fpm.conf && \
+    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php/7.0/fpm/php-fpm.conf && \
+    sed -i '/pid =/c pid = \/run\/php-fpm7.0.pid' /etc/php/7.0/fpm/php-fpm.conf && \
     # PHP CLI settings
-    ## /etc/php5/cli/php.ini
-    sed -i '/memory_limit =/c memory_limit = 512M' /etc/php5/cli/php.ini && \
-    sed -i '/max_execution_time =/c max_execution_time = 600' /etc/php5/cli/php.ini && \
-    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
-    sed -i '/always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php5/cli/php.ini && \
-    sed -i '/sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
-    sed -i '/date.timezone/c date.timezone = UTC' /etc/php5/cli/php.ini && \
-    sed -i '/display_errors =/c display_errors = On' /etc/php5/cli/php.ini && \
-    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php5/cli/php.ini && \
+    ## /etc/php/7.0/cli/php.ini
+    sed -i '/memory_limit =/c memory_limit = 512M' /etc/php/7.0/cli/php.ini && \
+    sed -i '/max_execution_time =/c max_execution_time = 600' /etc/php/7.0/cli/php.ini && \
+    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php/7.0/cli/php.ini && \
+    sed -i '/always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php/7.0/cli/php.ini && \
+    sed -i '/sendmail_path/c sendmail_path = /bin/true' /etc/php/7.0/cli/php.ini && \
+    sed -i '/date.timezone/c date.timezone = UTC' /etc/php/7.0/cli/php.ini && \
+    sed -i '/display_errors =/c display_errors = On' /etc/php/7.0/cli/php.ini && \
+    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php/7.0/cli/php.ini && \
     # PHP module settings
-    echo 'opcache.memory_consumption = 128' >> /etc/php5/mods-available/opcache.ini && \
-    sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
+    echo 'opcache.memory_consumption = 128' >> /etc/php/7.0/mods-available/opcache.ini && \
+    sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php/7.0/mods-available/blackfire.ini && \
     # Disable xdebug by default. We will enabled it at startup (see startup.sh)
-    php5dismod xdebug && \
+    phpdismod xdebug && \
     # Create symlinks to project level overrides (if the source files are missing, nothing will break)
-    ln -s /var/www/.docksal/etc/php/php.ini /etc/php5/fpm/conf.d/99-overrides.ini && \
-    ln -s /var/www/.docksal/etc/php/php-cli.ini /etc/php5/cli/conf.d/99-overrides.ini
+    ln -s /var/www/.docksal/etc/php/php.ini /etc/php/7.0/fpm/conf.d/99-overrides.ini && \
+    ln -s /var/www/.docksal/etc/php/php-cli.ini /etc/php/7.0/cli/conf.d/99-overrides.ini
 
 # xdebug settings
 ENV XDEBUG_ENABLED 0
-COPY config/php/xdebug.ini /etc/php5/mods-available/xdebug.ini
+COPY config/php/xdebug.ini /etc/php/7.0/mods-available/xdebug.ini
 
 # Other language packages and dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
