@@ -34,6 +34,10 @@ RUN mkdir /var/run/sshd & \
     echo "export VISIBLE=now" >> /etc/profile
 ENV NOTVISIBLE "in users profile"
 
+# Include blackfire.io repo
+RUN wget -O - https://packagecloud.io/gpg.key | sudo apt-key add - && \
+    echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
+
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
@@ -53,6 +57,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     php5-xdebug \
     php5-ssh2 \
     php5-gnupg \
+    blackfire-php \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -84,6 +89,7 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
     # PHP module settings
     echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini && \
+    sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
     # Disable xdebug by default. We will enabled it at startup (see startup.sh)
     php5dismod xdebug
 
