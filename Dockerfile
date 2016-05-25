@@ -82,12 +82,10 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/max_execution_time = /c max_execution_time = 600' /etc/php5/cli/php.ini && \
     sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
     sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
-    rm  /etc/php5/mods-available/xdebug.ini && \
     # PHP module settings
     echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini
 
-# Make xdebug available for php-fpm only
-COPY config/php5/xdebug.ini /etc/php5/fpm/conf.d/xdebug.ini
+COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 # Adding NodeJS repo (for up-to-date versions)
 # This is a stripped down version of the official nodejs install script (https://deb.nodesource.com/setup_4.x)
