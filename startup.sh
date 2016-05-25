@@ -57,5 +57,19 @@ copy_dot_drush '/.home-b2d' # boot2docker (docker-compose)
 # Reset home directory ownership
 sudo chown $(id -u):$(id -g) -R ~
 
+# Enable/disable xdebug
+php5query -s fpm -m xdebug 1>/dev/null; xdebug_status=$?
+if [ $XDEBUG_ENABLED -eq 1 ]; then
+  if [ $xdebug_status -ne 0 ]; then
+    echo "Enabling xdebug (fpm)..."
+    sudo php5enmod -s fpm xdebug
+  fi
+else
+  if [ $xdebug_status -eq 0 ]; then
+    echo "Disabling xdebug (fpm)..."
+    sudo php5dismod -s fpm xdebug
+  fi
+fi
+
 # Execute passed CMD arguments
 exec "$@"

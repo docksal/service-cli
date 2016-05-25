@@ -83,8 +83,12 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
     sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
     # PHP module settings
-    echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini
+    echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini && \
+    # Disable xdebug by default. We will enabled it at startup (see startup.sh)
+    php5dismod xdebug
 
+# xdebug settings
+ENV XDEBUG_ENABLED 0
 COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 # Adding NodeJS repo (for up-to-date versions)
