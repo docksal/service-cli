@@ -109,6 +109,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     ruby-full \
     rlwrap \
     build-essential \
+    socat \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
