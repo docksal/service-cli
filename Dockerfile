@@ -109,7 +109,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     ruby-full \
     rlwrap \
     build-essential \
-    socat \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean &&\
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -182,6 +181,8 @@ WORKDIR /var/www
 
 # Default SSH key name
 ENV SSH_KEY_NAME id_rsa
+# ssh-agent proxy socket (requires blinkreaction/ssh-agent)
+ENV SSH_AUTH_SOCK /.ssh-agent/proxy-socket
 
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]

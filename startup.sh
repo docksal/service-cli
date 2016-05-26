@@ -59,11 +59,6 @@ copy_dot_drush '/.home' # Generic
 copy_dot_drush '/.home-linux' # Linux (docker-compose)
 copy_dot_drush '/.home-b2d' # boot2docker (docker-compose)
 
-# Create proxy-socket for ssh-agent
-sudo rm ~/.ssh/socket
-sudo socat UNIX-LISTEN:~/.ssh/socket,fork UNIX-CONNECT:/.ssh-agent/socket &
-sudo chown $(id -u) ~/.ssh/socket
-
 # Reset home directory ownership
 sudo chown $(id -u):$(id -g) -R ~
 
