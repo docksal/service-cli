@@ -68,16 +68,16 @@ sudo chown $(id -u) ~/.ssh/socket
 sudo chown $(id -u):$(id -g) -R ~
 
 # Enable/disable xdebug
-php5query -s fpm -m xdebug 1>/dev/null; xdebug_status=$?
+php5query -m xdebug 1>/dev/null; xdebug_status=$?
 if [ $XDEBUG_ENABLED -eq 1 ]; then
   if [ $xdebug_status -ne 0 ]; then
-    echo "Enabling xdebug (fpm)..."
-    sudo php5enmod -s fpm xdebug
+    echo "Enabling xdebug..."
+    sudo php5enmod xdebug
   fi
 else
   if [ $xdebug_status -eq 0 ]; then
-    echo "Disabling xdebug (fpm)..."
-    sudo php5dismod -s fpm xdebug
+    echo "Disabling xdebug..."
+    sudo php5dismod xdebug
   fi
 fi
 
