@@ -11,6 +11,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     imagemagick \
     pv \
     openssh-client \
+    openssh-server \
     rsync \
     apt-transport-https \
     sudo \
@@ -22,6 +23,20 @@ RUN \
     # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
     useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
+# http://docs.docker.com/examples/running_ssh_service/
+RUN mkdir /var/run/sshd & \
+    echo 'docker:docker' | chpasswd && \
+    sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    # SSH login fix. Otherwise user is kicked off after login
+    sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd && \
+    echo "export VISIBLE=now" >> /etc/profile
+ENV NOTVISIBLE "in users profile"
+
+# Include blackfire.io repo
+RUN wget -O - https://packagecloud.io/gpg.key | sudo apt-key add - && \
+    echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
 
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -42,6 +57,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     php5-xdebug \
     php5-ssh2 \
     php5-gnupg \
+    blackfire-php \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -72,8 +88,13 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
     sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
     # PHP module settings
-    echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini
+    echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini && \
+    sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
+    # Disable xdebug by default. We will enabled it at startup (see startup.sh)
+    php5dismod xdebug
 
+# xdebug settings
+ENV XDEBUG_ENABLED 0
 COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 # Adding NodeJS repo (for up-to-date versions)
@@ -109,15 +130,15 @@ RUN \
     # Drupal Console
     curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/$DRUPAL_CONSOLE_VERSION/drupal.phar -o /usr/local/bin/drupal && \
     chmod +x /usr/local/bin/drupal
-ENV PATH /home/docker/.composer/vendor/bin:$PATH
 
 # All further RUN commands will run as the "docker" user
 USER docker
+ENV HOME /home/docker
 
 # Install nvm and a default node version
 ENV NVM_VERSION 0.31.0
 ENV NODE_VERSION 4.4.3
-ENV NVM_DIR /home/docker/.nvm
+ENV NVM_DIR $HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
     . $NVM_DIR/nvm.sh && \
@@ -127,36 +148,41 @@ RUN \
     npm install -g npm && \
     npm install -g bower
 
+ENV PATH $PATH:$HOME/.composer/vendor/bin
 RUN \
+    # Add composer bin directory to PATH
+    echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile && \
     # Legacy Drush versions (6 and 7)
-    mkdir /home/docker/drush6 && cd /home/docker/drush6 && composer require drush/drush:6.* && \
-    mkdir /home/docker/drush7 && cd /home/docker/drush7 && composer require drush/drush:7.* && \
-    echo "alias drush6='/home/docker/drush6/vendor/bin/drush'" >> /home/docker/.bashrc && \
-    echo "alias drush7='/home/docker/drush7/vendor/bin/drush'" >> /home/docker/.bashrc && \
-    echo "alias drush8='/usr/local/bin/drush'" >> /home/docker/.bashrc && \
+    mkdir $HOME/drush6 && cd $HOME/drush6 && composer require drush/drush:6.* && \
+    mkdir $HOME/drush7 && cd $HOME/drush7 && composer require drush/drush:7.* && \
+    echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bashrc && \
+    echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bashrc && \
+    echo "alias drush8='/usr/local/bin/drush'" >> $HOME/.bashrc && \
     # Drush modules
-    drush dl registry_rebuild-7.x-2.2 && \
-    drush dl coder --destination=/home/docker/.drush && \
+    drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush && \
     drush cc drush && \
     # Drupal Coder w/ a matching version of PHP_CodeSniffer
     composer global require drupal/coder && \
-    phpcs --config-set installed_paths /home/docker/.composer/vendor/drupal/coder/coder_sniffer
+    phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer
 
 # Copy configs and scripts
-COPY config/.ssh /home/docker/.ssh
-COPY config/.drush /home/docker/.drush
+COPY config/.ssh $HOME/.ssh
+COPY config/.drush $HOME/.drush
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
 # Fix permissions after COPY
-RUN sudo chown -R docker:users /home/docker
+RUN sudo chown -R docker:users $HOME
 
 EXPOSE 9000
+EXPOSE 22
 
 WORKDIR /var/www
 
 # Default SSH key name
 ENV SSH_KEY_NAME id_rsa
+# ssh-agent proxy socket (requires blinkreaction/ssh-agent)
+ENV SSH_AUTH_SOCK /.ssh-agent/proxy-socket
 
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
