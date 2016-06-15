@@ -62,18 +62,10 @@ copy_dot_drush '/.home-b2d' # boot2docker (docker-compose)
 # Reset home directory ownership
 sudo chown $(id -u):$(id -g) -R ~
 
-# Enable/disable xdebug
-php5query -m xdebug 1>/dev/null; xdebug_status=$?
+# Enable xdebug
 if [ $XDEBUG_ENABLED -eq 1 ]; then
-  if [ $xdebug_status -ne 0 ]; then
-    echo "Enabling xdebug..."
-    sudo php5enmod xdebug
-  fi
-else
-  if [ $xdebug_status -eq 0 ]; then
-    echo "Disabling xdebug..."
-    sudo php5dismod xdebug
-  fi
+  echo "Enabling xdebug..."
+  sudo php5enmod xdebug
 fi
 
 # Execute passed CMD arguments
