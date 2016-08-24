@@ -2,11 +2,17 @@ FROM blinkreaction/drupal-base:jessie
 
 MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
 
+# Include git-lfs repo
+RUN curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add - && \
+    echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' > /etc/apt/sources.list.d/github_git-lfs.list && \
+    echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list
+
 # Basic packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
     zip unzip \
     git \
+    git-lfs \
     mysql-client \
     imagemagick \
     pv \
