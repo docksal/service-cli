@@ -1,11 +1,10 @@
 # CLI Docker image for Drupal
 
-Based on Debian 7.0 "Wheezy" (debian:wheezy)
-
 ## Includes
 
 - php
   - php-fpm && php-cli 5.6.x
+  - xdebug
   - composer 1.0-dev
   - drush 6,7,8
     - registry_rebuild
@@ -32,6 +31,10 @@ Other notable tools:
 - ping
 - mc
 
+
+## xdebug
+
+xdebug is disabled by default
 
 ## License
 
