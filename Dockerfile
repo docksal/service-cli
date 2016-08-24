@@ -41,8 +41,8 @@ RUN mkdir /var/run/sshd & \
 ENV NOTVISIBLE "in users profile"
 
 # Include blackfire.io repo
-RUN wget -O - https://packagecloud.io/gpg.key | sudo apt-key add - && \
-    echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
+RUN curl -sSL https://packagecloud.io/gpg.key | apt-key add - && \
+    echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list
 
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
