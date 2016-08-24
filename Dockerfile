@@ -124,12 +124,13 @@ RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-ENV DRUSH_VERSION 8.0.5
-ENV DRUPAL_CONSOLE_VERSION 1.0.0-alpha1
+ENV COMPOSER_VERSION 1.2.0
+ENV DRUSH_VERSION 8.1.3
+ENV DRUPAL_CONSOLE_VERSION 1.0.0-beta5
 RUN \
     # Composer
-    curl -sSL https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer && \
+    curl -sSL https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar -o /usr/local/bin/composer && \
+    chmod +x /usr/local/bin/composer && \
     # Drush 8 (default)
     curl -sSL https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar -o /usr/local/bin/drush && \
     chmod +x /usr/local/bin/drush && \
@@ -142,8 +143,8 @@ USER docker
 ENV HOME /home/docker
 
 # Install nvm and a default node version
-ENV NVM_VERSION 0.31.0
-ENV NODE_VERSION 4.4.3
+ENV NVM_VERSION 0.31.6
+ENV NODE_VERSION 4.5.0
 ENV NVM_DIR $HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
