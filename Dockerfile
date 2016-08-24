@@ -127,16 +127,18 @@ ENV BUNDLE_PATH .bundler
 ENV COMPOSER_VERSION 1.2.0
 ENV DRUSH_VERSION 8.1.3
 ENV DRUPAL_CONSOLE_VERSION 1.0.0-beta5
+ENV MHSENDMAIL_VERSION 0.2.0
 RUN \
     # Composer
     curl -sSL https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar -o /usr/local/bin/composer && \
-    chmod +x /usr/local/bin/composer && \
     # Drush 8 (default)
     curl -sSL https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar -o /usr/local/bin/drush && \
-    chmod +x /usr/local/bin/drush && \
     # Drupal Console
     curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/$DRUPAL_CONSOLE_VERSION/drupal.phar -o /usr/local/bin/drupal && \
-    chmod +x /usr/local/bin/drupal
+    # mhsendmail for MailHog integration
+    curl -sSL https://github.com/mailhog/mhsendmail/releases/download/v$MHSENDMAIL_VERSION/mhsendmail_linux_amd64 -o /usr/local/bin/mhsendmail && \
+    # Make all binaries executable
+    chmod +x /usr/local/bin/*
 
 # All further RUN commands will run as the "docker" user
 USER docker
