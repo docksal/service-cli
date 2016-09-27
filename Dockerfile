@@ -190,7 +190,7 @@ WORKDIR /var/www
 
 # Default SSH key name
 ENV SSH_KEY_NAME id_rsa
-# ssh-agent proxy socket (requires blinkreaction/ssh-agent)
+# ssh-agent proxy socket (requires docksal/ssh-agent)
 ENV SSH_AUTH_SOCK /.ssh-agent/proxy-socket
 
 # Starter script
