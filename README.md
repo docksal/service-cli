@@ -1,4 +1,4 @@
-# CLI Docker image for Drupal
+# CLI Docker image for Docksal
 
 ## Includes
 
