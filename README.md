@@ -10,6 +10,7 @@
     - registry_rebuild
     - coder-8.x + phpcs
   - drupal console 0.9.7
+  - wp-cli 0.24.1
 - ruby
   - ruby 1.9.3
   - gem 1.8.23

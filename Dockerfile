@@ -140,6 +140,12 @@ RUN \
     # Make all binaries executable
     chmod +x /usr/local/bin/*
 
+# Install wp-cli
+RUN \
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
+
 # All further RUN commands will run as the "docker" user
 USER docker
 ENV HOME /home/docker
