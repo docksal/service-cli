@@ -1,4 +1,4 @@
-FROM blinkreaction/drupal-base:jessie
+FROM docksal/base:jessie
 
 MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
 
