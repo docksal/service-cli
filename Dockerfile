@@ -156,23 +156,20 @@ ENV COMPOSER_VERSION 1.2.0
 ENV DRUSH_VERSION 8.1.3
 ENV DRUPAL_CONSOLE_VERSION 1.0.0-beta5
 ENV MHSENDMAIL_VERSION 0.2.0
+ENV WPCLI_VERSION 0.24.1
 RUN \
     # Composer
-    curl -sSL https://github.com/composer/composer/releases/download/$COMPOSER_VERSION/composer.phar -o /usr/local/bin/composer && \
+    curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer && \
     # Drush 8 (default)
-    curl -sSL https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar -o /usr/local/bin/drush && \
+    curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush && \
     # Drupal Console
-    curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/$DRUPAL_CONSOLE_VERSION/drupal.phar -o /usr/local/bin/drupal && \
+    curl -sSL "https://github.com/hechoendrupal/DrupalConsole/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal && \
     # mhsendmail for MailHog integration
-    curl -sSL https://github.com/mailhog/mhsendmail/releases/download/v$MHSENDMAIL_VERSION/mhsendmail_linux_amd64 -o /usr/local/bin/mhsendmail && \
+    curl -sSL "https://github.com/mailhog/mhsendmail/releases/download/v${MHSENDMAIL_VERSION}/mhsendmail_linux_amd64" -o /usr/local/bin/mhsendmail && \
+    # Install wp-cli
+    curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp
     # Make all binaries executable
     chmod +x /usr/local/bin/*
-
-# Install wp-cli
-RUN \
-    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
-    chmod +x wp-cli.phar && \
-    mv wp-cli.phar /usr/local/bin/wp
 
 # All further RUN commands will run as the "docker" user
 USER docker
