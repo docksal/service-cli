@@ -120,6 +120,7 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/memory_limit = /c memory_limit = 512M' /etc/php5/cli/php.ini && \
     sed -i '/max_execution_time = /c max_execution_time = 600' /etc/php5/cli/php.ini && \
     sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
+    sed -i '/;always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php5/cli/php.ini && \
     sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
     # PHP module settings
     echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini && \
