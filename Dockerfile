@@ -154,8 +154,8 @@ RUN gem install bundler
 ENV BUNDLE_PATH .bundler
 
 ENV COMPOSER_VERSION 1.2.0
-ENV DRUSH_VERSION 8.1.3
-ENV DRUPAL_CONSOLE_VERSION 1.0.0-beta5
+ENV DRUSH_VERSION 8.1.5
+ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc5
 ENV MHSENDMAIL_VERSION 0.2.0
 ENV WPCLI_VERSION 0.24.1
 RUN \
@@ -168,7 +168,7 @@ RUN \
     # mhsendmail for MailHog integration
     curl -sSL "https://github.com/mailhog/mhsendmail/releases/download/v${MHSENDMAIL_VERSION}/mhsendmail_linux_amd64" -o /usr/local/bin/mhsendmail && \
     # Install wp-cli
-    curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp
+    curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp && \
     # Make all binaries executable
     chmod +x /usr/local/bin/*
 
@@ -177,8 +177,8 @@ USER docker
 ENV HOME /home/docker
 
 # Install nvm and a default node version
-ENV NVM_VERSION 0.31.6
-ENV NODE_VERSION 4.5.0
+ENV NVM_VERSION 0.32.0
+ENV NODE_VERSION 4.6.0
 ENV NVM_DIR $HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
