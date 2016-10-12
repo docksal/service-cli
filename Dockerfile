@@ -1,15 +1,42 @@
-FROM docksal/base:jessie
+FROM buildpack-deps:jessie-curl
 
 MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
 
-# Include git-lfs repo
-RUN curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add - && \
-    echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' > /etc/apt/sources.list.d/github_git-lfs.list && \
-    echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list
+# Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
+RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
 
 # Basic packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+    apt-transport-https \
+    locales \
+    # Cleanup
+    && DEBIAN_FRONTEND=noninteractive apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Set timezone and locale
+RUN dpkg-reconfigure locales && \
+    locale-gen C.UTF-8 && \
+    /usr/sbin/update-locale LANG=C.UTF-8
+ENV LC_ALL C.UTF-8
+
+# Enabling additional repos
+RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list && \
+	# Include blackfire.io repo
+	curl -sSL https://packagecloud.io/gpg.key | apt-key add - && \
+    echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list && \
+	# Include git-lfs repo
+	curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add - && \
+    echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' > /etc/apt/sources.list.d/github_git-lfs.list && \
+    echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list
+
+# Additional packages
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+    supervisor \
+    procps \
+    mc \
+    dnsutils \
     zip unzip \
     git \
     git-lfs \
@@ -30,6 +57,11 @@ RUN \
     useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
+# Install gosu and give access to the users group to use it. gosu will be used to run services as a different user.
+RUN curl -sSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
+    chown root:users /usr/local/bin/gosu && \
+    chmod +sx /usr/local/bin/gosu
+
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
 # http://docs.docker.com/examples/running_ssh_service/
 RUN mkdir /var/run/sshd & \
@@ -39,10 +71,6 @@ RUN mkdir /var/run/sshd & \
     sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd && \
     echo "export VISIBLE=now" >> /etc/profile
 ENV NOTVISIBLE "in users profile"
-
-# Include blackfire.io repo
-RUN curl -sSL https://packagecloud.io/gpg.key | apt-key add - && \
-    echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list
 
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -198,6 +226,8 @@ WORKDIR /var/www
 ENV SSH_KEY_NAME id_rsa
 # ssh-agent proxy socket (requires docksal/ssh-agent)
 ENV SSH_AUTH_SOCK /.ssh-agent/proxy-socket
+# Set TERM so text editors/etc. can be used
+ENV TERM xterm
 
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
