@@ -48,6 +48,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rsync \
     apt-transport-https \
     sudo \
+    less \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
