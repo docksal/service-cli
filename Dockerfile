@@ -1,4 +1,4 @@
-FROM buildpack-deps:jessie-curl
+FROM debian:jessie
 
 MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
 
@@ -8,6 +8,9 @@ RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/pol
 # Basic packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+    curl \
+    wget \
+    ca-certificates \
     apt-transport-https \
     locales \
     # Cleanup
