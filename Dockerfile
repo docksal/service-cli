@@ -25,11 +25,11 @@ ENV LC_ALL C.UTF-8
 
 # Enabling additional repos
 RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list && \
-	# Include blackfire.io repo
-	curl -sSL https://packagecloud.io/gpg.key | apt-key add - && \
+    # Include blackfire.io repo
+    curl -sSL https://packagecloud.io/gpg.key | apt-key add - && \
     echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list && \
-	# Include git-lfs repo
-	curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add - && \
+    # Include git-lfs repo
+    curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add - && \
     echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' > /etc/apt/sources.list.d/github_git-lfs.list && \
     echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list
 
