@@ -1,12 +1,48 @@
-FROM blinkreaction/drupal-base:jessie
+FROM debian:jessie
 
 MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
+
+# Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
+RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
 
 # Basic packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+    curl \
+    wget \
+    ca-certificates \
+    apt-transport-https \
+    locales \
+    # Cleanup
+    && DEBIAN_FRONTEND=noninteractive apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Set timezone and locale
+RUN dpkg-reconfigure locales && \
+    locale-gen C.UTF-8 && \
+    /usr/sbin/update-locale LANG=C.UTF-8
+ENV LC_ALL C.UTF-8
+
+# Enabling additional repos
+RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list && \
+    # Include blackfire.io repo
+    curl -sSL https://packagecloud.io/gpg.key | apt-key add - && \
+    echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list && \
+    # Include git-lfs repo
+    curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add - && \
+    echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' > /etc/apt/sources.list.d/github_git-lfs.list && \
+    echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list
+
+# Additional packages
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+    supervisor \
+    procps \
+    mc \
+    dnsutils \
     zip unzip \
     git \
+    git-lfs \
     mysql-client \
     imagemagick \
     pv \
@@ -15,6 +51,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rsync \
     apt-transport-https \
     sudo \
+    less \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -23,6 +60,11 @@ RUN \
     # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
     useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Install gosu and give access to the users group to use it. gosu will be used to run services as a different user.
+RUN curl -sSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
+    chown root:users /usr/local/bin/gosu && \
+    chmod +sx /usr/local/bin/gosu
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
 # http://docs.docker.com/examples/running_ssh_service/
@@ -33,10 +75,6 @@ RUN mkdir /var/run/sshd & \
     sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd && \
     echo "export VISIBLE=now" >> /etc/profile
 ENV NOTVISIBLE "in users profile"
-
-# Include blackfire.io repo
-RUN wget -O - https://packagecloud.io/gpg.key | sudo apt-key add - && \
-    echo "deb http://packages.blackfire.io/debian any main" | sudo tee /etc/apt/sources.list.d/blackfire.list
 
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -83,9 +121,11 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/;daemonize = /c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
     sed -i '/error_log = /c error_log = \/dev\/stdout' /etc/php5/fpm/php-fpm.conf && \
     # PHP CLI settings
+    ## /etc/php5/cli/php.ini
     sed -i '/memory_limit = /c memory_limit = 512M' /etc/php5/cli/php.ini && \
     sed -i '/max_execution_time = /c max_execution_time = 600' /etc/php5/cli/php.ini && \
     sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
+    sed -i '/;always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php5/cli/php.ini && \
     sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
     # PHP module settings
     echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini && \
@@ -118,26 +158,32 @@ RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-ENV DRUSH_VERSION 8.0.5
-ENV DRUPAL_CONSOLE_VERSION 1.0.0-alpha1
+ENV COMPOSER_VERSION 1.2.0
+ENV DRUSH_VERSION 8.1.5
+ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc5
+ENV MHSENDMAIL_VERSION 0.2.0
+ENV WPCLI_VERSION 0.24.1
 RUN \
     # Composer
-    curl -sSL https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer && \
+    curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer && \
     # Drush 8 (default)
-    curl -sSL https://github.com/drush-ops/drush/releases/download/$DRUSH_VERSION/drush.phar -o /usr/local/bin/drush && \
-    chmod +x /usr/local/bin/drush && \
+    curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush && \
     # Drupal Console
-    curl -sSL https://github.com/hechoendrupal/DrupalConsole/releases/download/$DRUPAL_CONSOLE_VERSION/drupal.phar -o /usr/local/bin/drupal && \
-    chmod +x /usr/local/bin/drupal
+    curl -sSL "https://github.com/hechoendrupal/DrupalConsole/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal && \
+    # mhsendmail for MailHog integration
+    curl -sSL "https://github.com/mailhog/mhsendmail/releases/download/v${MHSENDMAIL_VERSION}/mhsendmail_linux_amd64" -o /usr/local/bin/mhsendmail && \
+    # Install wp-cli
+    curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp && \
+    # Make all binaries executable
+    chmod +x /usr/local/bin/*
 
 # All further RUN commands will run as the "docker" user
 USER docker
 ENV HOME /home/docker
 
 # Install nvm and a default node version
-ENV NVM_VERSION 0.31.0
-ENV NODE_VERSION 4.4.3
+ENV NVM_VERSION 0.32.0
+ENV NODE_VERSION 4.6.0
 ENV NVM_DIR $HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
@@ -181,8 +227,10 @@ WORKDIR /var/www
 
 # Default SSH key name
 ENV SSH_KEY_NAME id_rsa
-# ssh-agent proxy socket (requires blinkreaction/ssh-agent)
+# ssh-agent proxy socket (requires docksal/ssh-agent)
 ENV SSH_AUTH_SOCK /.ssh-agent/proxy-socket
+# Set TERM so text editors/etc. can be used
+ENV TERM xterm
 
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
