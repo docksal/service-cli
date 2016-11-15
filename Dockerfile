@@ -1,6 +1,6 @@
 FROM debian:jessie
 
-MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
+MAINTAINER Team Docksal, https://docksal.io
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
 RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
