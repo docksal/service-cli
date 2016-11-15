@@ -210,7 +210,9 @@ RUN \
     drush cc drush && \
     # Drupal Coder w/ a matching version of PHP_CodeSniffer
     composer global require drupal/coder && \
-    phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer
+    phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer && \
+    # Cleanup
+    composer clear-cache
 
 # Copy configs and scripts
 COPY config/.ssh $HOME/.ssh
