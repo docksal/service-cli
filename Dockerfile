@@ -53,6 +53,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     sudo \
     less \
     nano \
+    zsh \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -182,6 +183,15 @@ RUN \
 USER docker
 ENV HOME /home/docker
 
+# Install Prezto zsh shell
+RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto" && \
+    ln -s $HOME/.zprezto/runcoms/zlogin $HOME/.zlogin && \
+    ln -s $HOME/.zprezto/runcoms/zlogout $HOME/.zlogout && \
+    ln -s $HOME/.zprezto/runcoms/zpreztorc $HOME/.zpreztorc && \
+    ln -s $HOME/.zprezto/runcoms/zprofile $HOME/.zprofile && \
+    ln -s $HOME/.zprezto/runcoms/zshenv $HOME/.zshenv && \
+    ln -s $HOME/.zprezto/runcoms/zshrc $HOME/.zshrc
+
 # Install nvm and a default node version
 ENV NVM_VERSION 0.32.0
 ENV NODE_VERSION 4.6.0
@@ -217,6 +227,7 @@ RUN \
 # Copy configs and scripts
 COPY config/.ssh $HOME/.ssh
 COPY config/.drush $HOME/.drush
+COPY config/.zpreztorc $HOME/.zpreztorc
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
