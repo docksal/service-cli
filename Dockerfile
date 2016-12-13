@@ -137,7 +137,7 @@ RUN mkdir -p /var/www/docroot && \
 
 # xdebug settings
 ENV XDEBUG_ENABLED 0
-COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
+COPY config/php/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 # Adding NodeJS repo (for up-to-date versions)
 # This is a stripped down version of the official nodejs install script (https://deb.nodesource.com/setup_4.x)
