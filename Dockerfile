@@ -133,7 +133,10 @@ RUN mkdir -p /var/www/docroot && \
     echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini && \
     sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
     # Disable xdebug by default. We will enabled it at startup (see startup.sh)
-    php5dismod xdebug
+    php5dismod xdebug && \
+    # Create symlinks to project level overrides
+    ln -s /var/www/.docksal/etc/php/php.ini /etc/php5/fpm/conf.d/99-overrides.ini && \
+    ln -s /var/www/.docksal/etc/php/php-cli.ini /etc/php5/cli/conf.d/99-overrides.ini
 
 # xdebug settings
 ENV XDEBUG_ENABLED 0
