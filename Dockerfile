@@ -1,6 +1,6 @@
 FROM debian:jessie
 
-MAINTAINER Leonid Makarov <leonid.makarov@blinkreaction.com>
+MAINTAINER Team Docksal, https://docksal.io
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
 RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
@@ -52,6 +52,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-transport-https \
     sudo \
     less \
+    nano \
+    zsh \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -131,11 +133,14 @@ RUN mkdir -p /var/www/docroot && \
     echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini && \
     sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
     # Disable xdebug by default. We will enabled it at startup (see startup.sh)
-    php5dismod xdebug
+    php5dismod xdebug && \
+    # Create symlinks to project level overrides
+    ln -s /var/www/.docksal/etc/php/php.ini /etc/php5/fpm/conf.d/99-overrides.ini && \
+    ln -s /var/www/.docksal/etc/php/php-cli.ini /etc/php5/cli/conf.d/99-overrides.ini
 
 # xdebug settings
 ENV XDEBUG_ENABLED 0
-COPY config/php5/xdebug.ini /etc/php5/mods-available/xdebug.ini
+COPY config/php/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
 # Adding NodeJS repo (for up-to-date versions)
 # This is a stripped down version of the official nodejs install script (https://deb.nodesource.com/setup_4.x)
@@ -181,6 +186,15 @@ RUN \
 USER docker
 ENV HOME /home/docker
 
+# Install Prezto zsh shell
+RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto" && \
+    ln -s $HOME/.zprezto/runcoms/zlogin $HOME/.zlogin && \
+    ln -s $HOME/.zprezto/runcoms/zlogout $HOME/.zlogout && \
+    ln -s $HOME/.zprezto/runcoms/zpreztorc $HOME/.zpreztorc && \
+    ln -s $HOME/.zprezto/runcoms/zprofile $HOME/.zprofile && \
+    ln -s $HOME/.zprezto/runcoms/zshenv $HOME/.zshenv && \
+    ln -s $HOME/.zprezto/runcoms/zshrc $HOME/.zshrc
+
 # Install nvm and a default node version
 ENV NVM_VERSION 0.32.0
 ENV NODE_VERSION 4.6.0
@@ -209,11 +223,14 @@ RUN \
     drush cc drush && \
     # Drupal Coder w/ a matching version of PHP_CodeSniffer
     composer global require drupal/coder && \
-    phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer
+    phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer && \
+    # Cleanup
+    composer clear-cache
 
 # Copy configs and scripts
 COPY config/.ssh $HOME/.ssh
 COPY config/.drush $HOME/.drush
+COPY config/.zpreztorc $HOME/.zpreztorc
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
