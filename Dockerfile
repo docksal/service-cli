@@ -106,31 +106,37 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 RUN mkdir -p /var/www/docroot && \
     # PHP-FPM settings
     ## /etc/php5/fpm/php.ini
-    sed -i '/memory_limit = /c memory_limit = 256M' /etc/php5/fpm/php.ini && \
-    sed -i '/max_execution_time = /c max_execution_time = 300' /etc/php5/fpm/php.ini && \
-    sed -i '/upload_max_filesize = /c upload_max_filesize = 500M' /etc/php5/fpm/php.ini && \
-    sed -i '/post_max_size = /c post_max_size = 500M' /etc/php5/fpm/php.ini && \
-    sed -i '/error_log = /c error_log = \/dev\/stdout' /etc/php5/fpm/php.ini && \
-    sed -i '/;always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php5/fpm/php.ini && \
-    sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/fpm/php.ini && \
+    sed -i '/memory_limit =/c memory_limit = 256M' /etc/php5/fpm/php.ini && \
+    sed -i '/max_execution_time =/c max_execution_time = 300' /etc/php5/fpm/php.ini && \
+    sed -i '/upload_max_filesize =/c upload_max_filesize = 500M' /etc/php5/fpm/php.ini && \
+    sed -i '/post_max_size =/c post_max_size = 500M' /etc/php5/fpm/php.ini && \
+    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php.ini && \
+    sed -i '/always_populate_raw_post_data =/c always_populate_raw_post_data = -1' /etc/php5/fpm/php.ini && \
+    sed -i '/sendmail_path =/c sendmail_path = /bin/true' /etc/php5/fpm/php.ini && \
+    sed -i '/date.timezone =/c date.timezone = UTC' /etc/php5/fpm/php.ini && \
+    sed -i '/display_errors =/c display_errors = On' /etc/php5/fpm/php.ini && \
+    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php5/fpm/php.ini && \
     ## /etc/php5/fpm/pool.d/www.conf
-    sed -i '/user = /c user = docker' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/;catch_workers_output = /c catch_workers_output = yes' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/listen = /c listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/user =/c user = docker' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/catch_workers_output =/c catch_workers_output = yes' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/listen =/c listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
     sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/;clear_env = /c clear_env = no' /etc/php5/fpm/pool.d/www.conf && \
+    sed -i '/clear_env =/c clear_env = no' /etc/php5/fpm/pool.d/www.conf && \
     ## /etc/php5/fpm/php-fpm.conf
-    sed -i '/;daemonize = /c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
-    sed -i '/error_log = /c error_log = \/dev\/stdout' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/daemonize =/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php-fpm.conf && \
     # PHP CLI settings
     ## /etc/php5/cli/php.ini
-    sed -i '/memory_limit = /c memory_limit = 512M' /etc/php5/cli/php.ini && \
-    sed -i '/max_execution_time = /c max_execution_time = 600' /etc/php5/cli/php.ini && \
-    sed -i '/error_log = php_errors.log/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
-    sed -i '/;always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php5/cli/php.ini && \
-    sed -i '/;sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
+    sed -i '/memory_limit =/c memory_limit = 512M' /etc/php5/cli/php.ini && \
+    sed -i '/max_execution_time =/c max_execution_time = 600' /etc/php5/cli/php.ini && \
+    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
+    sed -i '/always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php5/cli/php.ini && \
+    sed -i '/sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
+    sed -i '/date.timezone/c date.timezone = UTC' /etc/php5/cli/php.ini && \
+    sed -i '/display_errors =/c display_errors = On' /etc/php5/cli/php.ini && \
+    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php5/cli/php.ini && \
     # PHP module settings
-    echo 'opcache.memory_consumption=128' >> /etc/php5/mods-available/opcache.ini && \
+    echo 'opcache.memory_consumption = 128' >> /etc/php5/mods-available/opcache.ini && \
     sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
     # Disable xdebug by default. We will enabled it at startup (see startup.sh)
     php5dismod xdebug && \
@@ -215,9 +221,9 @@ RUN \
     # Legacy Drush versions (6 and 7)
     mkdir $HOME/drush6 && cd $HOME/drush6 && composer require drush/drush:6.* && \
     mkdir $HOME/drush7 && cd $HOME/drush7 && composer require drush/drush:7.* && \
-    echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bashrc && \
-    echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bashrc && \
-    echo "alias drush8='/usr/local/bin/drush'" >> $HOME/.bashrc && \
+    echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bash_aliases && \
+    echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bash_aliases && \
+    echo "alias drush8='/usr/local/bin/drush'" >> $HOME/.bash_aliases && \
     # Drush modules
     drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush && \
     drush cc drush && \
@@ -231,6 +237,7 @@ RUN \
 COPY config/.ssh $HOME/.ssh
 COPY config/.drush $HOME/.drush
 COPY config/.zpreztorc $HOME/.zpreztorc
+COPY config/.docksalrc $HOME/.docksalrc
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
