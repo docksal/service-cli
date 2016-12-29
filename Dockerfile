@@ -221,9 +221,9 @@ RUN \
     # Legacy Drush versions (6 and 7)
     mkdir $HOME/drush6 && cd $HOME/drush6 && composer require drush/drush:6.* && \
     mkdir $HOME/drush7 && cd $HOME/drush7 && composer require drush/drush:7.* && \
-    echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bashrc && \
-    echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bashrc && \
-    echo "alias drush8='/usr/local/bin/drush'" >> $HOME/.bashrc && \
+    echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bash_aliases && \
+    echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bash_aliases && \
+    echo "alias drush8='/usr/local/bin/drush'" >> $HOME/.bash_aliases && \
     # Drush modules
     drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush && \
     drush cc drush && \
@@ -237,6 +237,7 @@ RUN \
 COPY config/.ssh $HOME/.ssh
 COPY config/.drush $HOME/.drush
 COPY config/.zpreztorc $HOME/.zpreztorc
+COPY config/.docksalrc $HOME/.docksalrc
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
