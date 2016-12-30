@@ -2,7 +2,7 @@
 
 This image is focused on console tools necessary to develop LAMP stack applications (namely Drupal and WordPress).
 
-It is based on Debian Jessie and is part of the [Docksal](https://hub.docker.com/u/docksal) image library.
+This image(s) is part of the [Docksal](http://docksal.io) image library.
 
 ## Versions
 
