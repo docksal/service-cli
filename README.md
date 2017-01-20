@@ -6,8 +6,15 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 
 ## Versions
 
-- `docksal/cli:stable` - PHP 5.6
-- `docksal/cli:php7` - PHP 7.0
+**Stable tags**
+
+- `1.0-php7`, `1.0`, `latest` - PHP 7.0
+- `1.0-php5` - PHP 5.6
+
+**Development tags**
+
+- `php7`, `edge` - PHP 7.0
+- `php5` - PHP 5.6
 
 ## Includes
 
@@ -18,7 +25,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
   - drush (6,7,8)
     - registry_rebuild
     - coder-8.x + phpcs
-  - drupal console
+  - drupal console launcher
   - wp-cli
 - ruby
   - ruby
