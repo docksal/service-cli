@@ -101,6 +101,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     php7.0-xdebug \
     php7.0-xml \
     php7.0-mbstring \
+    php7.0-bcmath \
     #php5-ssh2 \
     #php5-gnupg \
     php-pear \
