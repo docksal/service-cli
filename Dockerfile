@@ -171,7 +171,7 @@ ENV BUNDLE_PATH .bundler
 
 ENV COMPOSER_VERSION 1.2.0
 ENV DRUSH_VERSION 8.1.7
-ENV DRUPAL_CONSOLE_VERSION 1.0.0-beta5
+ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc14
 ENV MHSENDMAIL_VERSION 0.2.0
 ENV WPCLI_VERSION 0.24.1
 RUN \
@@ -180,7 +180,7 @@ RUN \
     # Drush 8 (default)
     curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush && \
     # Drupal Console
-    curl -sSL "https://github.com/hechoendrupal/DrupalConsole/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal && \
+    curl -sSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal && \
     # mhsendmail for MailHog integration
     curl -sSL "https://github.com/mailhog/mhsendmail/releases/download/v${MHSENDMAIL_VERSION}/mhsendmail_linux_amd64" -o /usr/local/bin/mhsendmail && \
     # Install wp-cli
