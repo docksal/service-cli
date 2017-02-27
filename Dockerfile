@@ -96,6 +96,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     php5-sqlite \
     php5-ssh2 \
     php5-xdebug \
+    php5-xsl \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
