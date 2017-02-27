@@ -6,11 +6,11 @@ RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/pol
 # Basic packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    curl \
-    wget \
-    ca-certificates \
     apt-transport-https \
+    ca-certificates \
+    curl \
     locales \
+    wget \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -34,23 +34,23 @@ RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list && \
 # Additional packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    supervisor \
-    procps \
-    mc \
     dnsutils \
-    zip unzip \
     git \
     git-lfs \
-    mysql-client \
     imagemagick \
-    pv \
+    less \
+    mc \
+    mysql-client \
+    nano \
     openssh-client \
     openssh-server \
+    procps \
+    pv \
     rsync \
-    apt-transport-https \
     sudo \
-    less \
-    nano \
+    supervisor \
+    unzip \
+    zip \
     zsh \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
@@ -79,23 +79,23 @@ ENV NOTVISIBLE "in users profile"
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    php5-common \
-    php5-cli \
-    php-pear \
-    php5-mysql \
-    php5-imagick \
-    php5-mcrypt \
-    php5-curl \
-    php5-gd \
-    php5-sqlite \
-    php5-json \
-    php5-intl \
-    php5-fpm \
-    php5-memcache \
-    php5-xdebug \
-    php5-ssh2 \
-    php5-gnupg \
     blackfire-php \
+    php-pear \
+    php5-curl \
+    php5-cli \
+    php5-common \
+    php5-fpm \
+    php5-gd \
+    php5-gnupg \
+    php5-imagick \
+    php5-intl \
+    php5-json \
+    php5-mcrypt \
+    php5-memcache \
+    php5-mysql \
+    php5-sqlite \
+    php5-ssh2 \
+    php5-xdebug \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
