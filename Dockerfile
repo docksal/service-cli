@@ -90,6 +90,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     php5-imagick \
     php5-intl \
     php5-json \
+    php5-ldap \
     php5-mcrypt \
     php5-memcache \
     php5-mysql \
