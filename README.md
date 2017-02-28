@@ -20,6 +20,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
     - coder-8.x + phpcs
   - drupal console launcher
   - wp-cli
+  - magento code generator
 - ruby
   - ruby
   - gem
