@@ -209,6 +209,7 @@ RUN \
     nvm alias default $NODE_VERSION && \
     # Install global node packages
     npm install -g npm && \
+    npm install -g yarn && \
     npm install -g bower
 
 ENV PATH $PATH:$HOME/.composer/vendor/bin
