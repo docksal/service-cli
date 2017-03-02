@@ -164,8 +164,8 @@ RUN gem install bundler
 ENV BUNDLE_PATH .bundler
 
 ENV COMPOSER_VERSION 1.3.0
-ENV DRUSH_VERSION 8.1.9
-ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc15
+ENV DRUSH_VERSION 8.1.10
+ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc16
 ENV MHSENDMAIL_VERSION 0.2.0
 ENV WPCLI_VERSION 1.1.0
 ENV MG_CODEGEN_VERSION 1.4
@@ -200,7 +200,7 @@ RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR
 
 # Install nvm and a default node version
 ENV NVM_VERSION 0.33.0
-ENV NODE_VERSION 6.9.5
+ENV NODE_VERSION 6.10.0
 ENV NVM_DIR $HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
