@@ -6,15 +6,8 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 
 ## Versions
 
-**Stable tags**
-
-- `1.0-php7`, `1.0`, `latest` - PHP 7.0
-- `1.0-php5` - PHP 5.6
-
-**Development tags**
-
-- `php7`, `edge` - PHP 7.0
-- `php5` - PHP 5.6
+- `1.0-php7`, `php7`, `latest` - PHP 7.0
+- `1.0-php5`, `php5` - PHP 5.6
 
 ## Includes
 

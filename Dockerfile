@@ -1,18 +1,16 @@
 FROM debian:jessie
 
-MAINTAINER Team Docksal, https://docksal.io
-
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
 RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
 
 # Basic packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    curl \
-    wget \
-    ca-certificates \
     apt-transport-https \
+    ca-certificates \
+    curl \
     locales \
+    wget \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -36,23 +34,23 @@ RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list && \
 # Additional packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    supervisor \
-    procps \
-    mc \
     dnsutils \
-    zip unzip \
     git \
     git-lfs \
-    mysql-client \
     imagemagick \
-    pv \
+    less \
+    mc \
+    mysql-client \
+    nano \
     openssh-client \
     openssh-server \
+    procps \
+    pv \
     rsync \
-    apt-transport-https \
     sudo \
-    less \
-    nano \
+    supervisor \
+    unzip \
+    zip \
     zsh \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
@@ -81,23 +79,25 @@ ENV NOTVISIBLE "in users profile"
 # PHP packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    php5-common \
-    php5-cli \
-    php-pear \
-    php5-mysql \
-    php5-imagick \
-    php5-mcrypt \
-    php5-curl \
-    php5-gd \
-    php5-sqlite \
-    php5-json \
-    php5-intl \
-    php5-fpm \
-    php5-memcache \
-    php5-xdebug \
-    php5-ssh2 \
-    php5-gnupg \
     blackfire-php \
+    php-pear \
+    php5-curl \
+    php5-cli \
+    php5-common \
+    php5-fpm \
+    php5-gd \
+    php5-gnupg \
+    php5-imagick \
+    php5-intl \
+    php5-json \
+    php5-ldap \
+    php5-mcrypt \
+    php5-memcache \
+    php5-mysql \
+    php5-sqlite \
+    php5-ssh2 \
+    php5-xdebug \
+    php5-xsl \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -169,11 +169,12 @@ RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-ENV COMPOSER_VERSION 1.2.0
-ENV DRUSH_VERSION 8.1.7
-ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc14
+ENV COMPOSER_VERSION 1.3.0
+ENV DRUSH_VERSION 8.1.9
+ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc15
 ENV MHSENDMAIL_VERSION 0.2.0
-ENV WPCLI_VERSION 0.24.1
+ENV WPCLI_VERSION 1.1.0
+ENV MG_CODEGEN_VERSION 1.4
 RUN \
     # Composer
     curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer && \
@@ -185,6 +186,8 @@ RUN \
     curl -sSL "https://github.com/mailhog/mhsendmail/releases/download/v${MHSENDMAIL_VERSION}/mhsendmail_linux_amd64" -o /usr/local/bin/mhsendmail && \
     # Install wp-cli
     curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp && \
+    # Install magento code generator
+    curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen && \
     # Make all binaries executable
     chmod +x /usr/local/bin/*
 
@@ -202,8 +205,8 @@ RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR
     ln -s $HOME/.zprezto/runcoms/zshrc $HOME/.zshrc
 
 # Install nvm and a default node version
-ENV NVM_VERSION 0.32.0
-ENV NODE_VERSION 4.6.0
+ENV NVM_VERSION 0.33.0
+ENV NODE_VERSION 6.9.5
 ENV NVM_DIR $HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
