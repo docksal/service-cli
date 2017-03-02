@@ -174,6 +174,7 @@ ENV DRUSH_VERSION 8.1.9
 ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc15
 ENV MHSENDMAIL_VERSION 0.2.0
 ENV WPCLI_VERSION 1.1.0
+ENV MG_CODEGEN_VERSION 1.4
 RUN \
     # Composer
     curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer && \
@@ -185,6 +186,8 @@ RUN \
     curl -sSL "https://github.com/mailhog/mhsendmail/releases/download/v${MHSENDMAIL_VERSION}/mhsendmail_linux_amd64" -o /usr/local/bin/mhsendmail && \
     # Install wp-cli
     curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp && \
+    # Install magento code generator
+    curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen && \
     # Make all binaries executable
     chmod +x /usr/local/bin/*
 
