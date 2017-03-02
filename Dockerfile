@@ -148,12 +148,6 @@ RUN mkdir -p /var/www/docroot && \
 ENV XDEBUG_ENABLED 0
 COPY config/php/xdebug.ini /etc/php5/mods-available/xdebug.ini
 
-# Adding NodeJS repo (for up-to-date versions)
-# This is a stripped down version of the official nodejs install script (https://deb.nodesource.com/setup_4.x)
-RUN curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    echo 'deb https://deb.nodesource.com/node_4.x jessie main' > /etc/apt/sources.list.d/nodesource.list && \
-    echo 'deb-src https://deb.nodesource.com/node_4.x jessie main' >> /etc/apt/sources.list.d/nodesource.list
-
 # Other language packages and dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
@@ -170,8 +164,8 @@ RUN gem install bundler
 ENV BUNDLE_PATH .bundler
 
 ENV COMPOSER_VERSION 1.3.0
-ENV DRUSH_VERSION 8.1.9
-ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc15
+ENV DRUSH_VERSION 8.1.10
+ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc16
 ENV MHSENDMAIL_VERSION 0.2.0
 ENV WPCLI_VERSION 1.1.0
 ENV MG_CODEGEN_VERSION 1.4
@@ -206,7 +200,7 @@ RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR
 
 # Install nvm and a default node version
 ENV NVM_VERSION 0.33.0
-ENV NODE_VERSION 6.9.5
+ENV NODE_VERSION 6.10.0
 ENV NVM_DIR $HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
@@ -215,6 +209,7 @@ RUN \
     nvm alias default $NODE_VERSION && \
     # Install global node packages
     npm install -g npm && \
+    npm install -g yarn && \
     npm install -g bower
 
 ENV PATH $PATH:$HOME/.composer/vendor/bin
