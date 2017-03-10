@@ -253,6 +253,8 @@ ENV SSH_KEY_NAME id_rsa
 ENV SSH_AUTH_SOCK /.ssh-agent/proxy-socket
 # Set TERM so text editors/etc. can be used
 ENV TERM xterm
+# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
+ENV PROJECT_ROOT /var/www
 
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
