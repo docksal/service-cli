@@ -61,8 +61,10 @@ RUN \
     useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Install gosu and give access to the users group to use it. gosu will be used to run services as a different user.
-RUN curl -sSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
+# Install gosu and give access to the users group to use it.
+# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
+# https://github.com/tianon/gosu
+RUN curl -sSL "https://github.com/tianon/gosu/releases/download/1.10/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
     chown root:users /usr/local/bin/gosu && \
     chmod +sx /usr/local/bin/gosu
 
