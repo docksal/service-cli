@@ -165,12 +165,12 @@ RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-ENV COMPOSER_VERSION 1.3.0
-ENV DRUSH_VERSION 8.1.10
-ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc16
-ENV MHSENDMAIL_VERSION 0.2.0
-ENV WPCLI_VERSION 1.1.0
-ENV MG_CODEGEN_VERSION 1.4
+ENV COMPOSER_VERSION=1.3.0 \
+	DRUSH_VERSION=8.1.10 \
+	DRUPAL_CONSOLE_VERSION=1.0.0-rc16 \
+	MHSENDMAIL_VERSION=0.2.0 \
+	WPCLI_VERSION=1.1.0 \
+	MG_CODEGEN_VERSION=1.4
 RUN \
     # Composer
     curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer && \
@@ -201,9 +201,9 @@ RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR
     ln -s $HOME/.zprezto/runcoms/zshrc $HOME/.zshrc
 
 # Install nvm and a default node version
-ENV NVM_VERSION 0.33.0
-ENV NODE_VERSION 6.10.0
-ENV NVM_DIR $HOME/.nvm
+ENV NVM_VERSION=0.33.0 \
+	NODE_VERSION=6.10.0 \
+	NVM_DIR=$HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
     . $NVM_DIR/nvm.sh && \
@@ -249,14 +249,15 @@ EXPOSE 22
 
 WORKDIR /var/www
 
-# Default SSH key name
-ENV SSH_KEY_NAME id_rsa
-# ssh-agent proxy socket (requires docksal/ssh-agent)
-ENV SSH_AUTH_SOCK /.ssh-agent/proxy-socket
-# Set TERM so text editors/etc. can be used
-ENV TERM xterm
-# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
-ENV PROJECT_ROOT /var/www
+ENV \
+	# Default SSH key name
+	SSH_KEY_NAME=id_rsa \
+	# ssh-agent proxy socket (requires docksal/ssh-agent)
+	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
+	# Set TERM so text editors/etc. can be used
+	TERM=xterm \
+	# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
+	PROJECT_ROOT=/var/www
 
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
