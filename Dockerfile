@@ -57,8 +57,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN \
-    # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
-    useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
+    # Create a non-root "docker" user (uid = 1000) with access to sudo and the default group set to 'users' (gid = 100)
+    useradd -m -s /bin/bash -u 1000 -g users -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Install gosu and give access to the users group to use it.
@@ -142,7 +142,7 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
     # Disable xdebug by default. We will enabled it at startup (see startup.sh)
     php5dismod xdebug && \
-    # Create symlinks to project level overrides
+    # Create symlinks to project level overrides (if the source files are missing, nothing will break)
     ln -s /var/www/.docksal/etc/php/php.ini /etc/php5/fpm/conf.d/99-overrides.ini && \
     ln -s /var/www/.docksal/etc/php/php-cli.ini /etc/php5/cli/conf.d/99-overrides.ini
 
@@ -212,7 +212,9 @@ RUN \
     # Install global node packages
     npm install -g npm && \
     npm install -g yarn && \
-    npm install -g bower
+    npm install -g bower && \
+	# Fix npm complaining about permissions and not being able to update
+	sudo rm -rf $HOME/.config
 
 ENV PATH $PATH:$HOME/.composer/vendor/bin
 RUN \
@@ -241,8 +243,8 @@ COPY config/.docksalrc $HOME/.docksalrc
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 
-# Fix permissions after COPY
-RUN sudo chown -R docker:users $HOME
+# Fix permissions after copy
+RUN sudo chown -R $(id -u docker):$(id -g docker) $HOME
 
 EXPOSE 9000
 EXPOSE 22
@@ -257,10 +259,15 @@ ENV \
 	# Set TERM so text editors/etc. can be used
 	TERM=xterm \
 	# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
-	PROJECT_ROOT=/var/www
+	PROJECT_ROOT=/var/www \
+	# Allow matching host uid:gid
+	HOST_UID=1000 \
+	HOST_GID=100
+
+USER root
 
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
 
 # By default, launch supervisord to keep the container running.
-CMD ["gosu", "root", "supervisord"]
+CMD ["supervisord"]
