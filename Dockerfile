@@ -240,11 +240,11 @@ COPY config/.ssh $HOME/.ssh
 COPY config/.drush $HOME/.drush
 COPY config/.zpreztorc $HOME/.zpreztorc
 COPY config/.docksalrc $HOME/.docksalrc
-COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY startup.sh /opt/startup.sh
-
 # Fix permissions after copy
 RUN sudo chown -R $(id -u docker):$(id -g docker) $HOME
+
+COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY startup.sh /opt/startup.sh
 
 EXPOSE 9000
 EXPOSE 22

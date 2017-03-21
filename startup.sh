@@ -41,8 +41,8 @@ copy_dot_drush '/.home' # Generic
 if [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]]; then
 	if [[ "$HOST_UID" != "$(id -u docker)" ]] || [[ "$HOST_GID" != "$(id -g docker)" ]]; then
 		echo-debug "Updating docker user uid/gid to $HOST_UID/$HOST_GID to match the host user uid/gid..."
-		sudo groupmod -g "$HOST_GID" -o users
-		sudo usermod -u "$HOST_UID" -g "$HOST_GID" -o docker
+		sudo usermod -u "$HOST_UID" -o docker >/dev/null 2>&1
+		sudo groupmod -g "$HOST_GID" -o users >/dev/null 2>&1
 		# Make sure permissions are correct after the uid/gid change
 		sudo chown "$HOST_UID:$HOST_GID" -R ${HOME_DIR}
 		sudo chown "$HOST_UID:$HOST_GID" /var/www
