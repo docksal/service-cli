@@ -57,12 +57,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN \
-    # Create a non-root user with access to sudo and the default group set to 'users' (gid = 100)
-    useradd -m -s /bin/bash -g users -G sudo -p docker docker && \
+    # Create a non-root "docker" user (uid = 1000) with access to sudo and the default group set to 'users' (gid = 100)
+    useradd -m -s /bin/bash -u 1000 -g users -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Install gosu and give access to the users group to use it. gosu will be used to run services as a different user.
-RUN curl -sSL "https://github.com/tianon/gosu/releases/download/1.7/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
+# Install gosu and give access to the users group to use it.
+# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
+# https://github.com/tianon/gosu
+RUN curl -sSL "https://github.com/tianon/gosu/releases/download/1.10/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
     chown root:users /usr/local/bin/gosu && \
     chmod +sx /usr/local/bin/gosu
 
@@ -140,7 +142,7 @@ RUN mkdir -p /var/www/docroot && \
     sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
     # Disable xdebug by default. We will enabled it at startup (see startup.sh)
     php5dismod xdebug && \
-    # Create symlinks to project level overrides
+    # Create symlinks to project level overrides (if the source files are missing, nothing will break)
     ln -s /var/www/.docksal/etc/php/php.ini /etc/php5/fpm/conf.d/99-overrides.ini && \
     ln -s /var/www/.docksal/etc/php/php-cli.ini /etc/php5/cli/conf.d/99-overrides.ini
 
@@ -163,12 +165,12 @@ RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-ENV COMPOSER_VERSION 1.3.0
-ENV DRUSH_VERSION 8.1.10
-ENV DRUPAL_CONSOLE_VERSION 1.0.0-rc16
-ENV MHSENDMAIL_VERSION 0.2.0
-ENV WPCLI_VERSION 1.1.0
-ENV MG_CODEGEN_VERSION 1.4
+ENV COMPOSER_VERSION=1.3.0 \
+	DRUSH_VERSION=8.1.10 \
+	DRUPAL_CONSOLE_VERSION=1.0.0-rc16 \
+	MHSENDMAIL_VERSION=0.2.0 \
+	WPCLI_VERSION=1.1.0 \
+	MG_CODEGEN_VERSION=1.4
 RUN \
     # Composer
     curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer && \
@@ -199,9 +201,9 @@ RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR
     ln -s $HOME/.zprezto/runcoms/zshrc $HOME/.zshrc
 
 # Install nvm and a default node version
-ENV NVM_VERSION 0.33.0
-ENV NODE_VERSION 6.10.0
-ENV NVM_DIR $HOME/.nvm
+ENV NVM_VERSION=0.33.0 \
+	NODE_VERSION=6.10.0 \
+	NVM_DIR=$HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
     . $NVM_DIR/nvm.sh && \
@@ -210,7 +212,9 @@ RUN \
     # Install global node packages
     npm install -g npm && \
     npm install -g yarn && \
-    npm install -g bower
+    npm install -g bower && \
+	# Fix npm complaining about permissions and not being able to update
+	sudo rm -rf $HOME/.config
 
 ENV PATH $PATH:$HOME/.composer/vendor/bin
 RUN \
@@ -236,26 +240,34 @@ COPY config/.ssh $HOME/.ssh
 COPY config/.drush $HOME/.drush
 COPY config/.zpreztorc $HOME/.zpreztorc
 COPY config/.docksalrc $HOME/.docksalrc
+# Fix permissions after copy
+RUN sudo chown -R $(id -u docker):$(id -g docker) $HOME
+
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
-
-# Fix permissions after COPY
-RUN sudo chown -R docker:users $HOME
 
 EXPOSE 9000
 EXPOSE 22
 
 WORKDIR /var/www
 
-# Default SSH key name
-ENV SSH_KEY_NAME id_rsa
-# ssh-agent proxy socket (requires docksal/ssh-agent)
-ENV SSH_AUTH_SOCK /.ssh-agent/proxy-socket
-# Set TERM so text editors/etc. can be used
-ENV TERM xterm
+ENV \
+	# Default SSH key name
+	SSH_KEY_NAME=id_rsa \
+	# ssh-agent proxy socket (requires docksal/ssh-agent)
+	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
+	# Set TERM so text editors/etc. can be used
+	TERM=xterm \
+	# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
+	PROJECT_ROOT=/var/www \
+	# Allow matching host uid:gid
+	HOST_UID=1000 \
+	HOST_GID=100
+
+USER root
 
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
 
 # By default, launch supervisord to keep the container running.
-CMD ["gosu", "root", "supervisord"]
+CMD ["supervisord"]
