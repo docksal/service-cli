@@ -106,6 +106,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     php7.0-xdebug \
     php7.0-xml \
     php7.0-zip \
+    php7.0-bz2 \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
