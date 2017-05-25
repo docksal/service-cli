@@ -169,12 +169,12 @@ RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-ENV COMPOSER_VERSION=1.3.0 \
-	DRUSH_VERSION=8.1.10 \
-	DRUPAL_CONSOLE_VERSION=1.0.0-rc16 \
+ENV COMPOSER_VERSION=1.4.2 \
+	DRUSH_VERSION=8.1.11 \
+	DRUPAL_CONSOLE_VERSION=1.0.0-rc19 \
 	MHSENDMAIL_VERSION=0.2.0 \
 	WPCLI_VERSION=1.1.0 \
-	MG_CODEGEN_VERSION=1.4
+	MG_CODEGEN_VERSION=1.6.4
 RUN \
     # Composer
     curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer && \
@@ -205,8 +205,8 @@ RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR
     ln -s $HOME/.zprezto/runcoms/zshrc $HOME/.zshrc
 
 # Install nvm and a default node version
-ENV NVM_VERSION=0.33.0 \
-	NODE_VERSION=6.10.0 \
+ENV NVM_VERSION=0.33.2 \
+	NODE_VERSION=6.10.3 \
 	NVM_DIR=$HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
