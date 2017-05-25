@@ -29,7 +29,10 @@ RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list && \
     # Include git-lfs repo
     curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add - && \
     echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' > /etc/apt/sources.list.d/github_git-lfs.list && \
-    echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list
+    echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list && \
+	# Including yarn repo
+	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
 
 # Additional packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -52,6 +55,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     unzip \
     zip \
     zsh \
+    yarn \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -211,7 +215,6 @@ RUN \
     nvm alias default $NODE_VERSION && \
     # Install global node packages
     npm install -g npm && \
-    npm install -g yarn && \
     npm install -g bower && \
 	# Fix npm complaining about permissions and not being able to update
 	sudo rm -rf $HOME/.config
