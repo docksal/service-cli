@@ -216,6 +216,8 @@ RUN \
     # Install global node packages
     npm install -g npm && \
     npm install -g bower && \
+	# Cleanup
+	nvm clear-cache && npm cache clear && \
 	# Fix npm complaining about permissions and not being able to update
 	sudo rm -rf $HOME/.config
 
