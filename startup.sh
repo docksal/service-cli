@@ -10,33 +10,6 @@ echo-debug ()
 	[[ "$DEBUG" != 0 ]] && echo "$@"
 }
 
-# Copy Acquia Cloud API credentials
-# @param $1 path to the home directory (parent of the .acquia directory)
-copy_dot_acquia ()
-{
-  local path="${1}/.acquia/cloudapi.conf"
-  if [[ -f ${path} ]]; then
-    echo-debug "Copying Acquia Cloud API settings in ${path} from host..."
-    mkdir -p ${HOME_DIR}/.acquia
-    cp ${path} ${HOME_DIR}/.acquia
-  fi
-}
-
-# Copy Drush settings from host
-# @param $1 path to the home directory (parent of the .drush directory)
-copy_dot_drush ()
-{
-  local path="${1}/.drush"
-  if [[ -d ${path} ]]; then
-    echo-debug "Copying Drush settigns in ${path} from host..."
-    cp -r ${path} ${HOME_DIR}
-  fi
-}
-
-# Copy Acquia Cloud API credentials and Drush settings from host if available
-copy_dot_acquia '/.home' # Generic
-copy_dot_drush '/.home' # Generic
-
 ## Docker user uid/gid mapping to the host user uid/gid
 if [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]]; then
 	if [[ "$HOST_UID" != "$(id -u docker)" ]] || [[ "$HOST_GID" != "$(id -g docker)" ]]; then
