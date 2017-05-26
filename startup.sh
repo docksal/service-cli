@@ -25,7 +25,7 @@ uid_gid_reset()
 xdebug_enable()
 {
 	echo-debug "Enabling xdebug..."
-	php5enmod xdebug
+	phpenmod xdebug
 }
 
 # Docker user uid/gid mapping to the host user uid/gid
