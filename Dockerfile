@@ -100,6 +100,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     php5-mcrypt \
     php5-memcache \
     php5-mysql \
+    php5-redis \
     php5-sqlite \
     php5-ssh2 \
     php5-xdebug \
