@@ -216,9 +216,8 @@ RUN \
     nvm alias default $NODE_VERSION && \
     # Install global node packages
     npm install -g npm && \
-    npm install -g bower && \
 	# Cleanup
-	nvm clear-cache && npm cache clear && \
+	nvm clear-cache && npm cache clear --force && \
 	# Fix npm complaining about permissions and not being able to update
 	sudo rm -rf $HOME/.config
 
