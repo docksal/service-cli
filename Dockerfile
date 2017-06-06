@@ -132,6 +132,7 @@ RUN mkdir -p /var/www/docroot && \
     ## /etc/php5/fpm/php-fpm.conf
     sed -i '/daemonize =/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
     sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/pid =/c pid = \/run\/php-fpm.pid' /etc/php5/fpm/php-fpm.conf && \
     # PHP CLI settings
     ## /etc/php5/cli/php.ini
     sed -i '/memory_limit =/c memory_limit = 512M' /etc/php5/cli/php.ini && \
@@ -250,6 +251,9 @@ RUN sudo chown -R $(id -u docker):$(id -g docker) $HOME
 
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
+COPY healthcheck.sh /opt/healthcheck.sh
+
+HEALTHCHECK --interval=5s --timeout=1s CMD ["/opt/healthcheck.sh"]
 
 EXPOSE 9000
 EXPOSE 22

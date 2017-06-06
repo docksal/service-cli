@@ -27,7 +27,7 @@ uid_gid_reset()
 
 xdebug_enable()
 {
-	echo "Enabling xdebug..."
+	echo-debug "Enabling xdebug..."
 	php5enmod xdebug
 }
 
@@ -41,7 +41,12 @@ xdebug_enable()
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
 
+# Initialization steps completed. Create a pid file to mark the container is healthy
+echo-debug "Preliminary initialization completed"
+touch /var/run/cli
+
 # Execute passed CMD arguments
+echo-debug "Executing the requested command..."
 # Service mode (run as root)
 if [[ "$1" == "supervisord" ]]; then
 	gosu root supervisord -c /etc/supervisor/conf.d/supervisord.conf
