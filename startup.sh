@@ -44,7 +44,7 @@ xdebug_enable()
 # Execute passed CMD arguments
 # Service mode (run as root)
 if [[ "$1" == "supervisord" ]]; then
-	gosu root supervisord
+	gosu root supervisord -c /etc/supervisor/conf.d/supervisord.conf
 # Command mode (run as docker user)
 else
 	gosu docker "$@"
