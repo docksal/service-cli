@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script is running as root by default.
+# Switching to the docker user can be done via "gosu docker <command>".
+
 HOME_DIR='/home/docker'
 
 DEBUG=${DEBUG:-0}
@@ -10,23 +13,33 @@ echo-debug ()
 	[[ "$DEBUG" != 0 ]] && echo "$@"
 }
 
-## Docker user uid/gid mapping to the host user uid/gid
-if [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]]; then
+uid_gid_reset()
+{
 	if [[ "$HOST_UID" != "$(id -u docker)" ]] || [[ "$HOST_GID" != "$(id -g docker)" ]]; then
 		echo-debug "Updating docker user uid/gid to $HOST_UID/$HOST_GID to match the host user uid/gid..."
-		sudo usermod -u "$HOST_UID" -o docker >/dev/null 2>&1
-		sudo groupmod -g "$HOST_GID" -o users >/dev/null 2>&1
+		usermod -u "$HOST_UID" -o docker >/dev/null 2>&1
+		groupmod -g "$HOST_GID" -o users >/dev/null 2>&1
 		# Make sure permissions are correct after the uid/gid change
-		sudo chown "$HOST_UID:$HOST_GID" -R ${HOME_DIR}
-		sudo chown "$HOST_UID:$HOST_GID" /var/www
+		chown "$HOST_UID:$HOST_GID" -R ${HOME_DIR}
+		chown "$HOST_UID:$HOST_GID" -R /var/www
 	fi
-fi
+}
+
+xdebug_enable()
+{
+	echo "Enabling xdebug..."
+	php5enmod xdebug
+}
+
+# Docker user uid/gid mapping to the host user uid/gid
+# '""' is used as an empty variable designation in yml files (can't used empty vars without warnings from compose)
+# TODO: figure out a better way of checking for empty variables
+( [[ "$HOST_UID" != '' ]] || [[ "$HOST_UID" != '""' ]] ) &&
+	( [[ "$HOST_GID" != '' ]] || [[ "$HOST_GID" != '""' ]] ) &&
+	uid_gid_reset
 
 # Enable xdebug
-if [[ "${XDEBUG_ENABLED}" == "1" ]]; then
-  echo-debug "Enabling xdebug..."
-  sudo php5enmod xdebug
-fi
+[[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
 
 # Execute passed CMD arguments
 # Service mode (run as root)
