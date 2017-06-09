@@ -176,7 +176,8 @@ ENV COMPOSER_VERSION=1.4.2 \
 	DRUPAL_CONSOLE_VERSION=1.0.0-rc20 \
 	MHSENDMAIL_VERSION=0.2.0 \
 	WPCLI_VERSION=1.1.0 \
-	MG_CODEGEN_VERSION=1.6.4
+	MG_CODEGEN_VERSION=1.6.4 \
+	BLACKFIRE_VERSION=1.12.0
 RUN \
     # Composer
     curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer && \
@@ -190,6 +191,8 @@ RUN \
     curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp && \
     # Install magento code generator
     curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen && \
+    # Install blackfire cli
+    curl -L https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64 -o /usr/local/bin/blackfire && \
     # Make all binaries executable
     chmod +x /usr/local/bin/*
 
