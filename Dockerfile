@@ -111,7 +111,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ## PHP settings
-RUN mkdir -p /var/www/docroot && \
+RUN \
     # PHP-FPM settings
     ## /etc/php5/fpm/php.ini
     sed -i '/memory_limit =/c memory_limit = 256M' /etc/php5/fpm/php.ini && \
@@ -256,30 +256,31 @@ COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
 
-HEALTHCHECK --interval=5s --timeout=1s CMD ["/opt/healthcheck.sh"]
+ENV \
+	# ssh-agent proxy socket (requires docksal/ssh-agent)
+	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
+	# Set TERM so text editors/etc. can be used
+	TERM=xterm \
+	# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
+	PROJECT_ROOT=/var/www
+
+USER root
 
 EXPOSE 9000
 EXPOSE 22
 
 WORKDIR /var/www
 
-ENV \
-	# Default SSH key name
-	SSH_KEY_NAME=id_rsa \
-	# ssh-agent proxy socket (requires docksal/ssh-agent)
-	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
-	# Set TERM so text editors/etc. can be used
-	TERM=xterm \
-	# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
-	PROJECT_ROOT=/var/www \
-	# Allow matching host uid:gid
-	HOST_UID=1000 \
-	HOST_GID=100
-
-USER root
-
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
 
 # By default, launch supervisord to keep the container running.
 CMD ["supervisord"]
+
+# Health check script
+HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]
+
+# Keeping the volumes at the bottom as they would otherwise slow down each build step after them.
+# We want data in this folder to be preserved when container is recreated (configuration updated).
+VOLUME /home/docker
+VOLUME /var/www

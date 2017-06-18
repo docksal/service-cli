@@ -29,14 +29,10 @@ xdebug_enable()
 }
 
 # Docker user uid/gid mapping to the host user uid/gid
-# '""' is used as an empty variable designation in yml files (can't used empty vars without warnings from compose)
-# TODO: figure out a better way of checking for empty variables
-( [[ "$HOST_UID" != '' ]] || [[ "$HOST_UID" != '""' ]] ) &&
-	( [[ "$HOST_GID" != '' ]] || [[ "$HOST_GID" != '""' ]] ) &&
-	uid_gid_reset
+[[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
 
 # Enable xdebug
-[[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
+[[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
 
 # Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
 # To not bloat the image size permissions on the home folder are reset during image startup (in startup.sh)
