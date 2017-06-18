@@ -17,11 +17,8 @@ uid_gid_reset()
 {
 	if [[ "$HOST_UID" != "$(id -u docker)" ]] || [[ "$HOST_GID" != "$(id -g docker)" ]]; then
 		echo-debug "Updating docker user uid/gid to $HOST_UID/$HOST_GID to match the host user uid/gid..."
-		usermod -u "$HOST_UID" -o docker >/dev/null 2>&1
-		groupmod -g "$HOST_GID" -o users >/dev/null 2>&1
-		# Make sure permissions are correct after the uid/gid change
-		chown "$HOST_UID:$HOST_GID" -R ${HOME_DIR}
-		chown "$HOST_UID:$HOST_GID" -R /var/www
+		usermod -u "$HOST_UID" -o docker
+		groupmod -g "$HOST_GID" -o "$(id -gn docker)"
 	fi
 }
 
@@ -40,6 +37,14 @@ xdebug_enable()
 
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
+
+# Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
+# To not bloat the image size permissions on the home folder are reset during image startup (in startup.sh)
+echo-debug "Resetting permissions on $HOME_DIR and /var/www..."
+chown "$HOST_UID:$HOST_GID" -R "$HOME_DIR"
+# Docker resets the project root folder permissions to 0:0 when cli is recreated (e.g. an env variable updated).
+# Why apply a fix/woraround for this at startup.
+chown "$HOST_UID:$HOST_GID" /var/www
 
 # Initialization steps completed. Create a pid file to mark the container is healthy
 echo-debug "Preliminary initialization completed"

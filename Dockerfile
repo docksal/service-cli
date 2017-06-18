@@ -246,13 +246,12 @@ RUN \
     composer clear-cache
 
 # Copy configs and scripts
+# Docker does not honor the USER directive when doing COPY/ADD.
+# To not bloat the image size permissions on the home folder are reset during image startup (in startup.sh)
 COPY config/.ssh $HOME/.ssh
 COPY config/.drush $HOME/.drush
 COPY config/.zpreztorc $HOME/.zpreztorc
 COPY config/.docksalrc $HOME/.docksalrc
-# Fix permissions after copy
-RUN sudo chown -R $(id -u docker):$(id -g docker) $HOME
-
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
