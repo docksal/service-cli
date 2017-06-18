@@ -61,15 +61,16 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN \
-    # Create a non-root "docker" user (uid = 1000) with access to sudo and the default group set to 'users' (gid = 100)
-    useradd -m -s /bin/bash -u 1000 -g users -G sudo -p docker docker && \
+    # Create a regular user/group "docker" (uid = 1000, gid = 1000 ) with access to sudo
+    groupadd docker -g 1000 && \
+    useradd -m -s /bin/bash -u 1000 -g 1000 -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Install gosu and give access to the users group to use it.
+# Install gosu and give access to the docker user primary group to use it.
 # gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
 # https://github.com/tianon/gosu
 RUN curl -sSL "https://github.com/tianon/gosu/releases/download/1.10/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
-    chown root:users /usr/local/bin/gosu && \
+    chown root:"$(id -g docker)" /usr/local/bin/gosu && \
     chmod +sx /usr/local/bin/gosu
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
