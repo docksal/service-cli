@@ -70,7 +70,7 @@ RUN \
 # gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
 # https://github.com/tianon/gosu
 RUN curl -sSL "https://github.com/tianon/gosu/releases/download/1.10/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
-    chown root:"$(id -g docker)" /usr/local/bin/gosu && \
+    chown root:"$(id -gn docker)" /usr/local/bin/gosu && \
     chmod +sx /usr/local/bin/gosu
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
