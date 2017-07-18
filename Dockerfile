@@ -279,8 +279,3 @@ CMD ["supervisord"]
 
 # Health check script
 HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]
-
-# Keeping the volumes at the bottom as they would otherwise slow down each build step after them.
-# We want data in this folder to be preserved when container is recreated (configuration updated).
-VOLUME /home/docker
-VOLUME /var/www
