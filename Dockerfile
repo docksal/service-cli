@@ -29,7 +29,10 @@ RUN sed -i 's/main/main contrib non-free/' /etc/apt/sources.list && \
     # Include git-lfs repo
     curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add - && \
     echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' > /etc/apt/sources.list.d/github_git-lfs.list && \
-    echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list
+    echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list && \
+	# Including yarn repo
+	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
 
 # Additional packages
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -52,20 +55,22 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     unzip \
     zip \
     zsh \
+    yarn \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN \
-    # Create a non-root "docker" user (uid = 1000) with access to sudo and the default group set to 'users' (gid = 100)
-    useradd -m -s /bin/bash -u 1000 -g users -G sudo -p docker docker && \
+    # Create a regular user/group "docker" (uid = 1000, gid = 1000 ) with access to sudo
+    groupadd docker -g 1000 && \
+    useradd -m -s /bin/bash -u 1000 -g 1000 -G sudo -p docker docker && \
     echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Install gosu and give access to the users group to use it.
+# Install gosu and give access to the docker user primary group to use it.
 # gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
 # https://github.com/tianon/gosu
 RUN curl -sSL "https://github.com/tianon/gosu/releases/download/1.10/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu && \
-    chown root:users /usr/local/bin/gosu && \
+    chown root:"$(id -gn docker)" /usr/local/bin/gosu && \
     chmod +sx /usr/local/bin/gosu
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
@@ -96,6 +101,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     php5-mcrypt \
     php5-memcache \
     php5-mysql \
+    php5-redis \
     php5-sqlite \
     php5-ssh2 \
     php5-xdebug \
@@ -105,7 +111,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ## PHP settings
-RUN mkdir -p /var/www/docroot && \
+RUN \
     # PHP-FPM settings
     ## /etc/php5/fpm/php.ini
     sed -i '/memory_limit =/c memory_limit = 256M' /etc/php5/fpm/php.ini && \
@@ -127,6 +133,7 @@ RUN mkdir -p /var/www/docroot && \
     ## /etc/php5/fpm/php-fpm.conf
     sed -i '/daemonize =/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
     sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php-fpm.conf && \
+    sed -i '/pid =/c pid = \/run\/php-fpm.pid' /etc/php5/fpm/php-fpm.conf && \
     # PHP CLI settings
     ## /etc/php5/cli/php.ini
     sed -i '/memory_limit =/c memory_limit = 512M' /etc/php5/cli/php.ini && \
@@ -165,12 +172,13 @@ RUN gem install bundler
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
-ENV COMPOSER_VERSION=1.3.0 \
-	DRUSH_VERSION=8.1.10 \
-	DRUPAL_CONSOLE_VERSION=1.0.0-rc16 \
+ENV COMPOSER_VERSION=1.4.2 \
+	DRUSH_VERSION=8.1.11 \
+	DRUPAL_CONSOLE_VERSION=1.0.0-rc20 \
 	MHSENDMAIL_VERSION=0.2.0 \
 	WPCLI_VERSION=1.1.0 \
-	MG_CODEGEN_VERSION=1.4
+	MG_CODEGEN_VERSION=1.6.4 \
+	BLACKFIRE_VERSION=1.12.0
 RUN \
     # Composer
     curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer && \
@@ -184,6 +192,8 @@ RUN \
     curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp && \
     # Install magento code generator
     curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen && \
+    # Install blackfire cli
+    curl -L https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64 -o /usr/local/bin/blackfire && \
     # Make all binaries executable
     chmod +x /usr/local/bin/*
 
@@ -201,8 +211,8 @@ RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR
     ln -s $HOME/.zprezto/runcoms/zshrc $HOME/.zshrc
 
 # Install nvm and a default node version
-ENV NVM_VERSION=0.33.0 \
-	NODE_VERSION=6.10.0 \
+ENV NVM_VERSION=0.33.2 \
+	NODE_VERSION=6.10.3 \
 	NVM_DIR=$HOME/.nvm
 RUN \
     curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash && \
@@ -211,8 +221,8 @@ RUN \
     nvm alias default $NODE_VERSION && \
     # Install global node packages
     npm install -g npm && \
-    npm install -g yarn && \
-    npm install -g bower && \
+	# Cleanup
+	nvm clear-cache && npm cache clear --force && \
 	# Fix npm complaining about permissions and not being able to update
 	sudo rm -rf $HOME/.config
 
@@ -236,38 +246,36 @@ RUN \
     composer clear-cache
 
 # Copy configs and scripts
+# Docker does not honor the USER directive when doing COPY/ADD.
+# To not bloat the image size permissions on the home folder are reset during image startup (in startup.sh)
 COPY config/.ssh $HOME/.ssh
 COPY config/.drush $HOME/.drush
 COPY config/.zpreztorc $HOME/.zpreztorc
 COPY config/.docksalrc $HOME/.docksalrc
-# Fix permissions after copy
-RUN sudo chown -R $(id -u docker):$(id -g docker) $HOME
-
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
+COPY healthcheck.sh /opt/healthcheck.sh
+
+ENV \
+	# ssh-agent proxy socket (requires docksal/ssh-agent)
+	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
+	# Set TERM so text editors/etc. can be used
+	TERM=xterm \
+	# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
+	PROJECT_ROOT=/var/www
+
+USER root
 
 EXPOSE 9000
 EXPOSE 22
 
 WORKDIR /var/www
 
-ENV \
-	# Default SSH key name
-	SSH_KEY_NAME=id_rsa \
-	# ssh-agent proxy socket (requires docksal/ssh-agent)
-	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
-	# Set TERM so text editors/etc. can be used
-	TERM=xterm \
-	# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
-	PROJECT_ROOT=/var/www \
-	# Allow matching host uid:gid
-	HOST_UID=1000 \
-	HOST_GID=100
-
-USER root
-
 # Starter script
 ENTRYPOINT ["/opt/startup.sh"]
 
 # By default, launch supervisord to keep the container running.
 CMD ["supervisord"]
+
+# Health check script
+HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]

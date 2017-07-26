@@ -4,10 +4,21 @@ This image is focused on console tools necessary to develop LAMP stack applicati
 
 This image(s) is part of the [Docksal](http://docksal.io) image library.
 
-## Versions
 
-- `1.0-php7`, `php7`, `latest` - PHP 7.0
-- `1.0-php5`, `php5` - PHP 5.6
+## Versions and image tag naming convention
+
+- Stable versions
+  - `<version>-php7`, `php7`, `latest` - PHP 7.0
+  - `<version>-php5`, `php5` - PHP 5.6
+- Development versions
+  - `edge-php7` - PHP 7.0
+  - `edge-php5` - PHP 5.6
+
+Examples:
+
+- `docksal/cli:1.2-php7` - a specific stable image version with PHP7
+- `docksal/cli:php5` - the latest stable image version with PHP5
+
 
 ## Includes
 
@@ -27,8 +38,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 - nodejs
   - nvm
   - nodejs (via nvm)
-    - npm
-    - bower
+  - npm, yarn
 - python
 
 Other notable tools:
