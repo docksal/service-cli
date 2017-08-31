@@ -33,7 +33,7 @@ xdebug_enable()
 
 # Docker user uid/gid mapping to the host user uid/gid
 if [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] ; then
-	uid_gid_reset
+  uid_gid_reset
   # Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
   # To not bloat the image size permissions on the home folder are reset during image startup (in startup.sh)
   echo-debug "Resetting permissions on $HOME_DIR and /var/www..."
