@@ -28,19 +28,20 @@ xdebug_enable()
 	php5enmod xdebug
 }
 
-# Docker user uid/gid mapping to the host user uid/gid
-[[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
-
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
 
-# Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
-# To not bloat the image size permissions on the home folder are reset during image startup (in startup.sh)
-echo-debug "Resetting permissions on $HOME_DIR and /var/www..."
-chown "$HOST_UID:$HOST_GID" -R "$HOME_DIR"
-# Docker resets the project root folder permissions to 0:0 when cli is recreated (e.g. an env variable updated).
-# Why apply a fix/woraround for this at startup.
-chown "$HOST_UID:$HOST_GID" /var/www
+# Docker user uid/gid mapping to the host user uid/gid
+if [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] ; then
+  uid_gid_reset
+  # Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
+  # To not bloat the image size permissions on the home folder are reset during image startup (in startup.sh)
+  echo-debug "Resetting permissions on $HOME_DIR and /var/www..."
+  chown "$HOST_UID:$HOST_GID" -R "$HOME_DIR"
+  # Docker resets the project root folder permissions to 0:0 when cli is recreated (e.g. an env variable updated).
+  # Why apply a fix/woraround for this at startup.
+  chown "$HOST_UID:$HOST_GID" /var/www
+fi
 
 # Initialization steps completed. Create a pid file to mark the container is healthy
 echo-debug "Preliminary initialization completed"
