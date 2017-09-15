@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM php:5-fpm
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
 RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
@@ -83,79 +83,96 @@ RUN mkdir /var/run/sshd & \
     echo "export VISIBLE=now" >> /etc/profile
 ENV NOTVISIBLE "in users profile"
 
-# PHP packages
+# Needed to install PHP extentions
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    blackfire-php \
-    php-pear \
-    php5-curl \
-    php5-cli \
-    php5-common \
-    php5-fpm \
-    php5-gd \
-    php5-gnupg \
-    php5-imagick \
-    php5-intl \
-    php5-json \
-    php5-ldap \
-    php5-mcrypt \
-    php5-memcache \
-    php5-mysql \
-    php5-redis \
-    php5-sqlite \
-    php5-ssh2 \
-    php5-xdebug \
-    php5-xsl \
+    blackfire-php \ 
+    libmemcached-dev \
+    zlib1g-dev \
+    libmcrypt-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng12-dev \
+    libmagickwand-dev \
+    libmagickcore-dev \
+    libldap2-dev \
+    libssh2-1 \
+    libssh2-1-dev \
+    libmhash-dev \
+    zlib1g-dev \
+    libicu-dev \
+    g++ \
+    libxslt1-dev \
+    libgpgme11-dev \
+    # link ldap libs
+    && ln -s /usr/lib/x86_64-linux-gnu/libldap.so /usr/lib/ \
+    && ln -s /usr/lib/x86_64-linux-gnu/liblber.so /usr/lib/ \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN docker-php-ext-configure hash --with-mhash \
+    && docker-php-ext-install -j$(nproc) \
+       bcmath \
+       bz2 \
+       calendar\
+       dba \
+       exif \
+       gettext \
+       intl \
+       ldap \
+       mcrypt \
+       opcache \
+       pcntl \
+       pdo_mysql \
+       shmop \
+       soap \
+       sockets \
+       sysvmsg \
+       sysvsem \
+       sysvshm \
+       wddx \
+       xsl \
+       zip \
+    && pecl install memcache \
+    && pecl install xdebug \
+    && pecl install ssh2 \
+    && pecl install gnupg \
+    && pecl install imagick \
+    && pecl install redis \
+    && docker-php-ext-enable memcache xdebug ssh2 gnupg imagick redis \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd \
+#    && docker-php-ext-configure ldap --with-ldap-libs=/usr/lib/i386-linux-gnu/
+    && docker-php-ext-install -j$(nproc) opcache
+    
 ## PHP settings
+## /usr/local/etc/php/php.ini
+COPY config/php/php-cli.ini /usr/local/etc/php/php.ini
 RUN \
     # PHP-FPM settings
-    ## /etc/php5/fpm/php.ini
-    sed -i '/memory_limit =/c memory_limit = 256M' /etc/php5/fpm/php.ini && \
-    sed -i '/max_execution_time =/c max_execution_time = 300' /etc/php5/fpm/php.ini && \
-    sed -i '/upload_max_filesize =/c upload_max_filesize = 500M' /etc/php5/fpm/php.ini && \
-    sed -i '/post_max_size =/c post_max_size = 500M' /etc/php5/fpm/php.ini && \
-    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php.ini && \
-    sed -i '/always_populate_raw_post_data =/c always_populate_raw_post_data = -1' /etc/php5/fpm/php.ini && \
-    sed -i '/sendmail_path =/c sendmail_path = /bin/true' /etc/php5/fpm/php.ini && \
-    sed -i '/date.timezone =/c date.timezone = UTC' /etc/php5/fpm/php.ini && \
-    sed -i '/display_errors =/c display_errors = On' /etc/php5/fpm/php.ini && \
-    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php5/fpm/php.ini && \
-    ## /etc/php5/fpm/pool.d/www.conf
-    sed -i '/user =/c user = docker' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/catch_workers_output =/c catch_workers_output = yes' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/listen =/c listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/clear_env =/c clear_env = no' /etc/php5/fpm/pool.d/www.conf && \
-    ## /etc/php5/fpm/php-fpm.conf
-    sed -i '/daemonize =/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
-    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php-fpm.conf && \
-    sed -i '/pid =/c pid = \/run\/php-fpm.pid' /etc/php5/fpm/php-fpm.conf && \
-    # PHP CLI settings
-    ## /etc/php5/cli/php.ini
-    sed -i '/memory_limit =/c memory_limit = 512M' /etc/php5/cli/php.ini && \
-    sed -i '/max_execution_time =/c max_execution_time = 600' /etc/php5/cli/php.ini && \
-    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
-    sed -i '/always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php5/cli/php.ini && \
-    sed -i '/sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
-    sed -i '/date.timezone/c date.timezone = UTC' /etc/php5/cli/php.ini && \
-    sed -i '/display_errors =/c display_errors = On' /etc/php5/cli/php.ini && \
-    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php5/cli/php.ini && \
+    ## /usr/local/etc/php-fpm.d/www.conf
+    sed -i '/memory_limit/c php_admin_value[memory_limit] = 256M' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i '/sendmail_path/c php_admin_value[sendmail_path] = /bin/true' /usr/local/etc/php-fpm.d/www.conf && \
+    echo 'php_admin_value[max_execution_time] = 300' >>/usr/local/etc/php-fpm.d/www.conf && \
+    echo 'php_admin_value[upload_max_filesize] = 500M' >>/usr/local/etc/php-fpm.d/www.conf && \
+    echo 'php_admin_value[post_max_size] = 500M' >>/usr/local/etc/php-fpm.d/www.conf && \
+    echo 'php_admin_value[always_populate_raw_post_data] = -1' >>/usr/local/etc/php-fpm.d/www.conf && \
+    echo 'php_admin_value[date.timezone] = UTC' >>/usr/local/etc/php-fpm.d/www.conf && \
+    echo 'php_admin_value[display_errors] = On' >>/usr/local/etc/php-fpm.d/www.conf && \
+    echo 'php_admin_value[display_startup_errors] = On' >>/usr/local/etc/php-fpm.d/www.conf && \
+    sed -i '/user =/c user = docker' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i '/catch_workers_output =/c catch_workers_output = yes' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i '/listen =/c listen = 0.0.0.0:9000' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i '/clear_env =/c clear_env = no' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i '/pid =/c pid = \/run\/php-fpm.pid' /usr/local/etc/php-fpm.d/www.conf && \
     # PHP module settings
-    echo 'opcache.memory_consumption = 128' >> /etc/php5/mods-available/opcache.ini && \
-    sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
-    # Disable xdebug by default. We will enabled it at startup (see startup.sh)
-    php5dismod xdebug && \
+    echo 'opcache.memory_consumption = 128' >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
+    sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /usr/local/etc/php/conf.d/zz-blackfire.ini && \
     # Create symlinks to project level overrides (if the source files are missing, nothing will break)
-    ln -s /var/www/.docksal/etc/php/php.ini /etc/php5/fpm/conf.d/99-overrides.ini && \
-    ln -s /var/www/.docksal/etc/php/php-cli.ini /etc/php5/cli/conf.d/99-overrides.ini
-
-# xdebug settings
-ENV XDEBUG_ENABLED 0
-COPY config/php/xdebug.ini /etc/php5/mods-available/xdebug.ini
+    ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/zz-overrides.conf && \
+    ln -s /var/www/.docksal/etc/php/php-cli.ini /usr/local/etc/php/conf.d/zz-overrides.ini
 
 # Other language packages and dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
@@ -200,6 +217,10 @@ RUN \
 # All further RUN commands will run as the "docker" user
 USER docker
 ENV HOME /home/docker
+
+# xdebug settings
+ENV XDEBUG_ENABLED 0
+COPY config/php/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # Install Prezto zsh shell
 RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto" && \
