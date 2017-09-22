@@ -262,7 +262,10 @@ ENV \
 	# Set TERM so text editors/etc. can be used
 	TERM=xterm \
 	# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
-	PROJECT_ROOT=/var/www
+	PROJECT_ROOT=/var/www \
+	# Default values for HOST_UID and HOST_GUI to match the default Ubuntu user. These are used in startup.sh
+	HOST_UID=1000 \
+	HOST_GID=1000
 
 USER root
 
