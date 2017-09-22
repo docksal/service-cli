@@ -170,12 +170,18 @@ RUN \
     # PHP module settings
     echo 'opcache.memory_consumption = 128' >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
     sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /usr/local/etc/php/conf.d/zz-blackfire.ini && \
+    # remove xdebug ini file, get linked in startup.sh
+    rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
     # Create symlinks to project level overrides (if the source files are missing, nothing will break)
     ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/zz-overrides.conf && \
     ln -s /var/www/.docksal/etc/php/php-cli.ini /usr/local/etc/php/conf.d/zz-overrides.ini
 
+# xdebug settings
+ENV XDEBUG_ENABLED 0
+COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
+
 # Other language packages and dependencies
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get clean && apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
     ruby-full \
     rlwrap \
@@ -217,10 +223,6 @@ RUN \
 # All further RUN commands will run as the "docker" user
 USER docker
 ENV HOME /home/docker
-
-# xdebug settings
-ENV XDEBUG_ENABLED 0
-COPY config/php/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # Install Prezto zsh shell
 RUN git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto" && \
