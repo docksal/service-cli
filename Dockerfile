@@ -40,6 +40,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     dnsutils \
     git \
     git-lfs \
+    ghostscript \
     imagemagick \
     less \
     mc \
