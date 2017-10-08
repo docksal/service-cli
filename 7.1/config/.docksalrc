@@ -1,0 +1,13 @@
+# Commands in this file will be sourced for both interactive and non-interactive sessions.
+
+# Allow alias expansion in non-interactive shells.
+shopt -s expand_aliases
+
+# NVM initialization.
+export NVM_DIR="/home/docker/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
+# Source alias definitions.
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
