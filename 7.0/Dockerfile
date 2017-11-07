@@ -145,7 +145,11 @@ RUN docker-php-ext-configure hash --with-mhash \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install -j$(nproc) gd \
 #    && docker-php-ext-configure ldap --with-ldap-libs=/usr/lib/i386-linux-gnu/
-    && docker-php-ext-install -j$(nproc) opcache
+    && docker-php-ext-install -j$(nproc) opcache \
+    # Cleanup php compile stuff
+    && docker-php-source delete \
+    && rm -rf /tmp/pear ~/.pearrc
+
     
 ## PHP settings
 ## /usr/local/etc/php/php.ini
