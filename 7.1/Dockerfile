@@ -40,6 +40,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     dnsutils \
     git \
     git-lfs \
+    ghostscript \
     imagemagick \
     less \
     mc \
@@ -270,6 +271,8 @@ RUN \
     # Drupal Coder w/ a matching version of PHP_CodeSniffer
     composer global require drupal/coder && \
     phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer && \
+    # Composer parallel install plugin
+    composer global require hirak/prestissimo && \
     # Cleanup
     composer clear-cache
 
