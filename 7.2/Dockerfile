@@ -177,7 +177,6 @@ RUN \
     echo 'php_admin_value[max_execution_time] = 300' >>/usr/local/etc/php-fpm.d/www.conf && \
     echo 'php_admin_value[upload_max_filesize] = 500M' >>/usr/local/etc/php-fpm.d/www.conf && \
     echo 'php_admin_value[post_max_size] = 500M' >>/usr/local/etc/php-fpm.d/www.conf && \
-    echo 'php_admin_value[always_populate_raw_post_data] = -1' >>/usr/local/etc/php-fpm.d/www.conf && \
     echo 'php_admin_value[date.timezone] = UTC' >>/usr/local/etc/php-fpm.d/www.conf && \
     echo 'php_admin_value[display_errors] = On' >>/usr/local/etc/php-fpm.d/www.conf && \
     echo 'php_admin_value[display_startup_errors] = On' >>/usr/local/etc/php-fpm.d/www.conf && \
