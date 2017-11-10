@@ -85,10 +85,7 @@ RUN mkdir /var/run/sshd & \
 ENV NOTVISIBLE "in users profile"
 
 # Needed to install PHP extentions
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
-    blackfire-php \ 
-    libmemcached-dev \
+RUN buildDeps="libmemcached-dev \
     zlib1g-dev \
     libmcrypt-dev \
     libfreetype6-dev \
@@ -97,28 +94,41 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     libmagickwand-dev \
     libmagickcore-dev \
     libldap2-dev \
-    libssh2-1 \
     libssh2-1-dev \
     libmhash-dev \
     zlib1g-dev \
     libicu-dev \
     g++ \
     libxslt1-dev \
-    libgpgme11-dev \
-    # link ldap libs
-    && ln -s /usr/lib/x86_64-linux-gnu/libldap.so /usr/lib/ \
-    && ln -s /usr/lib/x86_64-linux-gnu/liblber.so /usr/lib/ \
-    # Cleanup
-    && DEBIAN_FRONTEND=noninteractive apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN docker-php-ext-configure hash --with-mhash \
+    libgpgme11-dev" \
+    && DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+    $buildDeps \
+    blackfire-php \
+    zlib1g \
+    libmcrypt4 \
+    libfreetype6 \
+    libjpeg62-turbo \
+    libpng12-0 \
+    libmagickwand-6.q16-2 \
+    libmagickcore-6.q16-2 \
+    libldap-2.4-2 \
+    libssh2-1 \
+    libmhash2 \
+    zlib1g \
+    libicu52 \
+    libxslt1.1 \
+    libgpgme11 \
+    && docker-php-ext-configure hash --with-mhash \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ \
     && docker-php-ext-install -j$(nproc) \
        bcmath \
        bz2 \
        calendar\
        dba \
        exif \
+       gd \
        gettext \
        intl \
        ldap \
@@ -141,14 +151,13 @@ RUN docker-php-ext-configure hash --with-mhash \
     && pecl install gnupg \
     && pecl install imagick \
     && pecl install redis \
-    && docker-php-ext-enable memcache xdebug ssh2 gnupg imagick redis \
-    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install -j$(nproc) gd \
-#    && docker-php-ext-configure ldap --with-ldap-libs=/usr/lib/i386-linux-gnu/
-    && docker-php-ext-install -j$(nproc) opcache \
-    # Cleanup php compile stuff
+    && docker-php-ext-enable memcache gnupg ssh2 imagick redis \
+    # Cleanup
     && docker-php-source delete \
-    && rm -rf /tmp/pear ~/.pearrc
+    && rm -rf /tmp/pear ~/.pearrc \
+    && DEBIAN_FRONTEND=noninteractive apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps \
+    && DEBIAN_FRONTEND=noninteractive apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
     
 ## PHP settings
