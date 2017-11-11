@@ -154,7 +154,7 @@ _healthcheck_wait ()
 	echo "$output" | grep "zlib"
 
 	# test some php-cli ini settings
-	run fin docker exec docksal-php-7.0 php -i
+	run fin docker exec "$NAME" php -i
 	echo "$output" | grep "memory_limit => 512M => 512M"
 	echo "$output" | grep "sendmail_path => /bin/true => /bin/true"
 
