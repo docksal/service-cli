@@ -187,7 +187,7 @@ RUN \
     # remove xdebug ini file, get linked in startup.sh
     rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
     # Create symlinks to project level overrides (if the source files are missing, nothing will break)
-    ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/zz-overrides.conf && \
+    ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/php-fpm.conf && \
     ln -s /var/www/.docksal/etc/php/php-cli.ini /usr/local/etc/php/conf.d/zz-overrides.ini
 
 # xdebug settings
@@ -294,6 +294,7 @@ COPY config/.docksalrc $HOME/.docksalrc
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
+COPY index.php /var/www/index.php
 
 ENV \
 	# ssh-agent proxy socket (requires docksal/ssh-agent)
