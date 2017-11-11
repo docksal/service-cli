@@ -1,0 +1,23 @@
+language: generic
+
+services:
+  - docker
+
+env:
+  matrix:
+    - VERSION=5.6
+    - VERSION=7.0
+    - VERSION=7.1
+    - VERSION=7.2
+
+install:
+  - curl -fsSL https://get.docksal.io | sh
+  - fin version
+  - fin sysinfo
+
+script:
+  - cd ${VERSION}
+  - make && make test
+
+after_failure:
+  - make logs
