@@ -6,10 +6,10 @@ teardown() {
 	# TODO: figure out how to deal with this (output from previous run commands showing up along with the error message)
 	echo "Note: ignore the lines between \"...failed\" above and here"
 	echo
-	echo "Status: $status"
+	echo "Status: ${status}"
 	echo "Output:"
 	echo "================================================================"
-	echo "$output"
+	echo "${output}"
 	echo "================================================================"
 }
 
@@ -84,9 +84,9 @@ _healthcheck_wait ()
 	export QUERY_STRING=
 	export REQUEST_METHOD=GET
 	run cgi-fcgi -bind -connect test.docksal:19000
-	echo "$output" | grep "X-Powered-By: PHP/7"
+	echo "$output" | grep "X-Powered-By: PHP"
 	echo "$output" | grep "It works!"
-	# test some php-fpm ini settings 
+	# test some php-fpm ini settings
 	echo "$output" | grep "memory_limit: 256M"
 	echo "$output" | grep "sendmail_path: /bin/true"
 
@@ -94,71 +94,21 @@ _healthcheck_wait ()
 	run cgi-fcgi -bind -connect test.docksal:19000
 	echo "$output" | grep "Status: 404 Not Found"
 
-	run fin docker exec "$NAME" php -m
-	echo "$output" | grep "bcmath"
-	echo "$output" | grep "blackfire"
-	echo "$output" | grep "bz2"
-	echo "$output" | grep "calendar"
-	echo "$output" | grep "Core"
-	echo "$output" | grep "ctype"
-	echo "$output" | grep "curl"
-	echo "$output" | grep "date"
-	echo "$output" | grep "dba"
-	echo "$output" | grep "dom"
-	echo "$output" | grep "exif"
-	echo "$output" | grep "fileinfo"
-	echo "$output" | grep "filter"
-	echo "$output" | grep "ftp"
-	echo "$output" | grep "gd"
-	echo "$output" | grep "gettext"
-	echo "$output" | grep "gnupg"
-	echo "$output" | grep "hash"
-	echo "$output" | grep "iconv"
-	echo "$output" | grep "imagick"
-	echo "$output" | grep "intl"
-	echo "$output" | grep "json"
-	echo "$output" | grep "ldap"
-	echo "$output" | grep "libxml"
-	echo "$output" | grep "mbstring"
-	echo "$output" | grep "mcrypt"
-	echo "$output" | grep "mysqlnd"
-	echo "$output" | grep "openssl"
-	echo "$output" | grep "pcntl"
-	echo "$output" | grep "pcre"
-	echo "$output" | grep "PDO"
-	echo "$output" | grep "pdo_mysql"
-	echo "$output" | grep "pdo_sqlite"
-	echo "$output" | grep "Phar"
-	echo "$output" | grep "posix"
-	echo "$output" | grep "readline"
-	echo "$output" | grep "redis"
-	echo "$output" | grep "Reflection"
-	echo "$output" | grep "session"
-	echo "$output" | grep "shmop"
-	echo "$output" | grep "SimpleXML"
-	echo "$output" | grep "soap"
-	echo "$output" | grep "sockets"
-	echo "$output" | grep "SPL"
-	echo "$output" | grep "sqlite3"
-	echo "$output" | grep "ssh2"
-	echo "$output" | grep "standard"
-	echo "$output" | grep "sysvmsg"
-	echo "$output" | grep "sysvsem"
-	echo "$output" | grep "sysvshm"
-	echo "$output" | grep "tokenizer"
-	echo "$output" | grep "wddx"
-	echo "$output" | grep "xml"
-	echo "$output" | grep "xmlreader"
-	echo "$output" | grep "xmlwriter"
-	echo "$output" | grep "xsl"
-	echo "$output" | grep "Zend OPcache"
-	echo "$output" | grep "zip"
-	echo "$output" | grep "zlib"
+	# Check PHP settings
+	phpInfo=$(fin docker exec "$NAME" php -i)
 
-	# test some php-cli ini settings
-	run fin docker exec "$NAME" php -i
+	output=$(echo "$phpInfo" | grep "PHP Version")
+	echo "$output" | grep "${PHP_VERSION}"
+
+	output=$(echo "$phpInfo" | grep "memory_limit")
 	echo "$output" | grep "memory_limit => 512M => 512M"
+
+	output=$(echo "$phpInfo" | grep "sendmail_path")
 	echo "$output" | grep "sendmail_path => /bin/true => /bin/true"
+
+	# Check PHP modules
+	run bash -c "fin docker exec '${NAME}' php -m | diff php-modules.txt -"
+	[[ ${status} == 0 ]]
 
 	### Cleanup ###
 	fin docker rm -vf "$NAME" >/dev/null 2>&1 || true
@@ -182,7 +132,7 @@ _healthcheck_wait ()
 	export QUERY_STRING=
 	export REQUEST_METHOD=GET
 	run cgi-fcgi -bind -connect test.docksal:19000
-	echo "$output" | grep "X-Powered-By: PHP/7"
+	#echo "$output" | grep "X-Powered-By: PHP/7"
 	echo "$output" | grep "Docroot testing!"
 
 	export SCRIPT_FILENAME=/var/www/docroot/nonsense.php
@@ -214,7 +164,7 @@ _healthcheck_wait ()
 	export QUERY_STRING=
 	export REQUEST_METHOD=GET
 	run cgi-fcgi -bind -connect test.docksal:19000
-	echo "$output" | grep "X-Powered-By: PHP/7"
+	#echo "$output" | grep "X-Powered-By: PHP/7"
 	echo "$output" | grep "It works!"
 	# test overrides php-fpm ini settings 
 	echo "$output" | grep "memory_limit: 512M"

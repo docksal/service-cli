@@ -1,9 +1,10 @@
 -include env_make
 
-VERSION ?= php-fpm-7.1
+PHP_VERSION=7.1
+VERSION ?= php-fpm-$(PHP_VERSION)
 
 REPO = docksal/cli
-NAME = docksal-cli-7.1
+NAME = docksal-cli-$(PHP_VERSION)
 
 .PHONY: build test push shell run start stop logs clean release
 
@@ -11,7 +12,7 @@ build:
 	fin docker build -t $(REPO):$(VERSION) .
 
 test:
-	IMAGE=$(REPO):$(VERSION) NAME=$(NAME) ../tests/test.bats
+	IMAGE=$(REPO):$(VERSION) NAME=$(NAME) PHP_VERSION=$(PHP_VERSION) ../tests/test.bats
 
 push:
 	fin docker push $(REPO):$(VERSION)
@@ -32,7 +33,7 @@ logs:
 	fin docker logs $(NAME)
 
 clean:
-	-fin docker rm -f $(NAME)
+	fin docker rm -f $(NAME)
 
 release: build
 	make push -e VERSION=$(VERSION)
