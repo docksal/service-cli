@@ -154,7 +154,7 @@ RUN buildDeps="zlib1g-dev \
        wddx \
        xsl \
        zip \
-    && pecl pecl update-channels \
+    && pecl update-channels \
     && pecl install memcached \
     && pecl install xdebug \
     && pecl install gnupg \
