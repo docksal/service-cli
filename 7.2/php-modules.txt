@@ -24,6 +24,7 @@ json
 ldap
 libxml
 mbstring
+memcached
 mysqlnd
 openssl
 pcntl

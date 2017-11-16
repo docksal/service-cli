@@ -25,6 +25,7 @@ ldap
 libxml
 mbstring
 mcrypt
+memcached
 mysqlnd
 openssl
 pcntl

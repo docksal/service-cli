@@ -93,6 +93,7 @@ RUN buildDeps="zlib1g-dev \
     libpng-dev \
     libmagickwand-dev \
     libmagickcore-dev \
+    libmemcached-dev \
     libldap2-dev \
     libssh2-1-dev \
     libmhash-dev \
@@ -112,6 +113,8 @@ RUN buildDeps="zlib1g-dev \
     libpng16-16 \
     libmagickwand-6.q16-3 \
     libmagickcore-6.q16-3 \
+    libmemcached11 \
+    libmemcachedutil2 \
     libldap-2.4-2 \
     libssh2-1 \
     libmhash2 \
@@ -155,10 +158,12 @@ RUN buildDeps="zlib1g-dev \
        xdebug \
        xsl \
        zip \
+    && pecl pecl update-channels \
+    && pecl install memcached \
     && pecl install gnupg \
     && pecl install imagick \
     && pecl install redis \
-    && docker-php-ext-enable gnupg imagick redis \
+    && docker-php-ext-enable memcached gnupg imagick redis \
     # Cleanup
     && docker-php-source delete \
     && rm -rf /tmp/pear ~/.pearrc \
