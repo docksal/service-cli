@@ -27,6 +27,8 @@ libxml
 mbstring
 mcrypt
 memcache
+mysql
+mysqli
 mysqlnd
 openssl
 pcntl
