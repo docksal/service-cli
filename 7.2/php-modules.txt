@@ -25,6 +25,7 @@ ldap
 libxml
 mbstring
 memcached
+mysqli
 mysqlnd
 openssl
 pcntl
@@ -51,6 +52,7 @@ sysvsem
 sysvshm
 tokenizer
 wddx
+xdebug
 xml
 xmlreader
 xmlwriter
@@ -60,6 +62,7 @@ zip
 zlib
 
 [Zend Modules]
+Xdebug
 Zend OPcache
 blackfire
 

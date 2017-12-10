@@ -1,4 +1,4 @@
-FROM php:7.2-rc-fpm
+FROM php:7.2-fpm
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
 RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
@@ -146,6 +146,7 @@ RUN buildDeps="zlib1g-dev \
        # mcrypt is removed from 7.2. See Deprecated features
        opcache \
        pcntl \
+       mysqli \
        pdo_mysql \
        shmop \
        soap \
@@ -171,38 +172,23 @@ RUN buildDeps="zlib1g-dev \
     && DEBIAN_FRONTEND=noninteractive apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
     
-## PHP settings
+## PHP settings, get default php.ini-development from php-src
 ## /usr/local/etc/php/php.ini
-COPY config/php/php-cli.ini /usr/local/etc/php/php.ini
-RUN \
-    # PHP-FPM settings
-    ## /usr/local/etc/php-fpm.d/www.conf
-    sed -i '/memory_limit/c php_admin_value[memory_limit] = 256M' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i '/sendmail_path/c php_admin_value[sendmail_path] = /bin/true' /usr/local/etc/php-fpm.d/www.conf && \
-    echo 'php_admin_value[max_execution_time] = 300' >>/usr/local/etc/php-fpm.d/www.conf && \
-    echo 'php_admin_value[upload_max_filesize] = 500M' >>/usr/local/etc/php-fpm.d/www.conf && \
-    echo 'php_admin_value[post_max_size] = 500M' >>/usr/local/etc/php-fpm.d/www.conf && \
-    echo 'php_admin_value[date.timezone] = UTC' >>/usr/local/etc/php-fpm.d/www.conf && \
-    echo 'php_admin_value[display_errors] = On' >>/usr/local/etc/php-fpm.d/www.conf && \
-    echo 'php_admin_value[display_startup_errors] = On' >>/usr/local/etc/php-fpm.d/www.conf && \
-    sed -i '/user =/c user = docker' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i '/catch_workers_output =/c catch_workers_output = yes' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i '/listen =/c listen = 0.0.0.0:9000' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i '/clear_env =/c clear_env = no' /usr/local/etc/php-fpm.d/www.conf && \
-    sed -i '/pid =/c pid = \/run\/php-fpm.pid' /usr/local/etc/php-fpm.conf && \
-    # PHP module settings
-    echo 'opcache.memory_consumption = 128' >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini && \
-    sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /usr/local/etc/php/conf.d/zz-blackfire.ini && \
-    # remove xdebug ini file, get linked in startup.sh
-    rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini && \
-    # Create symlinks to project level overrides (if the source files are missing, nothing will break)
-    ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/php-fpm.conf && \
-    ln -s /var/www/.docksal/etc/php/php-cli.ini /usr/local/etc/php/conf.d/zz-overrides.ini
-
+ADD https://raw.githubusercontent.com/php/php-src/PHP-${PHP_VERSION}/php.ini-development /usr/local/etc/php/php.ini
+# docksal php.ini settings are in /usr/local/etc/php/conf.d/  (for CLI and FPM)
+COPY config/php/docksal-php.ini /usr/local/etc/php/conf.d/
+# there is no separated php.ini for FPM (like in debian) 
+COPY config/php/docksal-www.conf /usr/local/etc/php-fpm.d/docksal-www.conf
 # xdebug settings
 ENV XDEBUG_ENABLED 0
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
+
+RUN \
+    # remove zz-blackfire.ini, we hev the settings in docksal-php.ini
+    rm -f /usr/local/etc/php/conf.d/zz-blackfire.ini && \
+    # Create symlinks to project level overrides (if the source files are missing, nothing will break)
+    ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/docksal-overrides.conf && \
+    ln -s /var/www/.docksal/etc/php/php-cli.ini /usr/local/etc/php/conf.d/zz-docksal-overrides.ini
 
 # Other language packages and dependencies
 RUN DEBIAN_FRONTEND=noninteractive apt-get clean && apt-get update && \
