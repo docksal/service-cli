@@ -1,10 +1,13 @@
 -include env_make
 
-PHP_VERSION=5.6
+PHP_VERSION = 5.6
 VERSION ?= php-fpm-$(PHP_VERSION)
 
 REPO = docksal/cli
 NAME = docksal-cli-$(PHP_VERSION)
+
+# Improve write performance for /home/docker by turning it into a volume
+VOLUMES += -v /home/docker
 
 .PHONY: build test push shell run start stop logs clean release
 
