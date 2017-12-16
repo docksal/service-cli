@@ -160,7 +160,7 @@ RUN set -xe; \
 		zip \
 	;\
 	# SSH2 must be installed from source
-	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2; \
+	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
 	\
 	pecl update-channels; \
 	pecl install >/dev/null \
