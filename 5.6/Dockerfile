@@ -8,7 +8,7 @@ RUN set -xe; \
 
 # Install basic packages
 RUN set -xe; \
-	apt-get update; apt-get -y --force-yes --no-install-recommends install \
+	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		apt-transport-https \
 		ca-certificates \
 		curl \
@@ -40,7 +40,7 @@ RUN set -xe; \
 
 # Additional packages
 RUN set -xe; \
-	apt-get update; apt-get -y --force-yes --no-install-recommends install \
+	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		dnsutils \
 		git \
 		git-lfs \
@@ -109,7 +109,7 @@ RUN set -xe; \
 		zlib1g-dev \
 	"; \
 	\
-	apt-get update; apt-get -y --force-yes --no-install-recommends install \
+	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
 		zlib1g \
@@ -127,11 +127,11 @@ RUN set -xe; \
 		libxslt1.1 \
 		libgpgme11; \
 	\
-	docker-php-ext-configure hash --with-mhash; \
-	docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
-	docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/; \
+	docker-php-ext-configure >/dev/null hash --with-mhash; \
+	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
+	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	\
-	docker-php-ext-install -j$(nproc) \
+	docker-php-ext-install >/dev/null -j$(nproc) \
 		bcmath \
 		bz2 \
 		calendar\
@@ -158,7 +158,7 @@ RUN set -xe; \
 		zip; \
 	\
 	pecl update-channels; \
-	pecl install \
+	pecl install >/dev/null \
 		memcache \
 		xdebug \
 		ssh2 \
@@ -200,7 +200,7 @@ RUN set -xe; \
 	# Install magento code generator
 	curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen; \
 	# Install blackfire cli
-	curl -L https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64 -o /usr/local/bin/blackfire; \
+	curl -sSL https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64 -o /usr/local/bin/blackfire; \
 	# Make all binaries executable in one shot
 	chmod +x /usr/local/bin/*
 
@@ -215,7 +215,7 @@ RUN set -xe; \
 
 # Other language packages and dependencies
 RUN set -xe; \
-	apt-get update; apt-get -y --force-yes --no-install-recommends install \
+	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		ruby-full \
 		rlwrap; \
 		#build-essential; \
@@ -223,7 +223,7 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # bundler
-RUN gem install bundler
+RUN gem install bundler >/dev/null
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
@@ -238,10 +238,10 @@ ENV NVM_VERSION=0.33.4 \
 RUN set -xe; \
 	curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash; \
 	. $NVM_DIR/nvm.sh; \
-	nvm install $NODE_VERSION; \
+	nvm install $NODE_VERSION >/dev/null; \
 	nvm alias default $NODE_VERSION; \
 	# Install global node packages
-	npm install -g npm; \
+	npm install -g npm >/dev/null; \
 	# Cleanup
 	nvm clear-cache && npm cache clear --force; \
 	# Fix npm complaining about permissions and not being able to update
@@ -258,13 +258,13 @@ RUN set -xe; \
 	#echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bash_aliases; \
 	echo "alias drush8='/usr/local/bin/drush'" >> $HOME/.bash_aliases; \
 	# Drush modules
-	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush; \
+	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
 	drush cc drush; \
 	# Drupal Coder w/ a matching version of PHP_CodeSniffer
-	composer global require drupal/coder; \
+	composer global require drupal/coder >/dev/null; \
 	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
 	# Composer parallel install plugin
-	composer global require hirak/prestissimo; \
+	composer global require hirak/prestissimo >/dev/null; \
 	# Cleanup
 	composer clear-cache
 
