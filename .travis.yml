@@ -21,7 +21,7 @@ install:
 
 script:
   - cd ${VERSION}
-  - make && make test
+  - travis_retry make && make test  # Retry builds, as pecl.php.net tends to time out often
 
 after_failure:
   - make logs
