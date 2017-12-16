@@ -13,12 +13,13 @@ RUN set -xe; \
 		ca-certificates \
 		curl \
 		locales \
-		wget; \
+		wget \
+	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
+# Set timezone and locale
 RUN set -xe; \
-	# Set timezone and locale
 	dpkg-reconfigure locales; \
 	locale-gen C.UTF-8; \
 	/usr/sbin/update-locale LANG=C.UTF-8
@@ -60,7 +61,8 @@ RUN set -xe; \
 		unzip \
 		zip \
 		zsh \
-		yarn; \
+		yarn \
+	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
@@ -89,44 +91,42 @@ RUN set -xe; \
 	echo "export VISIBLE=now" >> /etc/profile
 ENV NOTVISIBLE "in users profile"
 
-# Needed to install PHP extentions
+# Install PHP extentions
 RUN set -xe; \
 	buildDeps=" \
-		libmemcached-dev \
-		libmcrypt-dev \
-		libfreetype6-dev \
-		libjpeg62-turbo-dev \
-		libpng12-dev \
-		libmagickwand-dev \
-		libmagickcore-dev \
-		libldap2-dev \
-		libssh2-1-dev \
-		libmhash-dev \
-		libicu-dev \
 		g++ \
-		libxslt1-dev \
+		libfreetype6-dev \
 		libgpgme11-dev \
+		libicu-dev \
+		libjpeg62-turbo-dev \
+		libldap2-dev \
+		libmagickcore-dev \
+		libmagickwand-dev \
+		libmcrypt-dev \
+		libmemcached-dev \
+		libmhash-dev \
+		libpng12-dev \
+		libssh2-1-dev \
+		libxslt1-dev \
 		zlib1g-dev \
 	"; \
-	\
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
-		zlib1g \
-		libmcrypt4 \
 		libfreetype6 \
-		libjpeg62-turbo \
-		libpng12-0 \
-		libmagickwand-6.q16-2 \
-		libmagickcore-6.q16-2 \
-		libldap-2.4-2 \
-		libssh2-1 \
-		libmhash2 \
-		zlib1g \
+		libgpgme11 \
 		libicu52 \
+		libjpeg62-turbo \
+		libldap-2.4-2 \
+		libmagickcore-6.q16-2 \
+		libmagickwand-6.q16-2 \
+		libmcrypt4 \
+		libmhash2 \
+		libpng12-0 \
+		libssh2-1 \
 		libxslt1.1 \
-		libgpgme11; \
-	\
+		zlib1g \
+	;\
 	docker-php-ext-configure >/dev/null hash --with-mhash; \
 	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
@@ -155,24 +155,24 @@ RUN set -xe; \
 		sysvshm \
 		wddx \
 		xsl \
-		zip; \
-	\
+		zip \
+	;\
 	pecl update-channels; \
 	pecl install >/dev/null \
+		gnupg \
+		imagick \
 		memcache \
+		redis \
+		ssh2 \
 		xdebug \
-		ssh2 \
-		gnupg \
-		imagick \
-		redis; \
-	\
+	;\
 	docker-php-ext-enable \
-		memcache \
 		gnupg \
-		ssh2 \
 		imagick \
-		redis; \
-	\
+		memcache \
+		redis \
+		ssh2 \
+	;\
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \
