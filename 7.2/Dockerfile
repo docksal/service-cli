@@ -130,6 +130,11 @@ RUN set -xe; \
 		libxslt1.1 \
 		zlib1g \
 	;\
+	# SSH2 must be installed from source
+	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
+	# XDEBUG must be installed from source
+	git clone https://github.com/xdebug/xdebug.git /usr/src/php/ext/xdebug && rm -rf /usr/src/php/ext/xdebug/.git; \
+	\
 	docker-php-ext-configure >/dev/null hash --with-mhash; \
 	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
@@ -161,11 +166,6 @@ RUN set -xe; \
 		xsl \
 		zip \
 	;\
-	# SSH2 must be installed from source
-	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
-	# XDEBUG must be installed from source
-	git clone https://github.com/xdebug/xdebug.git /usr/src/php/ext/xdebug && rm -rf /usr/src/php/ext/xdebug/.git; \
-	\
 	pecl update-channels; \
 	pecl install >/dev/null \
 		gnupg \
