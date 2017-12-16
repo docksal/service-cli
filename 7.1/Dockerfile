@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM php:7.1-fpm
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
 RUN echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
@@ -84,82 +84,111 @@ RUN mkdir /var/run/sshd & \
     echo "export VISIBLE=now" >> /etc/profile
 ENV NOTVISIBLE "in users profile"
 
-# PHP packages
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+# Needed to install PHP extentions
+RUN buildDeps="zlib1g-dev \
+    libmcrypt-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng12-dev \
+    libmagickwand-dev \
+    libmagickcore-dev \
+    libmemcached-dev \
+    libldap2-dev \
+    libssh2-1-dev \
+    libmhash-dev \
+    zlib1g-dev \
+    libicu-dev \
+    g++ \
+    libxslt1-dev \
+    libgpgme11-dev" \
+    && DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
+    $buildDeps \
     blackfire-php \
-    php-pear \
-    php5-curl \
-    php5-cli \
-    php5-common \
-    php5-fpm \
-    php5-gd \
-    php5-gnupg \
-    php5-imagick \
-    php5-intl \
-    php5-json \
-    php5-ldap \
-    php5-mcrypt \
-    php5-memcache \
-    php5-mysql \
-    php5-redis \
-    php5-sqlite \
-    php5-ssh2 \
-    php5-xdebug \
-    php5-xsl \
+    zlib1g \
+    libmcrypt4 \
+    libfreetype6 \
+    libjpeg62-turbo \
+    libpng12-0 \
+    libmagickwand-6.q16-2 \
+    libmagickcore-6.q16-2 \
+    libmemcached11 \
+    libmemcachedutil2 \
+    libldap-2.4-2 \
+    libssh2-1 \
+    libmhash2 \
+    zlib1g \
+    libicu52 \
+    libxslt1.1 \
+    libgpgme11 \
+    # SSH2 must be installed from source
+    && git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 \
     # Cleanup
     && DEBIAN_FRONTEND=noninteractive apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-## PHP settings
-RUN \
-    # PHP-FPM settings
-    ## /etc/php5/fpm/php.ini
-    sed -i '/memory_limit =/c memory_limit = 256M' /etc/php5/fpm/php.ini && \
-    sed -i '/max_execution_time =/c max_execution_time = 300' /etc/php5/fpm/php.ini && \
-    sed -i '/upload_max_filesize =/c upload_max_filesize = 500M' /etc/php5/fpm/php.ini && \
-    sed -i '/post_max_size =/c post_max_size = 500M' /etc/php5/fpm/php.ini && \
-    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php.ini && \
-    sed -i '/always_populate_raw_post_data =/c always_populate_raw_post_data = -1' /etc/php5/fpm/php.ini && \
-    sed -i '/sendmail_path =/c sendmail_path = /bin/true' /etc/php5/fpm/php.ini && \
-    sed -i '/date.timezone =/c date.timezone = UTC' /etc/php5/fpm/php.ini && \
-    sed -i '/display_errors =/c display_errors = On' /etc/php5/fpm/php.ini && \
-    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php5/fpm/php.ini && \
-    ## /etc/php5/fpm/pool.d/www.conf
-    sed -i '/user =/c user = docker' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/catch_workers_output =/c catch_workers_output = yes' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/listen =/c listen = 0.0.0.0:9000' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/listen.allowed_clients/c ;listen.allowed_clients =' /etc/php5/fpm/pool.d/www.conf && \
-    sed -i '/clear_env =/c clear_env = no' /etc/php5/fpm/pool.d/www.conf && \
-    ## /etc/php5/fpm/php-fpm.conf
-    sed -i '/daemonize =/c daemonize = no' /etc/php5/fpm/php-fpm.conf && \
-    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/fpm/php-fpm.conf && \
-    sed -i '/pid =/c pid = \/run\/php-fpm.pid' /etc/php5/fpm/php-fpm.conf && \
-    # PHP CLI settings
-    ## /etc/php5/cli/php.ini
-    sed -i '/memory_limit =/c memory_limit = 512M' /etc/php5/cli/php.ini && \
-    sed -i '/max_execution_time =/c max_execution_time = 600' /etc/php5/cli/php.ini && \
-    sed -i '/error_log =/c error_log = \/dev\/stdout' /etc/php5/cli/php.ini && \
-    sed -i '/always_populate_raw_post_data/c always_populate_raw_post_data = -1' /etc/php5/cli/php.ini && \
-    sed -i '/sendmail_path/c sendmail_path = /bin/true' /etc/php5/cli/php.ini && \
-    sed -i '/date.timezone/c date.timezone = UTC' /etc/php5/cli/php.ini && \
-    sed -i '/display_errors =/c display_errors = On' /etc/php5/cli/php.ini && \
-    sed -i '/display_startup_errors =/c display_startup_errors = On' /etc/php5/cli/php.ini && \
-    # PHP module settings
-    echo 'opcache.memory_consumption = 128' >> /etc/php5/mods-available/opcache.ini && \
-    sed -i '/blackfire.agent_socket = /c blackfire.agent_socket = tcp://blackfire:8707' /etc/php5/mods-available/blackfire.ini && \
-    # Disable xdebug by default. We will enabled it at startup (see startup.sh)
-    php5dismod xdebug && \
-    # Create symlinks to project level overrides (if the source files are missing, nothing will break)
-    ln -s /var/www/.docksal/etc/php/php.ini /etc/php5/fpm/conf.d/99-overrides.ini && \
-    ln -s /var/www/.docksal/etc/php/php-cli.ini /etc/php5/cli/conf.d/99-overrides.ini
-
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    # Removed memcache for PHP 7.x. See https://groups.drupal.org/node/513801 for reasoning
+    && docker-php-ext-configure hash --with-mhash \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ \
+    && docker-php-ext-install -j$(nproc) \
+       bcmath \
+       bz2 \
+       calendar\
+       dba \
+       exif \
+       gd \
+       gettext \
+       intl \
+       ldap \
+       mcrypt \
+       opcache \
+       pcntl \
+       mysqli \
+       pdo_mysql \
+       shmop \
+       soap \
+       sockets \
+       ssh2 \
+       sysvmsg \
+       sysvsem \
+       sysvshm \
+       wddx \
+       xsl \
+       zip \
+    && pecl update-channels \
+    && pecl install memcached \
+    && pecl install xdebug \
+    && pecl install gnupg \
+    && pecl install imagick \
+    && pecl install redis \
+    && docker-php-ext-enable memcached gnupg imagick redis \
+    # Cleanup
+    && docker-php-source delete \
+    && rm -rf /tmp/pear ~/.pearrc \
+    && DEBIAN_FRONTEND=noninteractive apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps \
+    && DEBIAN_FRONTEND=noninteractive apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    
+## PHP settings, get default php.ini-development from php-src
+## /usr/local/etc/php/php.ini
+ADD https://raw.githubusercontent.com/php/php-src/PHP-${PHP_VERSION}/php.ini-development /usr/local/etc/php/php.ini
+# docksal php.ini settings are in /usr/local/etc/php/conf.d/  (for CLI and FPM)
+COPY config/php/docksal-php.ini /usr/local/etc/php/conf.d/
+# there is no separated php.ini for FPM (like in debian) 
+COPY config/php/docksal-www.conf /usr/local/etc/php-fpm.d/docksal-www.conf
 # xdebug settings
 ENV XDEBUG_ENABLED 0
-COPY config/php/xdebug.ini /etc/php5/mods-available/xdebug.ini
+COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
+
+RUN \
+    # remove zz-blackfire.ini, we hev the settings in docksal-php.ini
+    rm -f /usr/local/etc/php/conf.d/zz-blackfire.ini && \
+    # Create symlinks to project level overrides (if the source files are missing, nothing will break)
+    ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/docksal-overrides.conf && \
+    ln -s /var/www/.docksal/etc/php/php-cli.ini /usr/local/etc/php/conf.d/zz-docksal-overrides.ini
 
 # Other language packages and dependencies
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+RUN DEBIAN_FRONTEND=noninteractive apt-get clean && apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends install \
     ruby-full \
     rlwrap \
@@ -258,6 +287,7 @@ COPY config/.docksalrc $HOME/.docksalrc
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
+COPY index.php /var/www/index.php
 
 ENV \
 	# ssh-agent proxy socket (requires docksal/ssh-agent)
