@@ -235,7 +235,8 @@ ENV HOME /home/docker
 ENV NVM_VERSION=0.33.4 \
 	NODE_VERSION=6.11.3 \
 	NVM_DIR=$HOME/.nvm
-RUN set -xe; \
+# Don't use -x here - node/nvm stuff prints just too much stuff
+RUN set -e; \
 	curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash; \
 	. $NVM_DIR/nvm.sh; \
 	nvm install $NODE_VERSION >/dev/null; \
