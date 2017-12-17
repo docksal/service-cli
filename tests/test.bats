@@ -76,7 +76,6 @@ _healthcheck_wait ()
 		"$IMAGE"
 	_healthcheck_wait
 
-
 	### Tests ###
 
 	export SCRIPT_FILENAME=/var/www/index.php
@@ -124,7 +123,6 @@ _healthcheck_wait ()
 		"$IMAGE"
 	_healthcheck_wait
 
-
 	### Tests ###
 
 	export SCRIPT_FILENAME=/var/www/docroot/test.php
@@ -139,7 +137,6 @@ _healthcheck_wait ()
 	run cgi-fcgi -bind -connect test.docksal:19000
 	echo "$output" | grep "Status: 404 Not Found"
 
-
 	### Cleanup ###
 	fin docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
@@ -151,11 +148,10 @@ _healthcheck_wait ()
 	### Setup ###
 	fin docker rm -vf "$NAME" >/dev/null 2>&1 || true
 	fin docker run --name "$NAME" -d -p 19000:9000  \
-		-v $(pwd)/../tests/config:/var/www/.docksal/etc/php \
+		-v $(pwd)/../tests/docroot:/var/www/docroot \
 		-e XDEBUG_ENABLED=1 \
 		"$IMAGE"
 	_healthcheck_wait
-
 
 	### Tests ###
 

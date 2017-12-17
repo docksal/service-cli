@@ -55,6 +55,7 @@ sysvsem
 sysvshm
 tokenizer
 wddx
+xdebug
 xml
 xmlreader
 xmlwriter
@@ -64,6 +65,7 @@ zip
 zlib
 
 [Zend Modules]
+Xdebug
 Zend OPcache
 blackfire
 
