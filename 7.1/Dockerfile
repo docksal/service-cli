@@ -163,17 +163,17 @@ RUN set -xe; \
 		zip \
 	;\
 	pecl update-channels; \
-	pecl install < /dev/null \
+	pecl install >/dev/null \
 		gnupg \
 		imagick \
-		memcache \
+		memcached \
 		redis \
 		xdebug \
 	;\
 	docker-php-ext-enable \
 		gnupg \
 		imagick \
-		memcache \
+		memcached \
 		redis \
 	;\
 	# Cleanup

@@ -162,7 +162,7 @@ RUN set -xe; \
 		zip \
 	;\
 	pecl update-channels; \
-	pecl install < /dev/null \
+	pecl install >/dev/null \
 		gnupg \
 		imagick \
 		memcache \
