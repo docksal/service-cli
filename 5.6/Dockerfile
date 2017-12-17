@@ -46,8 +46,12 @@ RUN set -xe; \
 		git \
 		git-lfs \
 		ghostscript \
+		# html2text binary - used for self-testing (php-fpm)
+		html2text \
 		imagemagick \
 		less \
+		# cgi-fcgi binary - used for self-testing (php-fpm)
+		libfcgi0ldbl \
 		mc \
 		mysql-client \
 		nano \
@@ -204,15 +208,6 @@ RUN set -xe; \
 	# Make all binaries executable in one shot
 	chmod +x /usr/local/bin/*
 
-# PHP default settings, global overrides and fpm overrides
-ADD https://raw.githubusercontent.com/php/php-src/PHP-${PHP_VERSION}/php.ini-development /usr/local/etc/php/php.ini
-COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
-COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
-# Create symlinks to project level overrides (if the source files are missing, nothing will break)
-RUN set -xe; \
-	ln -s /var/www/.docksal/etc/php/php.ini /usr/local/etc/php/conf.d/zzz-php.ini && \
-	ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/zzz-php-fpm.conf
-
 # Other language packages and dependencies
 RUN set -xe; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
@@ -269,6 +264,8 @@ RUN set -xe; \
 	# Cleanup
 	composer clear-cache
 
+USER root
+
 # Copy configs and scripts
 COPY --chown=docker:docker config/.ssh $HOME/.ssh
 COPY --chown=docker:docker config/.drush $HOME/.drush
@@ -276,7 +273,15 @@ COPY --chown=docker:docker config/.docksalrc $HOME/.docksalrc
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
-COPY index.php /var/www/index.php
+# PHP default settings, global overrides and fpm overrides
+ADD https://raw.githubusercontent.com/php/php-src/PHP-${PHP_VERSION}/php.ini-development /usr/local/etc/php/php.ini
+COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
+COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
+COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
+# Create symlinks to project level overrides (if the source files are missing, nothing will break)
+RUN set -xe; \
+	ln -s /var/www/.docksal/etc/php/php.ini /usr/local/etc/php/conf.d/zzz-php.ini && \
+	ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/zzz-php-fpm.conf
 
 ENV \
 	# ssh-agent proxy socket (requires docksal/ssh-agent)
@@ -288,9 +293,8 @@ ENV \
 	# Default values for HOST_UID and HOST_GUI to match the default Ubuntu user. These are used in startup.sh
 	HOST_UID=1000 \
 	HOST_GID=1000 \
+	# xdebug disabled by default
 	XDEBUG_ENABLED=0
-
-USER root
 
 EXPOSE 9000
 EXPOSE 22
