@@ -185,7 +185,7 @@ RUN set -xe; \
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 ENV COMPOSER_VERSION=1.5.2 \
