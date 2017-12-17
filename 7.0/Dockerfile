@@ -46,8 +46,12 @@ RUN set -xe; \
 		git \
 		git-lfs \
 		ghostscript \
+		# html2text binary - used for self-testing (php-fpm)
+		html2text \
 		imagemagick \
 		less \
+		# cgi-fcgi binary - used for self-testing (php-fpm)
+		libfcgi0ldbl \
 		mc \
 		mysql-client \
 		nano \
@@ -166,6 +170,7 @@ RUN set -xe; \
 	pecl install >/dev/null \
 		gnupg \
 		imagick \
+		# Use memcached (not memcache) for PHP 7.x
 		memcached \
 		redis \
 		xdebug \
