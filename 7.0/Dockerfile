@@ -168,7 +168,6 @@ RUN set -xe; \
 		imagick \
 		memcache \
 		redis \
-		ssh2 \
 		xdebug \
 	;\
 	docker-php-ext-enable \
@@ -176,7 +175,6 @@ RUN set -xe; \
 		imagick \
 		memcache \
 		redis \
-		ssh2 \
 	;\
 	# Cleanup
 	docker-php-source delete; \
