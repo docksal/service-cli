@@ -181,6 +181,8 @@ RUN set -xe; \
 		memcached \
 		redis \
 	;\
+	# Disable xdebug by default
+	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \
@@ -284,7 +286,7 @@ COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 # Create symlinks to project level overrides (if the source files are missing, nothing will break)
 RUN set -xe; \
-	ln -s /var/www/.docksal/etc/php/php.ini /usr/local/etc/php/conf.d/zzz-php.ini && \
+	ln -s /var/www/.docksal/etc/php/php.ini /usr/local/etc/php/conf.d/zzz-php.ini; \
 	ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/zzz-php-fpm.conf
 
 ENV \
