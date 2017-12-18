@@ -167,7 +167,7 @@ RUN set -xe; \
 		zip \
 	;\
 	pecl update-channels; \
-	pecl install >/dev/null \
+	pecl install >/dev/null </dev/null \
 		gnupg \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
