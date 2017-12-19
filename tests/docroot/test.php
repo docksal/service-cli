@@ -1,2 +1,3 @@
 <?php
-  echo "Docroot testing!";
+
+echo "docroot works";

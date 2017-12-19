@@ -71,31 +71,26 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	fin docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	fin docker run --name "$NAME" -d -p 19000:9000  \
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests/docroot:/var/www/docroot \
 		"$IMAGE"
+	docker cp $(pwd)/../tests/scripts "$NAME:/var/www/"
 	_healthcheck_wait
-
 
 	### Tests ###
 
-	export SCRIPT_FILENAME=/var/www/index.php
-	export REQUEST_URI=/
-	export QUERY_STRING=
-	export REQUEST_METHOD=GET
-	run cgi-fcgi -bind -connect test.docksal:19000
-	echo "$output" | grep "X-Powered-By: PHP"
-	echo "$output" | grep "It works!"
-	# test some php-fpm ini settings
-	echo "$output" | grep "memory_limit: 256M"
-	echo "$output" | grep "sendmail_path: /bin/true"
+	# Check PHP FPM and settings
+	run docker exec "$NAME" /var/www/scripts/test-php-fpm.sh index.php
+	echo "$output" | grep "memory_limit" | grep "256M"
+	echo "$output" | grep "sendmail_path" | grep "/bin/true"
 
-	export SCRIPT_FILENAME=/var/www/nonsense.php
-	run cgi-fcgi -bind -connect test.docksal:19000
+	run docker exec "$NAME" /var/www/scripts/test-php-fpm.sh nonsense.php
 	echo "$output" | grep "Status: 404 Not Found"
 
-	# Check PHP settings
-	phpInfo=$(fin docker exec "$NAME" php -i)
+	# Check PHP CLI and settings
+	phpInfo=$(docker exec "$NAME" php -i)
 
 	output=$(echo "$phpInfo" | grep "PHP Version")
 	echo "$output" | grep "${PHP_VERSION}"
@@ -107,78 +102,39 @@ _healthcheck_wait ()
 	echo "$output" | grep "sendmail_path => /bin/true => /bin/true"
 
 	# Check PHP modules
-	run bash -c "fin docker exec '${NAME}' php -m | diff php-modules.txt -"
+	run bash -c "docker exec '${NAME}' php -m | diff php-modules.txt -"
 	[[ ${status} == 0 ]]
 
 	### Cleanup ###
-	fin docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
-
-@test "Docroot mount" {
-	[[ $SKIP == 1 ]] && skip
-
-	### Setup ###
-	fin docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	fin docker run --name "$NAME" -d -p 19000:9000  \
-		-v $(pwd)/../tests/docroot:/var/www/docroot \
-		"$IMAGE"
-	_healthcheck_wait
-
-
-	### Tests ###
-
-	export SCRIPT_FILENAME=/var/www/docroot/test.php
-	export REQUEST_URI=/
-	export QUERY_STRING=
-	export REQUEST_METHOD=GET
-	run cgi-fcgi -bind -connect test.docksal:19000
-	#echo "$output" | grep "X-Powered-By: PHP/7"
-	echo "$output" | grep "Docroot testing!"
-
-	export SCRIPT_FILENAME=/var/www/docroot/nonsense.php
-	run cgi-fcgi -bind -connect test.docksal:19000
-	echo "$output" | grep "Status: 404 Not Found"
-
-
-	### Cleanup ###
-	fin docker rm -vf "$NAME" >/dev/null 2>&1 || true
-}
-
 
 @test "Configuration overrides" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	fin docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	fin docker run --name "$NAME" -d -p 19000:9000  \
-		-v $(pwd)/../tests/config:/var/www/.docksal/etc/php \
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests:/var/www \
 		-e XDEBUG_ENABLED=1 \
 		"$IMAGE"
 	_healthcheck_wait
 
-
 	### Tests ###
 
-	export SCRIPT_FILENAME=/var/www/index.php
-	export REQUEST_URI=/
-	export QUERY_STRING=
-	export REQUEST_METHOD=GET
-	run cgi-fcgi -bind -connect test.docksal:19000
-	#echo "$output" | grep "X-Powered-By: PHP/7"
-	echo "$output" | grep "It works!"
-	# test overrides php-fpm ini settings 
-	echo "$output" | grep "memory_limit: 512M"
-	echo "$output" | grep "sendmail_path: /bin/true"
+	# Check PHP FPM settings overrides
+	run docker exec "$NAME" /var/www/scripts/test-php-fpm.sh index.php
+	echo "$output" | grep "memory_limit" | grep "512M"
 
-	# test env variable XDEBUG_ENABLED=true
-	run fin docker exec "$NAME" php -m
+	# Check xdebug was enabled
+	run docker exec "$NAME" php -m
 	echo "$output" | grep "xdebug"
 
-	# test overrides php-cli ini settings
-	run fin docker exec "$NAME" php -i
+	# Check PHP CLI overrides
+	run docker exec "$NAME" php -i
 	echo "$output" | grep "memory_limit => 128M => 128M"
-	echo "$output" | grep "sendmail_path => /bin/true => /bin/true"
 
 	### Cleanup ###
-	fin docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
