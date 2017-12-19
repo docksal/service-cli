@@ -35,10 +35,14 @@ after_success: |
     if [[ "$TAG" != "" ]]; then
       docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
       # Push edge, stable and release tags
+      docker tag ${REPO}:${VERSION} ${REPO}:${TAG}
       docker push ${REPO}:${TAG}
 
       # Push "latest" tag
-      [[ "${TRAVIS_BRANCH}" == "master" ]] && [[ "${VERSION}" == "${LATEST_VERSION}" ]] && docker push ${REPO}:latest
+      if [[ "${TRAVIS_BRANCH}" == "master" ]] && [[ "${VERSION}" == "${LATEST_VERSION}" ]]; then
+        docker tag ${REPO}:${VERSION} ${REPO}:latest
+        docker push ${REPO}:latest
+      fi
     fi
   fi
 
