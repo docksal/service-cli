@@ -4,8 +4,8 @@ ENV MHSENDMAIL_VERSION=0.2.0
 RUN set -xe; \
   go get -d github.com/mailhog/mhsendmail; \
   cd /go/src/github.com/mailhog/mhsendmail; \
-	git checkout tags/v${MHSENDMAIL_VERSION}; \
-	go get github.com/mailhog/mhsendmail
+  git checkout tags/v${MHSENDMAIL_VERSION}; \
+  go get github.com/mailhog/mhsendmail
 
 FROM php:7.0-fpm
 
