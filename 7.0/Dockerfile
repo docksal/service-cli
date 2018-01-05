@@ -1,3 +1,12 @@
+#Build mhsendmail
+FROM golang:1.8.3 as mhbuild
+ENV MHSENDMAIL_VERSION=0.2.0
+RUN set -xe; \
+  go get -d github.com/mailhog/mhsendmail; \
+  cd /go/src/github.com/mailhog/mhsendmail; \
+  git checkout tags/v${MHSENDMAIL_VERSION}; \
+  go get github.com/mailhog/mhsendmail
+
 FROM php:7.0-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -189,10 +198,12 @@ RUN set -xe; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
+# Copy mhsendmail binary from stage 1
+COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
+
 ENV COMPOSER_VERSION=1.5.2 \
 	DRUSH_VERSION=8.1.13 \
 	DRUPAL_CONSOLE_VERSION=1.0.2 \
-	MHSENDMAIL_VERSION=0.2.0 \
 	WPCLI_VERSION=1.3.0 \
 	MG_CODEGEN_VERSION=1.6.4 \
 	BLACKFIRE_VERSION=1.14.1
@@ -203,8 +214,6 @@ RUN set -xe; \
 	curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console
 	curl -sSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
-	# mhsendmail for MailHog integration
-	curl -sSL "https://github.com/mailhog/mhsendmail/releases/download/v${MHSENDMAIL_VERSION}/mhsendmail_linux_amd64" -o /usr/local/bin/mhsendmail; \
 	# Install wp-cli
 	curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Install magento code generator
