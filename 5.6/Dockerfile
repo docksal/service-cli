@@ -1,4 +1,4 @@
-#Build mhsendmail
+# Build mhsendmail
 FROM golang:1.8.3 as mhbuild
 ENV MHSENDMAIL_VERSION=0.2.0
 RUN set -xe; \
