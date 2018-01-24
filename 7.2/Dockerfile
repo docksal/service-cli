@@ -78,8 +78,8 @@ RUN set -xe; \
 		zsh \
 		yarn \
 	;\
-    # More recent version of git to get composer's git cache.
-	apt-get -y --force-yes --no-install-recommends -t jessie-backports install git >/dev/null
+	# More recent version of git to get composer's git cache.
+	apt-get -y --force-yes --no-install-recommends -t jessie-backports install git >/dev/null ;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
