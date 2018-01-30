@@ -83,11 +83,19 @@ _healthcheck_wait ()
 
 	# Check PHP FPM and settings
 	run docker exec "$NAME" /var/www/scripts/test-php-fpm.sh index.php
-	echo "$output" | grep "memory_limit" | grep "256M"
-	echo "$output" | grep "sendmail_path" | grep "/bin/true"
+	# sed below is used to normalize the web output of phpinfo
+	# It will transforms "memory_limit                256M                                         256M" into
+	# "memory_limit => 256M => 256M", which is much easier to parse
+	output=$(echo "$output" | sed -E 's/[[:space:]]{2,}/ => /g')
+	echo "$output" | grep "memory_limit => 256M => 256M"
+	# sendmail_path, being long, gets printed on two lines. We grep the first line only
+	echo "$output" | grep "sendmail_path => /usr/local/bin/mhsendmail --smtp-addr=mail: /usr/local/bin/mhsendmail --smtp-addr=mail:"
+	# Cleanup output after each "run"
+	unset output
 
 	run docker exec "$NAME" /var/www/scripts/test-php-fpm.sh nonsense.php
 	echo "$output" | grep "Status: 404 Not Found"
+	unset output
 
 	# Check PHP CLI and settings
 	phpInfo=$(docker exec "$NAME" php -i)
@@ -99,11 +107,12 @@ _healthcheck_wait ()
 	echo "$output" | grep "memory_limit => 512M => 512M"
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
-	echo "$output" | grep "sendmail_path => /bin/true => /bin/true"
+	echo "$output" | grep "sendmail_path => /usr/local/bin/mhsendmail --smtp-addr=mail:1025 => /usr/local/bin/mhsendmail --smtp-addr=mail:1025"
 
 	# Check PHP modules
 	run bash -c "docker exec '${NAME}' php -m | diff php-modules.txt -"
 	[[ ${status} == 0 ]]
+	unset output
 
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
@@ -126,14 +135,38 @@ _healthcheck_wait ()
 	# Check PHP FPM settings overrides
 	run docker exec "$NAME" /var/www/scripts/test-php-fpm.sh index.php
 	echo "$output" | grep "memory_limit" | grep "512M"
+	unset output
 
 	# Check xdebug was enabled
 	run docker exec "$NAME" php -m
 	echo "$output" | grep "xdebug"
+	unset output
 
 	# Check PHP CLI overrides
 	run docker exec "$NAME" php -i
 	echo "$output" | grep "memory_limit => 128M => 128M"
+	unset output
+
+	### Cleanup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+}
+
+@test "Check binaries and versions" {
+	### Setup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests:/var/www \
+		-e XDEBUG_ENABLED=1 \
+		"$IMAGE"
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Check mhsendmail (does not have a flag to report its versions...)
+	run docker exec "$NAME" which mhsendmail
+	echo "$output" | grep "/usr/local/bin/mhsendmail"
+	unset output
 
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
