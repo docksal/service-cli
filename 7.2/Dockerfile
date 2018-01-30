@@ -39,6 +39,8 @@ ENV LC_ALL C.UTF-8
 # Enable additional repos
 RUN set -xe; \
 	sed -i 's/main/main contrib non-free/' /etc/apt/sources.list; \
+	# Include backports
+	echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/backports.list; \
 	# Include blackfire.io repo
 	curl -sSL https://packagecloud.io/gpg.key | apt-key add -; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
@@ -54,7 +56,6 @@ RUN set -xe; \
 RUN set -xe; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		dnsutils \
-		git \
 		git-lfs \
 		ghostscript \
 		# html2text binary - used for self-testing (php-fpm)
@@ -78,6 +79,8 @@ RUN set -xe; \
 		zsh \
 		yarn \
 	;\
+	# More recent version of git to get composer's git cache.
+	apt-get -y --force-yes --no-install-recommends -t jessie-backports install git >/dev/null ;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
