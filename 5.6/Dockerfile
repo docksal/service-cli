@@ -7,7 +7,8 @@ RUN set -xe; \
   git checkout tags/v${MHSENDMAIL_VERSION}; \
   go get github.com/mailhog/mhsendmail
 
-FROM php:5-fpm
+# Build the image
+FROM php:5.6-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
 
