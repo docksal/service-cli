@@ -42,7 +42,7 @@ chown "$HOST_UID:$HOST_GID" -R "$HOME_DIR"
 # Why apply a fix/woraround for this at startup.
 chown "$HOST_UID:$HOST_GID" /var/www
 
-# Initialization steps completed. Create a pid file to mark the container is healthy
+# Initialization steps completed. Create a pid file to mark the container as healthy
 echo-debug "Preliminary initialization completed"
 touch /var/run/cli
 
@@ -50,8 +50,8 @@ touch /var/run/cli
 echo-debug "Executing the requested command..."
 # Service mode (run as root)
 if [[ "$1" == "supervisord" ]]; then
-	gosu root supervisord -c /etc/supervisor/conf.d/supervisord.conf
+	exec gosu root supervisord -c /etc/supervisor/conf.d/supervisord.conf
 # Command mode (run as docker user)
 else
-	gosu docker "$@"
+	exec gosu docker "$@"
 fi
