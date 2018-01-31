@@ -25,7 +25,7 @@ uid_gid_reset()
 xdebug_enable()
 {
 	echo-debug "Enabling xdebug..."
-	php5enmod xdebug
+	sudo ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
 # Docker user uid/gid mapping to the host user uid/gid
@@ -42,7 +42,7 @@ chown "$HOST_UID:$HOST_GID" -R "$HOME_DIR"
 # Why apply a fix/woraround for this at startup.
 chown "$HOST_UID:$HOST_GID" /var/www
 
-# Initialization steps completed. Create a pid file to mark the container is healthy
+# Initialization steps completed. Create a pid file to mark the container as healthy
 echo-debug "Preliminary initialization completed"
 touch /var/run/cli
 
@@ -50,8 +50,12 @@ touch /var/run/cli
 echo-debug "Executing the requested command..."
 # Service mode (run as root)
 if [[ "$1" == "supervisord" ]]; then
-	gosu root supervisord -c /etc/supervisor/conf.d/supervisord.conf
+	exec gosu root supervisord -c /etc/supervisor/conf.d/supervisord.conf
 # Command mode (run as docker user)
 else
-	gosu docker "$@"
+	# This makes sure the environment is set up correctly for the docker user
+	DOCKSALRC='source $HOME/.docksalrc >/dev/null 2>&1'
+	# Launch the passed command in an non-interactive bash session under docker user
+	# $@ does not work here. $* has to be used.
+	exec gosu docker bash -c "$DOCKSALRC; exec $*"
 fi
