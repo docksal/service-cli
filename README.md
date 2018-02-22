@@ -1,6 +1,6 @@
 # CLI Docker image for Docksal
 
-This image is focused on console tools necessary to develop LAMP stack applications (namely Drupal and WordPress).
+This image is focused on console tools necessary to develop LAMP stack applications.
 
 This image(s) is part of the [Docksal](http://docksal.io) image library.
 
@@ -8,22 +8,21 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 ## Versions and image tag naming convention
 
 - Stable versions
-  - `<version>-php7`, `php7`, `latest` - PHP 7.0
-  - `<version>-php5`, `php5` - PHP 5.6
+  - `2.0-php5.6`, `php5.6` - PHP 5.6
+  - `2.0-php7.0`, `php7.0` - PHP 7.0
+  - `2.0-php7.1`, `php7.1` - PHP 7.1
+  - `2.0-php7.2`, `php7.2`, `latest` - PHP 7.2
 - Development versions
-  - `edge-php7` - PHP 7.0
-  - `edge-php5` - PHP 5.6
-
-Examples:
-
-- `docksal/cli:1.2-php7` - a specific stable image version with PHP7
-- `docksal/cli:php5` - the latest stable image version with PHP5
+  - `edge-php5.6` - PHP 5.6
+  - `edge-php7.0` - PHP 7.0
+  - `edge-php7.1` - PHP 7.1
+  - `edge-php7.2` - PHP 7.2
 
 
 ## Includes
 
 - php
-  - php-fpm && php-cli 5.6.x / 7.0.x
+  - php-fpm && php-cli
   - xdebug
   - composer
   - drush (6,7,8)
@@ -65,3 +64,5 @@ cli
     - XDEBUG_ENABLED=1
     ...
 ```
+
+See [docs](https://docs.docksal.io/en/master/tools/xdebug) on using Xdebug for web and cli PHP debugging.
