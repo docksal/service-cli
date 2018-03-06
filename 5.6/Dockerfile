@@ -181,6 +181,7 @@ RUN set -xe; \
 		memcache \
 		redis \
 		ssh2 \
+		# xdebug-2.5.5 is the last version with php5 support
 		xdebug-2.5.5 \
 	;\
 	docker-php-ext-enable \
