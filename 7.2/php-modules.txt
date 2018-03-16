@@ -43,6 +43,7 @@ shmop
 SimpleXML
 soap
 sockets
+sodium
 SPL
 sqlite3
 ssh2

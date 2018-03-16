@@ -139,7 +139,7 @@ _healthcheck_wait ()
 
 	# Check xdebug was enabled
 	run docker exec "$NAME" php -m
-	echo "$output" | grep "xdebug"
+	echo "$output" | grep -e "^xdebug$"
 	unset output
 
 	# Check PHP CLI overrides
