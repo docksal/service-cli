@@ -205,12 +205,12 @@ RUN set -xe; \
 # Copy mhsendmail binary from stage 1
 COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 
-ENV COMPOSER_VERSION=1.5.2 \
-	DRUSH_VERSION=8.1.13 \
-	DRUPAL_CONSOLE_VERSION=1.0.2 \
-	WPCLI_VERSION=1.3.0 \
-	MG_CODEGEN_VERSION=1.6.4 \
-	BLACKFIRE_VERSION=1.14.1
+ENV COMPOSER_VERSION=1.6.3 \
+	DRUSH_VERSION=8.1.16 \
+	DRUPAL_CONSOLE_VERSION=1.7.0 \
+	WPCLI_VERSION=1.5.0 \
+	MG_CODEGEN_VERSION=1.10 \
+	BLACKFIRE_VERSION=1.15.0
 RUN set -xe; \
 	# Composer
 	curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
