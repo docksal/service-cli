@@ -249,8 +249,8 @@ USER docker
 ENV HOME /home/docker
 
 # Install nvm and a default node version
-ENV NVM_VERSION=0.33.4 \
-	NODE_VERSION=6.11.3 \
+ENV NVM_VERSION=0.33.8 \
+	NODE_VERSION=8.10.0 \
 	NVM_DIR=$HOME/.nvm
 # Don't use -x here - node/nvm stuff prints just too much stuff
 RUN set -e; \
