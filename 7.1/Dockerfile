@@ -162,7 +162,6 @@ RUN set -xe; \
 		intl \
 		ldap \
 		mcrypt \
-		mysql \
 		mysqli \
 		opcache \
 		pcntl \

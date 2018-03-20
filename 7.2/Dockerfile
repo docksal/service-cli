@@ -165,7 +165,6 @@ RUN set -xe; \
 		intl \
 		ldap \
 		# mcrypt is removed from 7.2. See Deprecated features
-		mysql \
 		mysqli \
 		opcache \
 		pcntl \
