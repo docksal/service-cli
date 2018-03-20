@@ -172,6 +172,7 @@ RUN set -xe; \
 		soap \
 		sockets \
 		ssh2 \
+		xdebug \
 		xsl \
 		zip \
 	;\
