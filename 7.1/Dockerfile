@@ -149,7 +149,6 @@ RUN set -xe; \
 	# SSH2 must be installed from source
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
 	\
-	docker-php-ext-configure >/dev/null hash --with-mhash; \
 	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	\
@@ -157,25 +156,20 @@ RUN set -xe; \
 		bcmath \
 		bz2 \
 		calendar\
-		dba \
 		exif \
 		gd \
 		gettext \
 		intl \
 		ldap \
 		mcrypt \
+		mysql \
+		mysqli \
 		opcache \
 		pcntl \
-		mysqli \
 		pdo_mysql \
-		shmop \
 		soap \
 		sockets \
 		ssh2 \
-		sysvmsg \
-		sysvsem \
-		sysvshm \
-		wddx \
 		xsl \
 		zip \
 	;\

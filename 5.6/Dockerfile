@@ -144,7 +144,6 @@ RUN set -xe; \
 		libxslt1.1 \
 		zlib1g \
 	;\
-	docker-php-ext-configure >/dev/null hash --with-mhash; \
 	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	\
@@ -152,25 +151,19 @@ RUN set -xe; \
 		bcmath \
 		bz2 \
 		calendar\
-		dba \
 		exif \
 		gd \
 		gettext \
 		intl \
 		ldap \
 		mcrypt \
-		opcache \
-		pcntl \
 		mysql \
 		mysqli \
+		opcache \
+		pcntl \
 		pdo_mysql \
-		shmop \
 		soap \
 		sockets \
-		sysvmsg \
-		sysvsem \
-		sysvshm \
-		wddx \
 		xsl \
 		zip \
 	;\

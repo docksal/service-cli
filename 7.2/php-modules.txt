@@ -7,7 +7,6 @@ Core
 ctype
 curl
 date
-dba
 dom
 exif
 fileinfo
@@ -39,7 +38,6 @@ readline
 redis
 Reflection
 session
-shmop
 SimpleXML
 soap
 sockets
@@ -48,11 +46,7 @@ SPL
 sqlite3
 ssh2
 standard
-sysvmsg
-sysvsem
-sysvshm
 tokenizer
-wddx
 xml
 xmlreader
 xmlwriter
