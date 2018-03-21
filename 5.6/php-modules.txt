@@ -19,6 +19,7 @@ gnupg
 hash
 iconv
 imagick
+imap
 intl
 json
 ldap

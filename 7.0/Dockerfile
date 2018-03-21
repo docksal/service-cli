@@ -112,10 +112,12 @@ ENV NOTVISIBLE "in users profile"
 RUN set -xe; \
 	buildDeps=" \
 		g++ \
+		libc-client2007e-dev \
 		libfreetype6-dev \
 		libgpgme11-dev \
 		libicu-dev \
 		libjpeg62-turbo-dev \
+		libkrb5-dev \
 		libldap2-dev \
 		libmagickcore-dev \
 		libmagickwand-dev \
@@ -131,6 +133,7 @@ RUN set -xe; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
+		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
 		libicu52 \
@@ -152,6 +155,7 @@ RUN set -xe; \
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
 	\
 	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
+	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
 	\
@@ -162,6 +166,7 @@ RUN set -xe; \
 		exif \
 		gd \
 		gettext \
+		imap \
 		intl \
 		ldap \
 		mcrypt \
