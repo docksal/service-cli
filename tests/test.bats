@@ -105,7 +105,7 @@ _healthcheck_wait ()
 	unset output
 
 	output=$(echo "$phpInfo" | grep "memory_limit")
-	echo "$output" | grep "memory_limit => 512M => 512M"
+	echo "$output" | grep "memory_limit => 1024M => 1024M"
 	unset output
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
