@@ -27,12 +27,14 @@ libxml
 mbstring
 mcrypt
 memcache
+mssql
 mysqli
 mysqlnd
 openssl
 pcntl
 pcre
 PDO
+pdo_dblib
 pdo_mysql
 pdo_pgsql
 pdo_sqlite

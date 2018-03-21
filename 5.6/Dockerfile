@@ -111,6 +111,7 @@ ENV NOTVISIBLE "in users profile"
 # Install PHP extentions
 RUN set -xe; \
 	buildDeps=" \
+		freetds-dev \
 		g++ \
 		libc-client2007e-dev \
 		libfreetype6-dev \
@@ -146,12 +147,16 @@ RUN set -xe; \
 		libpng12-0 \
 		libpq5 \
 		libssh2-1 \
+		libsybdb5 \
 		libxslt1.1 \
 		zlib1g \
 	;\
 	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
+	# mssql can be install in PHP 5.6 only. pdo_dblib is available in PHP 7.0+ as well.
+	docker-php-ext-configure >/dev/null mssql --with-libdir=/lib/x86_64-linux-gnu/; \
+	docker-php-ext-configure >/dev/null pdo_dblib --with-libdir=/lib/x86_64-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
 	\
 	docker-php-ext-install >/dev/null -j$(nproc) \
@@ -165,9 +170,11 @@ RUN set -xe; \
 		intl \
 		ldap \
 		mcrypt \
+		mssql \
 		mysqli \
 		opcache \
 		pcntl \
+		pdo_dblib \
 		pdo_mysql \
 		pdo_pgsql \
 		pgsql \

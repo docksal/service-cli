@@ -50,7 +50,7 @@ RUN set -xe; \
 	# yarn repo
 	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
 	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
-	# MSQSQL repo
+	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
 	curl -sSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
 	echo 'deb https://packages.microsoft.com/debian/8/prod jessie main' | tee /etc/apt/sources.list.d/mssql.list;
 

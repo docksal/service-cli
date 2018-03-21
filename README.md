@@ -25,7 +25,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
   - php-fpm && php-cli
   - xdebug
   - composer
-  - drush (6,7,8)
+  - drush
     - registry_rebuild
     - coder-8.x + phpcs
   - drupal console launcher
@@ -49,6 +49,15 @@ Other notable tools:
 - imagemagick
 - mc
 - mhsendmail
+
+
+## PHP database drivers support
+
+- SQLite - via `sqlite3`, `pdo_sqlite`
+- MySQL - via `mysqli`, `mysqlnd`, `pdo_mysql`
+- PostgreSQL - via `pgsql`, `pdo_pgsql`
+- MSSQL - via `mssql` and `pdo_dblib` for PHP 5.6; `sqlsrv` and `pdo_sqlsrv` for PHP 7.0+
+
 
 ## Xdebug
 
