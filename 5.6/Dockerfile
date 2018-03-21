@@ -112,10 +112,12 @@ ENV NOTVISIBLE "in users profile"
 RUN set -xe; \
 	buildDeps=" \
 		g++ \
+		libc-client2007e-dev \
 		libfreetype6-dev \
 		libgpgme11-dev \
 		libicu-dev \
 		libjpeg62-turbo-dev \
+		libkrb5-dev \
 		libldap2-dev \
 		libmagickcore-dev \
 		libmagickwand-dev \
@@ -123,6 +125,7 @@ RUN set -xe; \
 		libmemcached-dev \
 		libmhash-dev \
 		libpng12-dev \
+		libpq-dev \
 		libssh2-1-dev \
 		libxslt1-dev \
 		zlib1g-dev \
@@ -130,6 +133,7 @@ RUN set -xe; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
+		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
 		libicu52 \
@@ -140,37 +144,35 @@ RUN set -xe; \
 		libmcrypt4 \
 		libmhash2 \
 		libpng12-0 \
+		libpq5 \
 		libssh2-1 \
 		libxslt1.1 \
 		zlib1g \
 	;\
-	docker-php-ext-configure >/dev/null hash --with-mhash; \
 	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
+	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
+	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
 	\
 	docker-php-ext-install >/dev/null -j$(nproc) \
 		bcmath \
 		bz2 \
 		calendar\
-		dba \
 		exif \
 		gd \
 		gettext \
+		imap \
 		intl \
 		ldap \
 		mcrypt \
+		mysqli \
 		opcache \
 		pcntl \
-		mysql \
-		mysqli \
 		pdo_mysql \
-		shmop \
+		pdo_pgsql \
+		pgsql \
 		soap \
 		sockets \
-		sysvmsg \
-		sysvsem \
-		sysvshm \
-		wddx \
 		xsl \
 		zip \
 	;\
