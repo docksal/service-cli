@@ -102,12 +102,15 @@ _healthcheck_wait ()
 
 	output=$(echo "$phpInfo" | grep "PHP Version")
 	echo "$output" | grep "${PHP_VERSION}"
+	unset output
 
 	output=$(echo "$phpInfo" | grep "memory_limit")
 	echo "$output" | grep "memory_limit => 512M => 512M"
+	unset output
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
 	echo "$output" | grep "sendmail_path => /usr/local/bin/mhsendmail --smtp-addr=mail:1025 => /usr/local/bin/mhsendmail --smtp-addr=mail:1025"
+	unset output
 
 	# Check PHP modules
 	run bash -c "docker exec '${NAME}' php -m | diff php-modules.txt -"
