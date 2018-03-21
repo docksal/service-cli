@@ -38,18 +38,21 @@ ENV LC_ALL C.UTF-8
 # Enable additional repos
 RUN set -xe; \
 	sed -i 's/main/main contrib non-free/' /etc/apt/sources.list; \
-	# Include backports
+	# backports repo
 	echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/backports.list; \
-	# Include blackfire.io repo
+	# blackfire.io repo
 	curl -sSL https://packagecloud.io/gpg.key | apt-key add -; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
-	# Include git-lfs repo
+	# git-lfs repo
 	curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
 	echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' > /etc/apt/sources.list.d/github_git-lfs.list; \
 	echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list; \
-	# Including yarn repo
+	# yarn repo
 	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
-	echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
+	echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list; \
+	# MSQSQL repo
+	curl -sSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
+	echo 'deb https://packages.microsoft.com/debian/8/prod jessie main' | tee /etc/apt/sources.list.d/mssql.list;
 
 # Additional packages
 RUN set -xe; \
@@ -128,9 +131,13 @@ RUN set -xe; \
 		libpq-dev \
 		libssh2-1-dev \
 		libxslt1-dev \
+		unixodbc-dev \
 		zlib1g-dev \
 	"; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	# Necessary for msodbcsql17 (MSSQL)
+	ACCEPT_EULA=Y \
+	apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
 		libc-client2007e \
@@ -149,6 +156,7 @@ RUN set -xe; \
 		libpq5 \
 		libssh2-1 \
 		libxslt1.1 \
+		msodbcsql17 \
 		zlib1g \
 	;\
 	# SSH2 must be installed from source
@@ -188,14 +196,18 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
+		pdo_sqlsrv \
 		redis \
+		sqlsrv \
 		xdebug \
 	;\
 	docker-php-ext-enable \
 		gnupg \
 		imagick \
 		memcached \
+		pdo_sqlsrv \
 		redis \
+		sqlsrv \
 	;\
 	# Disable xdebug by default
 	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
