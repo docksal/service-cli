@@ -58,6 +58,7 @@ RUN set -xe; \
 # Additional packages
 RUN set -xe; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+		cron \
 		dnsutils \
 		git-lfs \
 		ghostscript \
