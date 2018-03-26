@@ -57,6 +57,9 @@ RUN set -xe; \
 
 # Additional packages
 RUN set -xe; \
+	# Create man direcotries, otherwise some packages may not install (e.g. postgresql-client)
+	# This should be a temporary workaround until fixed upstream: https://github.com/debuerreotype/debuerreotype/issues/10
+	mkdir -p /usr/share/man/man1 /usr/share/man/man7; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		cron \
 		dnsutils \
@@ -73,6 +76,7 @@ RUN set -xe; \
 		nano \
 		openssh-client \
 		openssh-server \
+		postgresql-client \
 		procps \
 		pv \
 		rsync \

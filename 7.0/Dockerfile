@@ -72,6 +72,7 @@ RUN set -xe; \
 		nano \
 		openssh-client \
 		openssh-server \
+		postgresql-client \
 		procps \
 		pv \
 		rsync \
