@@ -230,6 +230,7 @@ COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 
 ENV COMPOSER_VERSION=1.6.3 \
 	DRUSH_VERSION=8.1.16 \
+	DRUSH_LAUNCHER_VERSION=0.6.0 \
 	DRUPAL_CONSOLE_VERSION=1.7.0 \
 	WPCLI_VERSION=1.5.0 \
 	MG_CODEGEN_VERSION=1.10 \
@@ -238,7 +239,9 @@ RUN set -xe; \
 	# Composer
 	curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
 	# Drush 8 (default)
-	curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush; \
+	curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
+	# Drush Launcher
+	curl -sSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console
 	curl -sSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Install wp-cli
@@ -285,16 +288,11 @@ RUN set -e; \
 	# Fix npm complaining about permissions and not being able to update
 	sudo rm -rf $HOME/.config
 
-ENV PATH $PATH:$HOME/.composer/vendor/bin
+ENV PATH=$PATH:$HOME/.composer/vendor/bin \
+	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8
 RUN set -xe; \
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
-	# Legacy Drush versions (6 and 7)
-	#mkdir $HOME/drush6 && cd $HOME/drush6 && composer require drush/drush:6.*;\
-	#mkdir $HOME/drush7 && cd $HOME/drush7 && composer require drush/drush:7.*;\
-	#echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bash_aliases; \
-	#echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bash_aliases; \
-	echo "alias drush8='/usr/local/bin/drush'" >> $HOME/.bash_aliases; \
 	# Drush modules
 	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
 	drush cc drush; \
