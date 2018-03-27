@@ -82,7 +82,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check PHP FPM and settings
-	run docker exec "$NAME" /var/www/scripts/test-php-fpm.sh index.php
+	run docker exec -u docker "$NAME" /var/www/scripts/test-php-fpm.sh index.php
 	# sed below is used to normalize the web output of phpinfo
 	# It will transforms "memory_limit                256M                                         256M" into
 	# "memory_limit => 256M => 256M", which is much easier to parse
@@ -93,12 +93,12 @@ _healthcheck_wait ()
 	# Cleanup output after each "run"
 	unset output
 
-	run docker exec "$NAME" /var/www/scripts/test-php-fpm.sh nonsense.php
+	run docker exec -u docker "$NAME" /var/www/scripts/test-php-fpm.sh nonsense.php
 	echo "$output" | grep "Status: 404 Not Found"
 	unset output
 
 	# Check PHP CLI and settings
-	phpInfo=$(docker exec "$NAME" php -i)
+	phpInfo=$(docker exec -u docker "$NAME" php -i)
 
 	output=$(echo "$phpInfo" | grep "PHP Version")
 	echo "$output" | grep "${PHP_VERSION}"
@@ -136,17 +136,17 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check PHP FPM settings overrides
-	run docker exec "$NAME" /var/www/scripts/test-php-fpm.sh index.php
+	run docker exec -u docker "$NAME" /var/www/scripts/test-php-fpm.sh index.php
 	echo "$output" | grep "memory_limit" | grep "512M"
 	unset output
 
 	# Check xdebug was enabled
-	run docker exec "$NAME" php -m
+	run docker exec -u docker "$NAME" php -m
 	echo "$output" | grep -e "^xdebug$"
 	unset output
 
 	# Check PHP CLI overrides
-	run docker exec "$NAME" php -i
+	run docker exec -u docker "$NAME" php -i
 	echo "$output" | grep "memory_limit => 128M => 128M"
 	unset output
 
@@ -169,44 +169,44 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check Composer version
-	run docker exec "$NAME" bash -c 'composer --version | grep "^Composer version ${COMPOSER_VERSION} "'
+	run docker exec -u docker "$NAME" bash -c 'composer --version | grep "^Composer version ${COMPOSER_VERSION} "'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drush Launcher version
-	run docker exec "$NAME" bash -c 'drush --version | grep "^Drush Launcher Version: ${DRUSH_LAUNCHER_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'drush --version | grep "^Drush Launcher Version: ${DRUSH_LAUNCHER_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drush version
-	run docker exec "$NAME" bash -c 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
+	run docker exec -u docker "$NAME" bash -c 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drupal Console version
-	run docker exec "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Wordpress CLI version
-	run docker exec "$NAME" bash -c 'wp --version | grep "^WP-CLI ${WPCLI_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'wp --version | grep "^WP-CLI ${WPCLI_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Magento 2 Code Generator version
 	# TODO: this should not require running with sudo - sudo should be removed ones the following issues is addressed:
 	# https://github.com/staempfli/magento2-code-generator/issues/11
-	run docker exec "$NAME" bash -c 'sudo mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'sudo mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Blackfire CLI version
-	run docker exec "$NAME" bash -c 'blackfire version | grep "^blackfire ${BLACKFIRE_VERSION} "'
+	run docker exec -u docker "$NAME" bash -c 'blackfire version | grep "^blackfire ${BLACKFIRE_VERSION} "'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check mhsendmail (does not have a flag to report its versions...)
-	run docker exec "$NAME" which mhsendmail
+	run docker exec -u docker "$NAME" which mhsendmail
 	echo "$output" | grep "/usr/local/bin/mhsendmail"
 	unset output
 
