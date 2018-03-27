@@ -155,6 +155,8 @@ _healthcheck_wait ()
 }
 
 @test "Check binaries and versions" {
+	[[ $SKIP == 1 ]] && skip
+
 	### Setup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 	docker run --name "$NAME" -d \
@@ -165,6 +167,43 @@ _healthcheck_wait ()
 	_healthcheck_wait
 
 	### Tests ###
+
+	# Check Composer version
+	run docker exec "$NAME" bash -c 'composer --version | grep "^Composer version ${COMPOSER_VERSION} "'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check Drush Launcher version
+	run docker exec "$NAME" bash -c 'drush --version | grep "^Drush Launcher Version: ${DRUSH_LAUNCHER_VERSION}$"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check Drush version
+	run docker exec "$NAME" bash -c 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check Drupal Console version
+	run docker exec "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_VERSION}$"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check Wordpress CLI version
+	run docker exec "$NAME" bash -c 'wp --version | grep "^WP-CLI ${WPCLI_VERSION}$"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check Magento 2 Code Generator version
+	# TODO: this should not require running with sudo - sudo should be removed ones the following issues is addressed:
+	# https://github.com/staempfli/magento2-code-generator/issues/11
+	run docker exec "$NAME" bash -c 'sudo mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check Blackfire CLI version
+	run docker exec "$NAME" bash -c 'blackfire version | grep "^blackfire ${BLACKFIRE_VERSION} "'
+	[[ ${status} == 0 ]]
+	unset output
 
 	# Check mhsendmail (does not have a flag to report its versions...)
 	run docker exec "$NAME" which mhsendmail
