@@ -218,3 +218,43 @@ _healthcheck_wait ()
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
+
+@test "Check config templates" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	cd ../tests
+	echo "CLI_IMAGE=\"${IMAGE}\"" > .docksal/docksal-local.env
+	fin reset -f
+
+	### Tests ###
+
+	# Load environment variables from docksal.env and confirm then are not empty
+	source .docksal/docksal.env
+	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
+	[[ "${SECRET_ACAPI_KEY}" != "" ]]
+	[[ "${SECRET_SSH_PRIVATE_KEY}" != "" ]]
+
+	# Check Acquia Cloud API conf
+	run fin exec 'echo ${SECRET_ACAPI_EMAIL}'
+	[[ "${output}" != "" ]]
+	unset output
+	run fin exec 'echo ${SECRET_ACAPI_KEY}'
+	[[ "${output}" != "" ]]
+	unset output
+	run fin exec 'grep "${SECRET_ACAPI_EMAIL}" "$HOME/.acquia/cloudapi.conf" && grep "${SECRET_ACAPI_KEY}" "$HOME/.acquia/cloudapi.conf"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check private SSH key
+	run fin exec 'echo ${SECRET_SSH_PRIVATE_KEY}'
+	[[ "${output}" != "" ]]
+	unset output
+	run fin exec 'echo "${SECRET_SSH_PRIVATE_KEY}" | diff $HOME/.ssh/id_rsa -'
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	fin rm -f
+	rm -f .docksal/docksal-local.env
+}

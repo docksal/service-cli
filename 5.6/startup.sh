@@ -31,15 +31,15 @@ xdebug_enable()
 # Helper function to render configs from go templates using gomplate
 render_tmpl()
 {
-	local file=${1}
+	local file="${1}"
 	local tmpl="${1}.tmpl"
 
-	if [[ ! -f ${tmpl} ]]; then
+	if [[ -f "${tmpl}" ]]; then
+		echo-debug "Rendering template: ${tmpl}..."
+		gomplate --file "${tmpl}" --out "${file}"
+	else
 		echo-debug "Error: Template file not found: ${tmpl}"
 		return 1
-	else
-		echo-debug "Rendering tempalte: ${tmpl}..."
-		gompalte -f "${tmpl}" -o "${file}"
 	fi
 }
 
