@@ -282,8 +282,10 @@ RUN set -e; \
 	# Fix npm complaining about permissions and not being able to update
 	sudo rm -rf $HOME/.config
 
+# Install Composer based dependencies
 ENV PATH=$PATH:$HOME/.composer/vendor/bin \
-	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8
+	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8 \
+	TERMINUS_VERSION=1.7.1
 RUN set -xe; \
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
@@ -295,6 +297,8 @@ RUN set -xe; \
 	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
 	# Composer parallel install plugin
 	composer global require hirak/prestissimo >/dev/null; \
+	# Terminus
+	composer global require pantheon-systems/terminus:${TERMINUS_VERSION}; \
 	# Cleanup
 	composer clear-cache
 
