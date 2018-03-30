@@ -219,7 +219,8 @@ ENV COMPOSER_VERSION=1.6.3 \
 	DRUPAL_CONSOLE_VERSION=1.7.0 \
 	WPCLI_VERSION=1.5.0 \
 	MG_CODEGEN_VERSION=1.10 \
-	BLACKFIRE_VERSION=1.15.0
+	BLACKFIRE_VERSION=1.15.0 \
+	GOMPLATE_VERSION=2.4.0
 RUN set -xe; \
 	# Composer
 	curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -229,12 +230,14 @@ RUN set -xe; \
 	curl -sSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console
 	curl -sSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
-	# Install wp-cli
+	# Wordpress CLI
 	curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
-	# Install magento code generator
+	# Magento2 Code Generator
 	curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen; \
-	# Install blackfire cli
+	# Blackfire CLI
 	curl -sSL https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64 -o /usr/local/bin/blackfire; \
+	# gomplate
+	curl -sSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gompalte; \
 	# Make all binaries executable in one shot
 	chmod +x /usr/local/bin/*
 
