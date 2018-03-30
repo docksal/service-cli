@@ -282,8 +282,11 @@ RUN set -e; \
 	# Fix npm complaining about permissions and not being able to update
 	sudo rm -rf $HOME/.config
 
+# Install Composer based dependencies
 ENV PATH=$PATH:$HOME/.composer/vendor/bin \
 	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8
+ENV PATH=$PATH:$HOME/.pantheon/vendor/bin \
+	TERMINUS_VERSION=1.8.0
 RUN set -xe; \
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
@@ -295,6 +298,12 @@ RUN set -xe; \
 	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
 	# Composer parallel install plugin
 	composer global require hirak/prestissimo >/dev/null; \
+	# Terminus
+	# Installed in a dedicated directory to avoid dependency conflicts.
+	echo "\n"'PATH="$PATH:$HOME/.pantheon/vendor/bin"' >> $HOME/.profile; \
+	mkdir -p $HOME/.pantheon; \
+	# Run in a subshell since we are doing directory switching
+	(cd $HOME/.pantheon && composer require pantheon-systems/terminus:${TERMINUS_VERSION}); \
 	# Cleanup
 	composer clear-cache
 

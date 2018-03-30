@@ -210,6 +210,11 @@ _healthcheck_wait ()
 	echo "$output" | grep "/usr/local/bin/mhsendmail"
 	unset output
 
+	# Check Terminus version
+	run docker exec -u docker "$NAME" bash -c 'terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+	[[ ${status} == 0 ]]
+	unset output
+
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
