@@ -28,6 +28,27 @@ xdebug_enable()
 	sudo ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
+# Helper function to render configs from go templates using gomplate
+render_tmpl()
+{
+	local file=${1}
+	local tmpl="${1}.tmpl"
+
+	if [[ ! -f ${tmpl} ]]; then
+		echo-debug "Error: Template file not found: ${tmpl}"
+		return 1
+	else
+		echo-debug "Rendering tempalte: ${tmpl}..."
+		gompalte -f "${tmpl}" -o "${file}"
+	fi
+}
+
+# Process templates
+# Private SSH key
+render_tmpl "$HOME_DIR/.ssh/id_rsa"
+# Acquia Cloud API config
+render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
+
 # Docker user uid/gid mapping to the host user uid/gid
 [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
 

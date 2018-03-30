@@ -304,9 +304,10 @@ RUN set -xe; \
 USER root
 
 # Copy configs and scripts
-COPY --chown=docker:docker config/.ssh $HOME/.ssh
-COPY --chown=docker:docker config/.drush $HOME/.drush
+COPY --chown=docker:docker config/.acquia $HOME/.acquia
 COPY --chown=docker:docker config/.docksalrc $HOME/.docksalrc
+COPY --chown=docker:docker config/.drush $HOME/.drush
+COPY --chown=docker:docker config/.ssh $HOME/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
