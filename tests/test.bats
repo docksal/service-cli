@@ -18,19 +18,19 @@ teardown() {
 # @param $1 container id/name
 _healthcheck ()
 {
-        local health_status
-        health_status=$(docker inspect --format='{{json .State.Health.Status}}' "$1" 2>/dev/null)
+	local health_status
+	health_status=$(docker inspect --format='{{json .State.Health.Status}}' "$1" 2>/dev/null)
 
-        # Wait for 5s then exit with 0 if a container does not have a health status property
-        # Necessary for backward compatibility with images that do not support health checks
-        if [[ $? != 0 ]]; then
-                echo "Waiting 10s for container to start..."
-                sleep 10
-                return 0
-        fi
+	# Wait for 5s then exit with 0 if a container does not have a health status property
+	# Necessary for backward compatibility with images that do not support health checks
+	if [[ $? != 0 ]]; then
+		echo "Waiting 10s for container to start..."
+		sleep 10
+		return 0
+	fi
 
-        # If it does, check the status
-        echo $health_status | grep '"healthy"' >/dev/null 2>&1
+	# If it does, check the status
+	echo $health_status | grep '"healthy"' >/dev/null 2>&1
 }
 
 # Waits for containers to become healthy
@@ -39,27 +39,27 @@ _healthcheck ()
 # TODO: make this universal. Currently hardcoded for cli only.
 _healthcheck_wait ()
 {
-        # Wait for cli to become ready by watching its health status
-        local container_name="${NAME}"
-        local delay=5
-        local timeout=30
-        local elapsed=0
+	# Wait for cli to become ready by watching its health status
+	local container_name="${NAME}"
+	local delay=5
+	local timeout=30
+	local elapsed=0
 
-        until _healthcheck "$container_name"; do
-                echo "Waiting for $container_name to become ready..."
-                sleep "$delay";
+	until _healthcheck "$container_name"; do
+		echo "Waiting for $container_name to become ready..."
+		sleep "$delay";
 
-                # Give the container 30s to become ready
-                elapsed=$((elapsed + delay))
-                if ((elapsed > timeout)); then
-                        echo-error "$container_name heathcheck failed" \
-                                "Container did not enter a healthy state within the expected amount of time." \
-                                "Try ${yellow}fin restart${NC}"
-                        exit 1
-                fi
-        done
+		# Give the container 30s to become ready
+		elapsed=$((elapsed + delay))
+		if ((elapsed > timeout)); then
+			echo-error "$container_name heathcheck failed" \
+				"Container did not enter a healthy state within the expected amount of time." \
+				"Try ${yellow}fin restart${NC}"
+			exit 1
+		fi
+	done
 
-        return 0
+	return 0
 }
 
 
@@ -217,4 +217,44 @@ _healthcheck_wait ()
 
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+}
+
+@test "Check config templates" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	cd ../tests
+	echo "CLI_IMAGE=\"${IMAGE}\"" > .docksal/docksal-local.env
+	fin reset -f
+
+	### Tests ###
+
+	# Load environment variables from docksal.env and confirm then are not empty
+	source .docksal/docksal.env
+	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
+	[[ "${SECRET_ACAPI_KEY}" != "" ]]
+	[[ "${SECRET_SSH_PRIVATE_KEY}" != "" ]]
+
+	# Check Acquia Cloud API conf
+	run fin exec 'echo ${SECRET_ACAPI_EMAIL}'
+	[[ "${output}" != "" ]]
+	unset output
+	run fin exec 'echo ${SECRET_ACAPI_KEY}'
+	[[ "${output}" != "" ]]
+	unset output
+	run fin exec 'grep "${SECRET_ACAPI_EMAIL}" "$HOME/.acquia/cloudapi.conf" && grep "${SECRET_ACAPI_KEY}" "$HOME/.acquia/cloudapi.conf"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check private SSH key
+	run fin exec 'echo ${SECRET_SSH_PRIVATE_KEY}'
+	[[ "${output}" != "" ]]
+	unset output
+	run fin exec 'echo "${SECRET_SSH_PRIVATE_KEY}" | diff $HOME/.ssh/id_rsa -'
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	fin rm -f
+	rm -f .docksal/docksal-local.env
 }
