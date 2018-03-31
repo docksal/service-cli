@@ -13,7 +13,7 @@ echo-debug ()
 	[[ "$DEBUG" != 0 ]] && echo "$@"
 }
 
-uid_gid_reset()
+uid_gid_reset ()
 {
 	if [[ "$HOST_UID" != "$(id -u docker)" ]] || [[ "$HOST_GID" != "$(id -g docker)" ]]; then
 		echo-debug "Updating docker user uid/gid to $HOST_UID/$HOST_GID to match the host user uid/gid..."
@@ -22,14 +22,14 @@ uid_gid_reset()
 	fi
 }
 
-xdebug_enable()
+xdebug_enable ()
 {
 	echo-debug "Enabling xdebug..."
 	sudo ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
 # Helper function to render configs from go templates using gomplate
-render_tmpl()
+render_tmpl ()
 {
 	local file="${1}"
 	local tmpl="${1}.tmpl"
@@ -43,11 +43,20 @@ render_tmpl()
 	fi
 }
 
+terminus_login ()
+{
+	echo-debug "Authenticating with Pantheon..."
+	terminus auth:login --machine-token="$SECRET_TERMINUS_TOKEN"
+}
+
 # Process templates
 # Private SSH key
 render_tmpl "$HOME_DIR/.ssh/id_rsa"
 # Acquia Cloud API config
 render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
+
+# Terminus authentication
+[[ "$SECRET_TERMINUS_TOKEN" ]] && terminus_login
 
 # Docker user uid/gid mapping to the host user uid/gid
 [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
