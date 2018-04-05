@@ -39,22 +39,29 @@ ENV LC_ALL C.UTF-8
 # Enable additional repos
 RUN set -xe; \
 	sed -i 's/main/main contrib non-free/' /etc/apt/sources.list; \
-	# Include backports
+	# backports repo
 	echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/backports.list; \
-	# Include blackfire.io repo
+	# blackfire.io repo
 	curl -sSL https://packagecloud.io/gpg.key | apt-key add -; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
-	# Include git-lfs repo
+	# git-lfs repo
 	curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' > /etc/apt/sources.list.d/github_git-lfs.list; \
-	echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' >> /etc/apt/sources.list.d/github_git-lfs.list; \
-	# Including yarn repo
+	echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
+	echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
+	# yarn repo
 	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
-	echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
+	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
+	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
+	curl -sSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
+	echo 'deb https://packages.microsoft.com/debian/8/prod jessie main' | tee /etc/apt/sources.list.d/mssql.list;
 
 # Additional packages
 RUN set -xe; \
+	# Create man direcotries, otherwise some packages may not install (e.g. postgresql-client)
+	# This should be a temporary workaround until fixed upstream: https://github.com/debuerreotype/debuerreotype/issues/10
+	mkdir -p /usr/share/man/man1 /usr/share/man/man7; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+		cron \
 		dnsutils \
 		git-lfs \
 		ghostscript \
@@ -69,6 +76,7 @@ RUN set -xe; \
 		nano \
 		openssh-client \
 		openssh-server \
+		postgresql-client \
 		procps \
 		pv \
 		rsync \
@@ -113,10 +121,12 @@ ENV NOTVISIBLE "in users profile"
 RUN set -xe; \
 	buildDeps=" \
 		g++ \
+		libc-client2007e-dev \
 		libfreetype6-dev \
 		libgpgme11-dev \
 		libicu-dev \
 		libjpeg62-turbo-dev \
+		libkrb5-dev \
 		libldap2-dev \
 		libmagickcore-dev \
 		libmagickwand-dev \
@@ -124,13 +134,19 @@ RUN set -xe; \
 		libmemcached-dev \
 		libmhash-dev \
 		libpng-dev \
+		libpq-dev \
 		libssh2-1-dev \
 		libxslt1-dev \
+		unixodbc-dev \
 		zlib1g-dev \
 	"; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	# Necessary for msodbcsql17 (MSSQL)
+	ACCEPT_EULA=Y \
+	apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
+		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
 		libicu57 \
@@ -143,8 +159,10 @@ RUN set -xe; \
 		libmemcachedutil2 \
 		libmhash2 \
 		libpng16-16 \
+		libpq5 \
 		libssh2-1 \
 		libxslt1.1 \
+		msodbcsql17 \
 		zlib1g \
 	;\
 	# SSH2 must be installed from source
@@ -152,33 +170,31 @@ RUN set -xe; \
 	# XDEBUG must be installed from source
 	git clone https://github.com/xdebug/xdebug.git /usr/src/php/ext/xdebug && rm -rf /usr/src/php/ext/xdebug/.git; \
 	\
-	docker-php-ext-configure >/dev/null hash --with-mhash; \
 	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
+	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
+	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
 	\
 	docker-php-ext-install >/dev/null -j$(nproc) \
 		bcmath \
 		bz2 \
 		calendar\
-		dba \
 		exif \
 		gd \
 		gettext \
+		imap \
 		intl \
 		ldap \
 		# mcrypt is removed from 7.2. See Deprecated features
+		mysqli \
 		opcache \
 		pcntl \
-		mysqli \
 		pdo_mysql \
-		shmop \
+		pdo_pgsql \
+		pgsql \
 		soap \
 		sockets \
 		ssh2 \
-		sysvmsg \
-		sysvsem \
-		sysvshm \
-		wddx \
 		xdebug \
 		xsl \
 		zip \
@@ -189,13 +205,17 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
+		pdo_sqlsrv \
 		redis \
+		sqlsrv \
 	;\
 	docker-php-ext-enable \
 		gnupg \
 		imagick \
 		memcached \
+		pdo_sqlsrv \
 		redis \
+		sqlsrv \
 	;\
 	# Disable xdebug by default
 	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
@@ -208,25 +228,31 @@ RUN set -xe; \
 # Copy mhsendmail binary from stage 1
 COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 
-ENV COMPOSER_VERSION=1.5.2 \
-	DRUSH_VERSION=8.1.13 \
-	DRUPAL_CONSOLE_VERSION=1.0.2 \
-	WPCLI_VERSION=1.3.0 \
-	MG_CODEGEN_VERSION=1.6.4 \
-	BLACKFIRE_VERSION=1.14.1
+ENV COMPOSER_VERSION=1.6.3 \
+	DRUSH_VERSION=8.1.16 \
+	DRUSH_LAUNCHER_VERSION=0.6.0 \
+	DRUPAL_CONSOLE_VERSION=1.7.0 \
+	WPCLI_VERSION=1.5.0 \
+	MG_CODEGEN_VERSION=1.10 \
+	BLACKFIRE_VERSION=1.15.0 \
+	GOMPLATE_VERSION=2.4.0
 RUN set -xe; \
 	# Composer
 	curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
 	# Drush 8 (default)
-	curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush; \
+	curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
+	# Drush Launcher
+	curl -sSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console
 	curl -sSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
-	# Install wp-cli
+	# Wordpress CLI
 	curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
-	# Install magento code generator
+	# Magento2 Code Generator
 	curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen; \
-	# Install blackfire cli
+	# Blackfire CLI
 	curl -sSL https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64 -o /usr/local/bin/blackfire; \
+	# gomplate
+	curl -sSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
 	# Make all binaries executable in one shot
 	chmod +x /usr/local/bin/*
 
@@ -249,8 +275,8 @@ USER docker
 ENV HOME /home/docker
 
 # Install nvm and a default node version
-ENV NVM_VERSION=0.33.4 \
-	NODE_VERSION=6.11.3 \
+ENV NVM_VERSION=0.33.8 \
+	NODE_VERSION=8.11.0 \
 	NVM_DIR=$HOME/.nvm
 # Don't use -x here - node/nvm stuff prints just too much stuff
 RUN set -e; \
@@ -265,16 +291,14 @@ RUN set -e; \
 	# Fix npm complaining about permissions and not being able to update
 	sudo rm -rf $HOME/.config
 
-ENV PATH $PATH:$HOME/.composer/vendor/bin
+# Install Composer based dependencies
+ENV PATH=$PATH:$HOME/.composer/vendor/bin \
+	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8
+ENV PATH=$PATH:$HOME/.terminus/vendor/bin \
+	TERMINUS_VERSION=1.8.0
 RUN set -xe; \
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
-	# Legacy Drush versions (6 and 7)
-	#mkdir $HOME/drush6 && cd $HOME/drush6 && composer require drush/drush:6.*;\
-	#mkdir $HOME/drush7 && cd $HOME/drush7 && composer require drush/drush:7.*;\
-	#echo "alias drush6='$HOME/drush6/vendor/bin/drush'" >> $HOME/.bash_aliases; \
-	#echo "alias drush7='$HOME/drush7/vendor/bin/drush'" >> $HOME/.bash_aliases; \
-	echo "alias drush8='/usr/local/bin/drush'" >> $HOME/.bash_aliases; \
 	# Drush modules
 	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
 	drush cc drush; \
@@ -283,15 +307,22 @@ RUN set -xe; \
 	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
 	# Composer parallel install plugin
 	composer global require hirak/prestissimo >/dev/null; \
+	# Terminus
+	# Installed in a dedicated directory to avoid dependency conflicts.
+	echo "\n"'PATH="$PATH:$HOME/.terminus/vendor/bin"' >> $HOME/.profile; \
+	mkdir -p $HOME/.terminus; \
+	# Run in a subshell since we are doing directory switching
+	(cd $HOME/.terminus && composer require pantheon-systems/terminus:${TERMINUS_VERSION}); \
 	# Cleanup
 	composer clear-cache
 
 USER root
 
 # Copy configs and scripts
-COPY --chown=docker:docker config/.ssh $HOME/.ssh
-COPY --chown=docker:docker config/.drush $HOME/.drush
+COPY --chown=docker:docker config/.acquia $HOME/.acquia
 COPY --chown=docker:docker config/.docksalrc $HOME/.docksalrc
+COPY --chown=docker:docker config/.drush $HOME/.drush
+COPY --chown=docker:docker config/.ssh $HOME/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
