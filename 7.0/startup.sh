@@ -65,7 +65,7 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
 
 # Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
-# To not bloat the image size permissions on the home folder are reset during image startup (in startup.sh)
+# To not bloat the image size, permissions on the home folder are reset at runtime.
 echo-debug "Resetting permissions on $HOME_DIR and /var/www..."
 chown "$HOST_UID:$HOST_GID" -R "$HOME_DIR"
 # Docker resets the project root folder permissions to 0:0 when cli is recreated (e.g. an env variable updated).
