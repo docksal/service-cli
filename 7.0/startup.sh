@@ -46,7 +46,7 @@ render_tmpl ()
 terminus_login ()
 {
 	echo-debug "Authenticating with Pantheon..."
-	terminus auth:login --machine-token="$SECRET_TERMINUS_TOKEN"
+	terminus auth:login --machine-token="$SECRET_TERMINUS_TOKEN" > /dev/null
 }
 
 # Process templates
