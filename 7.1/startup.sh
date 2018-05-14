@@ -52,6 +52,7 @@ terminus_login ()
 # Process templates
 # Private SSH key
 render_tmpl "$HOME_DIR/.ssh/id_rsa"
+chmod 0600 "$HOME_DIR/.ssh/id_rsa"
 # Acquia Cloud API config
 render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 
