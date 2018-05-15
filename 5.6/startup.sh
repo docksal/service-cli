@@ -70,7 +70,7 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 echo-debug "Resetting permissions on $HOME_DIR and /var/www..."
 chown "$HOST_UID:$HOST_GID" -R "$HOME_DIR"
 # Docker resets the project root folder permissions to 0:0 when cli is recreated (e.g. an env variable updated).
-# Why apply a fix/woraround for this at startup.
+# We apply a fix/workaround for this at startup.
 chown "$HOST_UID:$HOST_GID" /var/www
 
 # Initialization steps completed. Create a pid file to mark the container as healthy
