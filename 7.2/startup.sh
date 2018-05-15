@@ -10,7 +10,7 @@ DEBUG=${DEBUG:-0}
 [[ "$1" == "supervisord" ]] && DEBUG=1
 echo-debug ()
 {
-	[[ "$DEBUG" != 0 ]] && echo "$@"
+	[[ "$DEBUG" != 0 ]] && echo "$(date +"%F %H:%M:%S") | $@"
 }
 
 uid_gid_reset ()
