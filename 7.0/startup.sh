@@ -10,7 +10,7 @@ DEBUG=${DEBUG:-0}
 [[ "$1" == "supervisord" ]] && DEBUG=1
 echo-debug ()
 {
-	[[ "$DEBUG" != 0 ]] && echo "$@"
+	[[ "$DEBUG" != 0 ]] && echo "$(date +"%F %H:%M:%S") | $@"
 }
 
 uid_gid_reset ()
@@ -46,12 +46,13 @@ render_tmpl ()
 terminus_login ()
 {
 	echo-debug "Authenticating with Pantheon..."
-	terminus auth:login --machine-token="$SECRET_TERMINUS_TOKEN"
+	terminus auth:login --machine-token="$SECRET_TERMINUS_TOKEN" >/dev/null 2>&1
 }
 
 # Process templates
 # Private SSH key
 render_tmpl "$HOME_DIR/.ssh/id_rsa"
+chmod 0600 "$HOME_DIR/.ssh/id_rsa"
 # Acquia Cloud API config
 render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 
@@ -65,11 +66,11 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
 
 # Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
-# To not bloat the image size permissions on the home folder are reset during image startup (in startup.sh)
+# To not bloat the image size, permissions on the home folder are reset at runtime.
 echo-debug "Resetting permissions on $HOME_DIR and /var/www..."
 chown "$HOST_UID:$HOST_GID" -R "$HOME_DIR"
 # Docker resets the project root folder permissions to 0:0 when cli is recreated (e.g. an env variable updated).
-# Why apply a fix/woraround for this at startup.
+# We apply a fix/workaround for this at startup.
 chown "$HOST_UID:$HOST_GID" /var/www
 
 # Initialization steps completed. Create a pid file to mark the container as healthy
