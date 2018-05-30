@@ -22,6 +22,7 @@ RUN set -xe; \
 		apt-transport-https \
 		ca-certificates \
 		curl \
+		gnupg \
 		locales \
 		wget \
 	;\
@@ -53,6 +54,9 @@ RUN set -xe; \
 
 # Additional packages
 RUN set -xe; \
+	# Create man direcotries, otherwise some packages may not install (e.g. postgresql-client)
+	# This should be a temporary workaround until fixed upstream: https://github.com/debuerreotype/debuerreotype/issues/10
+	mkdir -p /usr/share/man/man1 /usr/share/man/man7; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		cron \
 		dnsutils \
@@ -63,7 +67,7 @@ RUN set -xe; \
 		imagemagick \
 		less \
 		# cgi-fcgi binary - used for self-testing (php-fpm)
-		libfcgi0ldbl \
+		libfcgi-bin \
 		mc \
 		mysql-client \
 		nano \
@@ -127,7 +131,7 @@ RUN set -xe; \
 		libmcrypt-dev \
 		libmemcached-dev \
 		libmhash-dev \
-		libpng12-dev \
+		libpng-dev \
 		libpq-dev \
 		libssh2-1-dev \
 		libxslt1-dev \
@@ -139,14 +143,14 @@ RUN set -xe; \
 		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
-		libicu52 \
+		libicu57 \
 		libjpeg62-turbo \
 		libldap-2.4-2 \
-		libmagickcore-6.q16-2 \
-		libmagickwand-6.q16-2 \
+		libmagickcore-6.q16-3 \
+		libmagickwand-6.q16-3 \
 		libmcrypt4 \
 		libmhash2 \
-		libpng12-0 \
+		libpng16-16 \
 		libpq5 \
 		libssh2-1 \
 		libsybdb5 \
