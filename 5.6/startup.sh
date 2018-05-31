@@ -81,7 +81,7 @@ touch /var/run/cli
 echo-debug "Executing the requested command..."
 # Service mode (run as root)
 if [[ "$1" == "supervisord" ]]; then
-	exec gosu root supervisord -c /etc/supervisor/conf.d/supervisord.conf
+	exec gosu root supervisord -c /etc/supervisor/supervisord.conf
 # Command mode (run as docker user)
 else
 	# This makes sure the environment is set up correctly for the docker user
