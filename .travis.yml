@@ -27,6 +27,8 @@ script:
   - travis_retry make && make test  # Retry builds, as pecl.php.net tends to time out often
 
 after_success: |
+  docker image ls
+
   if [[ "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
     [[ "${TRAVIS_BRANCH}" == "develop" ]] && TAG="edge-php${VERSION}"
     [[ "${TRAVIS_BRANCH}" == "master" ]] && TAG="php${VERSION}"
