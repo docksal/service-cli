@@ -82,7 +82,6 @@ RUN set -xe; \
 		unzip \
 		zip \
 		zsh \
-		yarn \
 	;\
 	# More recent version of git to get composer's git cache.
 	apt-get -y --force-yes --no-install-recommends -t jessie-backports install git >/dev/null ;\
@@ -259,15 +258,17 @@ RUN set -xe; \
 	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
 	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
-		nodejs; \
+		nodejs \
+		yarn \
+	;\
 	apt-get clean; rm -rf /var/lib/apt/lists/*;
 
 # Ruby
 RUN set -xe; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		ruby-full \
-		rlwrap; \
-		#build-essential; \
+		rlwrap \
+	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*; \
 	# bundler
