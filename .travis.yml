@@ -26,6 +26,9 @@ script:
   # Build the base image
   - cd ${TRAVIS_BUILD_DIR}/${VERSION}
   - travis_retry make && make test  # Retry builds, as pecl.php.net tends to time out often
+  # Build the Cloud9 flavor
+  - cd ${TRAVIS_BUILD_DIR}/cloud9
+  - travis_retry make && make test
 
 after_success:
   - docker image ls
@@ -41,6 +44,9 @@ after_success:
         # Base image
         docker tag ${REPO}:build-${VERSION} ${REPO}:${TAG}
         docker push ${REPO}:${TAG}
+        # Cloud9 flavor
+        docker tag ${REPO}:build-${VERSION}-ide ${REPO}:${TAG}-ide
+        docker push ${REPO}:${TAG}-ide
 
         # Push "latest" tag
         if [[ "${TRAVIS_BRANCH}" == "master" ]] && [[ "${VERSION}" == "${LATEST_VERSION}" ]]; then
@@ -52,3 +58,4 @@ after_success:
 
 after_failure:
   - cd ${TRAVIS_BUILD_DIR}/${VERSION} && make logs
+  - cd ${TRAVIS_BUILD_DIR}/cloud9 && make logs
