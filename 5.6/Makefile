@@ -1,10 +1,9 @@
 -include env_make
 
-PHP_VERSION = 5.6
-VERSION ?= php-fpm-$(PHP_VERSION)
-
+VERSION ?= 5.6
 REPO = docksal/cli
-NAME = docksal-cli-$(PHP_VERSION)
+TAG = build-$(VERSION)
+NAME = docksal-cli-$(VERSION)
 
 # Improve write performance for /home/docker by turning it into a volume
 VOLUMES += -v /home/docker
@@ -12,22 +11,22 @@ VOLUMES += -v /home/docker
 .PHONY: build test push shell run start stop logs clean release
 
 build:
-	docker build -t $(REPO):$(VERSION) .
+	docker build -t $(REPO):$(TAG) .
 
 test:
-	IMAGE=$(REPO):$(VERSION) NAME=$(NAME) PHP_VERSION=$(PHP_VERSION) ../tests/test.bats
+	IMAGE=$(REPO):$(TAG) NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats
 
 push:
-	docker push $(REPO):$(VERSION)
+	docker push $(REPO):$(TAG)
 
 shell:
-	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(VERSION) /bin/bash
+	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG) /bin/bash
 
 run:
-	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(VERSION)
+	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG)
 
 start:
-	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(VERSION)
+	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG)
 
 exec:
 	docker exec -it $(NAME) /bin/bash
@@ -42,6 +41,6 @@ clean:
 	docker rm -f $(NAME)
 
 release: build
-	make push -e VERSION=$(VERSION)
+	make push -e TAG=$(TAG)
 
 default: build

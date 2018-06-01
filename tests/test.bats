@@ -101,7 +101,7 @@ _healthcheck_wait ()
 	phpInfo=$(docker exec -u docker "$NAME" php -i)
 
 	output=$(echo "$phpInfo" | grep "PHP Version")
-	echo "$output" | grep "${PHP_VERSION}"
+	echo "$output" | grep "${VERSION}"
 	unset output
 
 	output=$(echo "$phpInfo" | grep "memory_limit")
