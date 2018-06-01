@@ -252,7 +252,7 @@ RUN set -xe; \
 	# gomplate
 	curl -sSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
 	# Make all binaries executable in one shot
-	chmod +x /usr/local/bin/*
+	cd /usr/local/bin && chmod +x composer drush8 drush drupal wp mg2-codegen blackfire gomplate;
 
 # Other language packages and dependencies
 RUN set -xe; \
