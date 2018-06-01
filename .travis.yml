@@ -23,28 +23,39 @@ install:
   - fin sysinfo
 
 script:
-  - cd ${VERSION}
+  # Build the base image
+  - cd ${TRAVIS_BUILD_DIR}/${VERSION}
   - travis_retry make && make test  # Retry builds, as pecl.php.net tends to time out often
+  # Build the Cloud9 flavor
+  - cd ${TRAVIS_BUILD_DIR}/cloud9
+  - travis_retry make && make test
 
-after_success: |
-  if [[ "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
-    [[ "${TRAVIS_BRANCH}" == "develop" ]] && TAG="edge-php${VERSION}"
-    [[ "${TRAVIS_BRANCH}" == "master" ]] && TAG="php${VERSION}"
-    [[ "${TRAVIS_TAG}" != "" ]] && TAG="${TRAVIS_TAG:1:3}-php${VERSION}"
+after_success:
+  - docker image ls
+  - |
+    if [[ "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
+      [[ "${TRAVIS_BRANCH}" == "develop" ]] && TAG="edge-php${VERSION}"
+      [[ "${TRAVIS_BRANCH}" == "master" ]] && TAG="php${VERSION}"
+      [[ "${TRAVIS_TAG}" != "" ]] && TAG="${TRAVIS_TAG:1:3}-php${VERSION}"
 
-    if [[ "$TAG" != "" ]]; then
-      docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
-      # Push edge, stable and release tags
-      docker tag ${REPO}:${VERSION} ${REPO}:${TAG}
-      docker push ${REPO}:${TAG}
+      if [[ "$TAG" != "" ]]; then
+        docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
+        # Push edge, stable and release tags
+        # Base image
+        docker tag ${REPO}:build-${VERSION} ${REPO}:${TAG}
+        docker push ${REPO}:${TAG}
+        # Cloud9 flavor
+        docker tag ${REPO}:build-${VERSION}-ide ${REPO}:${TAG}-ide
+        docker push ${REPO}:${TAG}-ide
 
-      # Push "latest" tag
-      if [[ "${TRAVIS_BRANCH}" == "master" ]] && [[ "${VERSION}" == "${LATEST_VERSION}" ]]; then
-        docker tag ${REPO}:${VERSION} ${REPO}:latest
-        docker push ${REPO}:latest
+        # Push "latest" tag
+        if [[ "${TRAVIS_BRANCH}" == "master" ]] && [[ "${VERSION}" == "${LATEST_VERSION}" ]]; then
+          docker tag ${REPO}:build-${VERSION} ${REPO}:latest
+          docker push ${REPO}:latest
+        fi
       fi
     fi
-  fi
 
 after_failure:
-  - make logs
+  - cd ${TRAVIS_BUILD_DIR}/${VERSION} && make logs
+  - cd ${TRAVIS_BUILD_DIR}/cloud9 && make logs

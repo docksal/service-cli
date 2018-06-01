@@ -48,9 +48,6 @@ RUN set -xe; \
 	curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
 	echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
 	echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
-	# yarn repo
-	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
-	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
 	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
 	curl -sSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
 	echo 'deb https://packages.microsoft.com/debian/8/prod jessie main' | tee /etc/apt/sources.list.d/mssql.list;
@@ -85,7 +82,6 @@ RUN set -xe; \
 		unzip \
 		zip \
 		zsh \
-		yarn \
 	;\
 	# More recent version of git to get composer's git cache.
 	apt-get -y --force-yes --no-install-recommends -t jessie-backports install git >/dev/null ;\
@@ -117,7 +113,7 @@ RUN set -xe; \
 	echo "export VISIBLE=now" >> /etc/profile
 ENV NOTVISIBLE "in users profile"
 
-# Install PHP extentions
+# PHP
 RUN set -xe; \
 	buildDeps=" \
 		g++ \
@@ -225,9 +221,6 @@ RUN set -xe; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
-# Copy mhsendmail binary from stage 1
-COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
-
 ENV COMPOSER_VERSION=1.6.3 \
 	DRUSH_VERSION=8.1.16 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
@@ -256,40 +249,38 @@ RUN set -xe; \
 	# Make all binaries executable in one shot
 	cd /usr/local/bin && chmod +x composer drush8 drush drupal wp mg2-codegen blackfire gomplate;
 
-# Other language packages and dependencies
+# Node.js
+ENV NODE_VERSION=8.x
+RUN set -xe; \
+	# Node.js repo
+	curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -; \
+	echo "deb https://deb.nodesource.com/node_${NODE_VERSION} jessie main" | sudo tee /etc/apt/sources.list.d/nodesource.list; \
+	echo "deb-src https://deb.nodesource.com/node_${NODE_VERSION} jessie main" | sudo tee -a /etc/apt/sources.list.d/nodesource.list; \
+	# yarn repo
+	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
+	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
+	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+		nodejs \
+		yarn \
+	;\
+	apt-get clean; rm -rf /var/lib/apt/lists/*;
+
+# Ruby
 RUN set -xe; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		ruby-full \
-		rlwrap; \
-		#build-essential; \
+		rlwrap \
+	;\
 	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*
-
-# bundler
-RUN gem install bundler >/dev/null
+	apt-get clean; rm -rf /var/lib/apt/lists/*; \
+	# bundler
+	gem install bundler >/dev/null
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
 # All further RUN commands will run as the "docker" user
 USER docker
 ENV HOME /home/docker
-
-# Install nvm and a default node version
-ENV NVM_VERSION=0.33.8 \
-	NODE_VERSION=8.11.0 \
-	NVM_DIR=$HOME/.nvm
-# Don't use -x here - node/nvm stuff prints just too much stuff
-RUN set -e; \
-	curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash; \
-	. $NVM_DIR/nvm.sh; \
-	nvm install $NODE_VERSION >/dev/null; \
-	nvm alias default $NODE_VERSION; \
-	# Install global node packages
-	npm install -g npm >/dev/null; \
-	# Cleanup
-	nvm clear-cache && npm cache clear --force; \
-	# Fix npm complaining about permissions and not being able to update
-	sudo rm -rf $HOME/.config
 
 # Install Composer based dependencies
 ENV PATH=$PATH:$HOME/.composer/vendor/bin \
@@ -318,6 +309,8 @@ RUN set -xe; \
 
 USER root
 
+# Copy mhsendmail binary from stage 1
+COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 # Copy configs and scripts
 COPY --chown=docker:docker config/.acquia $HOME/.acquia
 COPY --chown=docker:docker config/.docksalrc $HOME/.docksalrc

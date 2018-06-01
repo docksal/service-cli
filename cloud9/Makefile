@@ -1,9 +1,10 @@
 -include env_make
 
-VERSION ?= 5.6
+VERSION ?= 7.1
 REPO = docksal/cli
-TAG = build-$(VERSION)
-NAME = docksal-cli-$(VERSION)
+FROM_TAG = build-$(VERSION)
+TAG = $(FROM_TAG)-ide
+NAME = docksal-cli-$(VERSION)-ide
 
 # Improve write performance for /home/docker by turning it into a volume
 VOLUMES += -v /home/docker
@@ -11,10 +12,10 @@ VOLUMES += -v /home/docker
 .PHONY: build test push shell run start stop logs clean release
 
 build:
-	docker build -t $(REPO):$(TAG) .
+	docker build --build-arg FROM_TAG=$(FROM_TAG) -t $(REPO):$(TAG) .
 
 test:
-	IMAGE=$(REPO):$(TAG) NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats
+	IMAGE=$(REPO):$(TAG) NAME=$(NAME) tests/test.bats
 
 push:
 	docker push $(REPO):$(TAG)

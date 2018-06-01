@@ -37,8 +37,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
   - gem
   - bundler
 - nodejs
-  - nvm
-  - nodejs (via nvm)
+  - nodejs
   - npm, yarn
 - python
 
