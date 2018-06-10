@@ -90,3 +90,9 @@ else
 	# $@ does not work here. $* has to be used.
 	exec gosu docker bash -c "$DOCKSALRC; exec $*"
 fi
+
+if [[ -x ${PROJECT_ROOT}/.docksal/services/cli/startup.sh ]]; then
+    echo-debug "Running Custom Startup Script..."
+    ${PROJECT_ROOT}/.docksal/services/cli/startup.sh
+    echo-debug "Custom Startup Script Complete..."
+fi
