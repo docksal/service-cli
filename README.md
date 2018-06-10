@@ -106,3 +106,10 @@ Credentials used to authenticate [Terminus](https://pantheon.io/docs/terminus) w
 Stored in `/home/docker/.terminus/` inside `cli`.
 
 Terminus is installed and available globally in `cli`.
+
+`SECRET_PLATFORMSH_CLI_TOKEN`
+
+Credentials used to authenticate with the [Platform.sh CLI](https://github.com/platformsh/platformsh-cli) tool.
+Stored in `/home/docker/.platform` inside `cli`.
+
+Platform CLI is installed and available globally in `cli`.

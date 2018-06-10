@@ -59,6 +59,11 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 # Terminus authentication
 [[ "$SECRET_TERMINUS_TOKEN" ]] && terminus_login
 
+# Platform CLI Token
+if [[ -n "$SECRET_PLATFORMSH_CLI_TOKEN" ]]; then
+    PLATFORMSH_CLI_TOKEN=$SECRET_PLATFORMSH_CLI_TOKEN
+fi
+
 # Docker user uid/gid mapping to the host user uid/gid
 [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
 
