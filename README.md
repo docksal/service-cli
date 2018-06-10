@@ -31,6 +31,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
     - Acquia Cloud API commands
   - drupal console launcher
   - terminus (Pantheon)
+  - platform (Platform.sh)
   - wp-cli
 - ruby
   - ruby
