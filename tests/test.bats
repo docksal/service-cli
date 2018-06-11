@@ -258,3 +258,29 @@ _healthcheck_wait ()
 	fin rm -f
 	rm -f .docksal/docksal-local.env
 }
+
+@test "Check Platform.sh Integration" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests:/var/www \
+		-e SECRET_PLATFORMSH_CLI_TOKEN=${PLATFORM_TOKEN} \
+		"$IMAGE"
+	_healthcheck_wait
+
+	### Tests ###
+	run fin exec 'echo ${SECRET_PLATFORMSH_CLI_TOKEN}'
+	[[ "${output}" != "" ]]
+	unset output
+
+	run fin exec 'platform auth:info'
+	[[ ${status} == 0 ]] && [[ ! "${output}" =~ "Invalid API token" ]]
+	[[ "${output}" =~ "Sean Dietrich" ]]
+	unset output
+
+	### Cleanup ###
+	fin rm -f
+}
