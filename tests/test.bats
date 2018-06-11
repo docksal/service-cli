@@ -262,7 +262,8 @@ _healthcheck_wait ()
 @test "Check Custom Startup Script Works" {
 	[[ $SKIP == 1 ]] && skip
 
-    fin reset -f
-    run fin exec 'cat /tmp/test-startup.txt'
-    [[ ${status} == 0 ]] && [[ "${output}" == "I ran properly" ]]
+	cd ../tests
+	fin reset -f
+	run fin exec 'cat /tmp/test-startup.txt'
+	[[ ${status} == 0 ]] && [[ "${output}" == "I ran properly" ]]
 }
