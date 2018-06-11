@@ -77,6 +77,12 @@ chown "${HOST_UID-:1000}:${HOST_GID:-1000}" /var/www
 echo-debug "Preliminary initialization completed"
 touch /var/run/cli
 
+if [[ -x ${PROJECT_ROOT}/.docksal/services/cli/startup.sh ]]; then
+	echo-debug "Running Custom Startup Script..."
+	${PROJECT_ROOT}/.docksal/services/cli/startup.sh
+	echo-debug "Custom Startup Script Complete..."
+fi
+
 # Execute passed CMD arguments
 echo-debug "Executing the requested command..."
 # Service mode (run as root)
@@ -89,10 +95,4 @@ else
 	# Launch the passed command in an non-interactive bash session under docker user
 	# $@ does not work here. $* has to be used.
 	exec gosu docker bash -c "$DOCKSALRC; exec $*"
-fi
-
-if [[ -x ${PROJECT_ROOT}/.docksal/services/cli/startup.sh ]]; then
-    echo-debug "Running Custom Startup Script..."
-    ${PROJECT_ROOT}/.docksal/services/cli/startup.sh
-    echo-debug "Custom Startup Script Complete..."
 fi
