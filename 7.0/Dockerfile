@@ -286,7 +286,7 @@ ENV PATH=$PATH:$HOME/.composer/vendor/bin \
 ENV PATH=$PATH:$HOME/.terminus/vendor/bin \
 	TERMINUS_VERSION=1.8.0
 ENV PATH=$PATH:$HOME/.platformsh \
-	PLATFORM_CLI_VERSION=3.33.3
+	PLATFORMSH_CLI_VERSION=3.33.3
 RUN set -xe; \
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
@@ -305,7 +305,7 @@ RUN set -xe; \
 	# Run in a subshell since we are doing directory switching
 	(cd $HOME/.terminus && composer require pantheon-systems/terminus:${TERMINUS_VERSION}); \
 	mkdir -p $HOME/.platformsh; \
-	(cd $HOME/.platformsh && curl -o platform -L "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORM_CLI_VERSION}/platform.phar" && chmod 755 platform); \
+	(cd $HOME/.platformsh && curl -o platform -L "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" && chmod 755 platform); \
 	# Cleanup
 	composer clear-cache
 
