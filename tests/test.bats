@@ -268,5 +268,5 @@ _healthcheck_wait ()
 
 	run fin exec -T 'cat /tmp/test-startup.txt'
 	[[ ${status} == 0 ]] &&
-	[[ "${output}" == "I ran properly" ]]
+	[[ "${output}" =~ "I ran properly" ]]
 }
