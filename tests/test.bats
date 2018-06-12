@@ -263,7 +263,9 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	cd ../tests
+	echo "CLI_IMAGE=\"${IMAGE}\"" > .docksal/docksal-local.env
 	fin reset -f
+
 	run fin exec -T 'cat /tmp/test-startup.txt'
 	[[ ${status} == 0 ]] &&
 	[[ "${output}" == "I ran properly" ]]
