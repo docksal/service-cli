@@ -264,6 +264,7 @@ _healthcheck_wait ()
 
 	cd ../tests
 	fin reset -f
-	run fin exec 'cat /tmp/test-startup.txt'
-	[[ ${status} == 0 ]] && [[ "${output}" == "I ran properly" ]]
+	run fin exec -T 'cat /tmp/test-startup.txt'
+	[[ ${status} == 0 ]] &&
+	[[ "${output}" == "I ran properly" ]]
 }
