@@ -50,7 +50,7 @@ convert_secrets ()
 	do
 		secret_value=${!secret_key}
 		key=$(echo $secret_key | sed 's/SECRET_//g')
-		echo "export ${key}=\"${secret_value}\";" | sudo -u docker tee -a $HOME/.docksalrc
+		echo "export ${key}=\"${secret_value}\";" >> /etc/profile
 	done
 }
 
