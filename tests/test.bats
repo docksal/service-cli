@@ -215,8 +215,8 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
-    $ Check Platform CLI version
-	run docker exec -u docker "$NAME" bash -c 'platform --version | grep "^Platform.sh CLI ${PLATFORM_VERSION}$"'
+	# Check Platform CLI version
+	run docker exec -u docker "$NAME" bash -c 'platform --version | grep "^Platform.sh CLI ${PLATFORMSH_CLI_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
