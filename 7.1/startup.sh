@@ -50,7 +50,7 @@ convert_secrets ()
 	do
 		secret_value=${!secret_key}
 		key=$(echo $secret_key | sed 's/SECRET_//g')
-		echo "${key}=\"${secret_value}\";"
+		echo "export ${key}=\"${secret_value}\";" | sudo -u docker tee -a $HOME/.docksalrc
 	done
 }
 
@@ -70,7 +70,7 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 # Terminus authentication
 [[ "$SECRET_TERMINUS_TOKEN" ]] && terminus_login
 
-eval $(convert_secrets)
+convert_secrets
 
 # Docker user uid/gid mapping to the host user uid/gid
 [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
