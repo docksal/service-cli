@@ -43,6 +43,17 @@ render_tmpl ()
 	fi
 }
 
+convert_secrets ()
+{
+	eval 'secrets=(${!'"SECRET_"'@})'
+	for secret_key in "${secrets[@]}"
+	do
+		secret_value=${!secret_key}
+		key=$(echo $secret_key | sed 's/SECRET_//g')
+		echo "${key}=\"${secret_value}\";"
+	done
+}
+
 terminus_login ()
 {
 	echo-debug "Authenticating with Pantheon..."
@@ -59,13 +70,7 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 # Terminus authentication
 [[ "$SECRET_TERMINUS_TOKEN" ]] && terminus_login
 
-eval 'secrets=(${!'"SECRET_"'@})'
-for secret_key in "${secrets[@]}"
-do
-	secret_value=${!secret_key}
-	key=$(echo $secret_key | sed 's/SECRET_//g')
-	eval "${key}=\"${secret_value}\""
-done
+eval $(convert_secrets)
 
 # Docker user uid/gid mapping to the host user uid/gid
 [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
