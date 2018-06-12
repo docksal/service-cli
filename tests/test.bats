@@ -283,7 +283,6 @@ _healthcheck_wait ()
 	unset output
 
 	run docker exec -u docker "$NAME" bash -c 'platform auth:info'
-	echo "${output}"
 	[[ ${status} == 0 ]] &&
 	[[ ! "${output}" =~ "Invalid API token" ]] &&
 	[[ "${output}" =~ "Sean Dietrich" ]] &&
