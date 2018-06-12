@@ -216,7 +216,7 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Platform CLI version
-	run docker exec -u docker "$NAME" bash -c 'platform --version | grep "^Platform.sh CLI ${PLATFORMSH_CLI_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -282,12 +282,13 @@ _healthcheck_wait ()
 	[[ "${output}" != "" ]]
 	unset output
 
-	run fin exec 'platform auth:info'
 	run docker exec -u docker "$NAME" bash -c 'platform auth:info'
-	[[ ${status} == 0 ]] && [[ ! "${output}" =~ "Invalid API token" ]]
-	[[ "${output}" =~ "Sean Dietrich" ]]
+	echo "${output}"
+	[[ ${status} == 0 ]] &&
+	[[ ! "${output}" =~ "Invalid API token" ]] &&
+	[[ "${output}" =~ "Sean Dietrich" ]] &&
 	unset output
 
 	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	#docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
