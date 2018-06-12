@@ -215,6 +215,11 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
+    $ Check Platform CLI version
+	run docker exec -u docker "$NAME" bash -c 'platform --version | grep "^Platform.sh CLI ${PLATFORM_VERSION}$"'
+	[[ ${status} == 0 ]]
+	unset output
+
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
@@ -267,13 +272,13 @@ _healthcheck_wait ()
 	docker run --name "$NAME" -d \
 		-v /home/docker \
 		-v $(pwd)/../tests:/var/www \
-		-e SECRET_PLATFORMSH_CLI_TOKEN=${PLATFORM_TOKEN} \
+		-e SECRET_PLATFORMSH_CLI_TOKEN \
 		"$IMAGE"
 	_healthcheck_wait
 
 	### Tests ###
 	run docker exec -u docker "$NAME" bash -c 'echo "${SECRET_PLATFORMSH_CLI_TOKEN}"'
-	run fin exec 'echo ${SECRET_PLATFORMSH_CLI_TOKEN}'
+	run fin exec 'echo ${PLATFORMSH_CLI_TOKEN}'
 	[[ "${output}" != "" ]]
 	unset output
 
