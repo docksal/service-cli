@@ -45,12 +45,12 @@ render_tmpl ()
 
 convert_secrets ()
 {
-	eval 'secrets=(${!'"SECRET_"'@})'
+	eval 'secrets=(${!SECRET_@})'
 	for secret_key in "${secrets[@]}"
 	do
 		secret_value=${!secret_key}
-		key=$(echo $secret_key | sed 's/SECRET_//g')
-		echo "export ${key}=\"${secret_value}\";" >> /etc/profile
+		key=${secret_key#SECRET_}
+		echo "export ${key}=\"${secret_value}\";" | sudo -u docker tee -a ~/.bashrc
 	done
 }
 
