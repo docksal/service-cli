@@ -277,12 +277,12 @@ _healthcheck_wait ()
 	_healthcheck_wait
 
 	### Tests ###
-	run docker exec -u docker "$NAME" bash -c 'echo "${SECRET_PLATFORMSH_CLI_TOKEN}"'
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_PLATFORMSH_CLI_TOKEN}"'
 	run fin exec 'echo ${PLATFORMSH_CLI_TOKEN}'
 	[[ "${output}" != "" ]]
 	unset output
 
-	run docker exec -u docker "$NAME" bash -c 'platform auth:info'
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; platform auth:info'
 	[[ ${status} == 0 ]] &&
 	[[ ! "${output}" =~ "Invalid API token" ]] &&
 	[[ "${output}" =~ "Sean Dietrich" ]] &&
