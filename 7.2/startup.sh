@@ -50,7 +50,7 @@ convert_secrets ()
 	do
 		secret_value=${!secret_key}
 		key=${secret_key#SECRET_}
-		echo "export ${key}=\"${secret_value}\";" | sudo -u docker tee -a ~/.bashrc
+		echo "export ${key}=\"${secret_value}\";" | sudo -u docker tee -a ~/.docksalrc
 	done
 }
 
