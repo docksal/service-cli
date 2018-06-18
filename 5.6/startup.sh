@@ -71,6 +71,8 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 [[ "$SECRET_TERMINUS_TOKEN" ]] && terminus_login
 
 convert_secrets
+# Source Docksalrc for when someone runs bash in the container
+echo "source ~/.docksalrc" | sudo -u docker tee -a ~/.bashrc
 
 # Docker user uid/gid mapping to the host user uid/gid
 [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
