@@ -43,6 +43,9 @@ render_tmpl ()
 	fi
 }
 
+# Helper function to loop through all environment variables prefixed with SECRET_ and
+# convert to the equivalent variable without SECRET. (ex SECRET_TERMINUS_TOKEN has a variable
+# called TERMINUS_TOKEN.
 convert_secrets ()
 {
 	eval 'secrets=(${!SECRET_@})'
@@ -70,7 +73,9 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 # Terminus authentication
 [[ "$SECRET_TERMINUS_TOKEN" ]] && terminus_login
 
+# Convert all Environment Variables Prefixed with SECRET_ into
 convert_secrets
+
 # Source Docksalrc for when someone runs bash in the container
 echo "source ~/.docksalrc" | sudo -u docker tee -a ~/.bashrc
 
