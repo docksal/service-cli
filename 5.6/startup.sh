@@ -73,7 +73,7 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 # Terminus authentication
 [[ "$SECRET_TERMINUS_TOKEN" ]] && terminus_login
 
-# Convert all Environment Variables Prefixed with SECRET_ into
+# Convert all Environment Variables Prefixed with SECRET_
 convert_secrets
 
 # Source Docksalrc for when someone runs bash in the container
