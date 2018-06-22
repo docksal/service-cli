@@ -29,6 +29,8 @@ is_latest ()
 }
 
 # Tag and push an image
+# $1 - source image
+# $2 - target image
 tag_and_push ()
 {
 	local source=$1
