@@ -275,8 +275,8 @@ ENV HOME /home/docker
 ENV PATH=$PATH:$HOME/.composer/vendor/bin \
 	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8
 ENV PATH=$PATH:$HOME/.terminus/vendor/bin \
-	TERMINUS_VERSION=1.8.0
 ENV PATH=$PATH:$HOME/.platformsh/ \
+	TERMINUS_VERSION=1.8.1
 	PLATFORMSH_CLI_VERSION=3.33.3
 RUN set -xe; \
 	# Add composer bin directory to PATH

@@ -284,7 +284,7 @@ ENV HOME /home/docker
 ENV PATH=$PATH:$HOME/.composer/vendor/bin \
 	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8
 ENV PATH=$PATH:$HOME/.terminus/vendor/bin \
-	TERMINUS_VERSION=1.8.0
+	TERMINUS_VERSION=1.8.1
 ENV PATH=$PATH:$HOME/.platformsh \
 	PLATFORMSH_CLI_VERSION=3.33.3
 RUN set -xe; \
