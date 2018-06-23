@@ -277,17 +277,24 @@ _healthcheck_wait ()
 	_healthcheck_wait
 
 	### Tests ###
+
+	# Confirm output is not empty and token is passed to container
 	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_PLATFORMSH_CLI_TOKEN}"'
+	[[ "${output" != "" ]]
+	unset output
+
+	# Confirm token passed to container was converted without SECRET_
 	run fin exec 'echo ${PLATFORMSH_CLI_TOKEN}'
 	[[ "${output}" != "" ]]
 	unset output
 
+	# Confirm Authentication
 	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; platform auth:info'
 	[[ ${status} == 0 ]] &&
 	[[ ! "${output}" =~ "Invalid API token" ]] &&
-	[[ "${output}" =~ "Sean Dietrich" ]] &&
+	[[ "${output}" =~ "Docksal App" ]] &&
 	unset output
 
 	### Cleanup ###
-	#docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
