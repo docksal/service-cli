@@ -286,7 +286,7 @@ ENV PATH=$PATH:$HOME/.composer/vendor/bin \
 ENV PATH=$PATH:$HOME/.terminus/vendor/bin \
 	TERMINUS_VERSION=1.8.1
 ENV PATH=$PATH:$HOME/.platformsh \
-	PLATFORMSH_CLI_VERSION=3.33.3
+	PLATFORMSH_CLI_VERSION=3.33.5
 RUN set -xe; \
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
