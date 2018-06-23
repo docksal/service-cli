@@ -289,7 +289,7 @@ _healthcheck_wait ()
 	unset output
 
 	# Confirm Authentication
-	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; platform auth:info'
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; platform auth:info -n'
 	[[ ${status} == 0 ]] &&
 	[[ ! "${output}" =~ "Invalid API token" ]] &&
 	[[ "${output}" =~ "Docksal App" ]] &&
