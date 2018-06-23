@@ -280,7 +280,7 @@ _healthcheck_wait ()
 
 	# Confirm output is not empty and token is passed to container
 	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_PLATFORMSH_CLI_TOKEN}"'
-	[[ "${output" != "" ]]
+	[[ "${output}" != "" ]]
 	unset output
 
 	# Confirm token passed to container was converted without SECRET_
