@@ -275,7 +275,7 @@ _healthcheck_wait ()
 
 	# Confirm output is not empty and token is passed to container
 	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_TERMINUS_TOKEN}"'
-	[[ "${output}" != "" ]]
+	[[ "${output}" =~ "${SECRET_TERMINUS_TOKEN}" ]]
 	unset output
 
 	# Confirm Authentication
