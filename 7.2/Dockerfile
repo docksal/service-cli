@@ -286,7 +286,9 @@ ENV HOME /home/docker
 ENV PATH=$PATH:$HOME/.composer/vendor/bin \
 	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8
 ENV PATH=$PATH:$HOME/.terminus/vendor/bin \
-	TERMINUS_VERSION=1.8.0
+	TERMINUS_VERSION=1.8.1
+ENV PATH=$PATH:$HOME/.platformsh \
+	PLATFORMSH_CLI_VERSION=3.33.5
 RUN set -xe; \
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
@@ -304,6 +306,8 @@ RUN set -xe; \
 	mkdir -p $HOME/.terminus; \
 	# Run in a subshell since we are doing directory switching
 	(cd $HOME/.terminus && composer require pantheon-systems/terminus:${TERMINUS_VERSION}); \
+	mkdir -p $HOME/.platformsh; \
+	(cd $HOME/.platformsh && curl -o platform -L "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" && chmod 755 platform); \
 	# Cleanup
 	composer clear-cache
 

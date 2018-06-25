@@ -215,6 +215,11 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
+	# Check Platform CLI version
+	run docker exec -u docker "$NAME" bash -c 'platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
+	[[ ${status} == 0 ]]
+	unset output
+
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
@@ -257,4 +262,39 @@ _healthcheck_wait ()
 	### Cleanup ###
 	fin rm -f
 	rm -f .docksal/docksal-local.env
+}
+
+@test "Check Platform.sh Integration" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests:/var/www \
+		-e SECRET_PLATFORMSH_CLI_TOKEN \
+		"$IMAGE"
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Confirm output is not empty and token is passed to container
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_PLATFORMSH_CLI_TOKEN}"'
+	[[ "${output}" != "" ]]
+	unset output
+
+	# Confirm token passed to container was converted without SECRET_
+	run fin exec 'echo ${PLATFORMSH_CLI_TOKEN}'
+	[[ "${output}" != "" ]]
+	unset output
+
+	# Confirm Authentication
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; platform auth:info -n'
+	[[ ${status} == 0 ]] &&
+	[[ ! "${output}" =~ "Invalid API token" ]] &&
+	[[ "${output}" =~ "Docksal App" ]] &&
+	unset output
+
+	### Cleanup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
