@@ -310,3 +310,33 @@ _healthcheck_wait ()
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
+
+@test "Check Pantheon Integration" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests:/var/www \
+		-e SECRET_TERMINUS_TOKEN \
+		"$IMAGE"
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Confirm output is not empty and token is passed to container
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_TERMINUS_TOKEN}"'
+	[[ "${output}" =~ "${SECRET_TERMINUS_TOKEN}" ]]
+	unset output
+
+	# Confirm Authentication
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; terminus auth:whoami'
+	[[ ${status} == 0 ]] &&
+	[[ ! "${output}" =~ "You are not logged in." ]] &&
+	[[ "${output}" =~ "developer@docksal.io" ]] &&
+	unset output
+
+	### Cleanup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+}
