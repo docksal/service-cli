@@ -43,6 +43,20 @@ render_tmpl ()
 	fi
 }
 
+# Helper function to loop through all environment variables prefixed with SECRET_ and
+# convert to the equivalent variable without SECRET. (ex SECRET_TERMINUS_TOKEN has a variable
+# called TERMINUS_TOKEN.
+convert_secrets ()
+{
+	eval 'secrets=(${!SECRET_@})'
+	for secret_key in "${secrets[@]}"
+	do
+		secret_value=${!secret_key}
+		key=${secret_key#SECRET_}
+		echo "export ${key}=\"${secret_value}\";" | sudo -u docker tee -a ~/.docksalrc
+	done
+}
+
 terminus_login ()
 {
 	echo-debug "Authenticating with Pantheon..."
@@ -58,6 +72,12 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 
 # Terminus authentication
 [[ "$SECRET_TERMINUS_TOKEN" ]] && terminus_login
+
+# Convert all Environment Variables Prefixed with SECRET_
+convert_secrets
+
+# Source Docksalrc for when someone runs bash in the container
+echo "source ~/.docksalrc" | sudo -u docker tee -a ~/.bashrc
 
 # Docker user uid/gid mapping to the host user uid/gid
 [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
