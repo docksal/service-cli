@@ -264,6 +264,18 @@ _healthcheck_wait ()
 	rm -f .docksal/docksal-local.env
 }
 
+@test "Check Custom Startup Script Works" {
+	[[ $SKIP == 1 ]] && skip
+
+	cd ../tests
+	echo "CLI_IMAGE=\"${IMAGE}\"" > .docksal/docksal-local.env
+	fin reset -f
+
+	run fin exec -T 'cat /tmp/test-startup.txt'
+	[[ ${status} == 0 ]] &&
+	[[ "${output}" =~ "I ran properly" ]]
+}
+
 @test "Check Platform.sh Integration" {
 	[[ $SKIP == 1 ]] && skip
 

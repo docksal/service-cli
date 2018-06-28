@@ -78,6 +78,11 @@ cli
 
 See [docs](https://docs.docksal.io/en/master/tools/xdebug) on using Xdebug for web and cli PHP debugging.
 
+## Customizing Startup
+
+To run a custom startup script anytime the `cli` container has started create a `startup.sh` file within the
+`.docksal/services/cli` directory. Additionally, make sure that the file is executable as well so that the container
+does not run into issues when attempting to execute the file.
 
 ## Secrets and integrations
 
