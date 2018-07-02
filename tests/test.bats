@@ -354,6 +354,10 @@ _healthcheck_wait ()
 
 	### Tests ###
 	# Confirm output from cron is working
+
+	# Sleep for 60 Seconds so cron can run first time.
+	sleep 60
+
 	run docker exec -it -u docker "$NAME" bash -c 'cat /tmp/date.txt'
 	[[ "${output}" =~ "The current date is " ]]
 	OLD_OUTPUT=${output}"
