@@ -99,7 +99,7 @@ touch /var/run/cli
 
 # If crontab file is found within project add contents to user crontab file.
 if [[ -f ${PROJECT_ROOT}/.docksal/services/cli/crontab ]]; then
-	cat ${PROJECT_ROOT}/.docksal/services/cli/crontab | crontab -
+	cat ${PROJECT_ROOT}/.docksal/services/cli/crontab | crontab -u docker -
 	sudo /etc/init.d/cron start
 fi
 
