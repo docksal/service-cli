@@ -355,20 +355,22 @@ _healthcheck_wait ()
 	### Tests ###
 	# Confirm output from cron is working
 
-	# Sleep for 60 Seconds so cron can run first time.
-	sleep 60
+	# Create tmp date file
+	docker exec -it -u docker "$NAME" bash -c 'echo "The current date is $(date)" > /tmp/date.txt; chmod 0777 /tmp/date.txt'
 
+	# Confirm File created and exists
 	run docker exec -it -u docker "$NAME" bash -c 'cat /tmp/date.txt'
 	[[ "${output}" =~ "The current date is " ]]
-	OLD_OUTPUT=${output}"
+	OLD_OUTPUT="${output}"
 	unset output
 
 	# Sleep for 60 Seconds so cron can run again.
 	sleep 60
 
+	# Confirm cron has ran and file contents has changed
 	run docker exec -it -u docker "$NAME" bash -c 'cat /tmp/date.txt'
 	[[ "${output}" =~ "The current date is " ]]
-	NEW_OUTPUT=${output}"
+	NEW_OUTPUT="${output}"
 	unset output
 
 	# Confirm First Test is not the same as old test
