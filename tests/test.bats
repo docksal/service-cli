@@ -340,3 +340,42 @@ _healthcheck_wait ()
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
+
+@test "Custom Cron Integration" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests:/var/www \
+		"$IMAGE"
+	_healthcheck_wait
+
+	### Tests ###
+	# Confirm output from cron is working
+
+	# Create tmp date file
+	docker exec -it -u docker "$NAME" bash -c 'echo "The current date is $(date)" > /tmp/date.txt; chmod 0777 /tmp/date.txt'
+
+	# Confirm File created and exists
+	run docker exec -it -u docker "$NAME" bash -c 'cat /tmp/date.txt'
+	[[ "${output}" =~ "The current date is " ]]
+	OLD_OUTPUT="${output}"
+	unset output
+
+	# Sleep for 60 Seconds so cron can run again.
+	sleep 60
+
+	# Confirm cron has ran and file contents has changed
+	run docker exec -it -u docker "$NAME" bash -c 'cat /tmp/date.txt'
+	[[ "${output}" =~ "The current date is " ]]
+	NEW_OUTPUT="${output}"
+	unset output
+
+	# Confirm First Test is not the same as old test
+	[[ "${OLD_OUTPUT}" != "${NEW_OUTPUT}" ]]
+
+	### Cleanup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+}

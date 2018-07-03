@@ -97,6 +97,11 @@ chown "${HOST_UID-:1000}:${HOST_GID:-1000}" /var/www
 echo-debug "Preliminary initialization completed"
 touch /var/run/cli
 
+# If crontab file is found within project add contents to user crontab file.
+if [[ -f ${PROJECT_ROOT}/.docksal/services/cli/crontab ]]; then
+	cat ${PROJECT_ROOT}/.docksal/services/cli/crontab | crontab -u docker -
+fi
+
 if [[ -x ${PROJECT_ROOT}/.docksal/services/cli/startup.sh ]]; then
 	echo-debug "Running Custom Startup Script..."
 	${PROJECT_ROOT}/.docksal/services/cli/startup.sh
