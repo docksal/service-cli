@@ -77,18 +77,18 @@ cli
     ...
 ```
 
-See [docs](https://docs.docksal.io/en/master/tools/xdebug) on using Xdebug for web and cli PHP debugging.
+[See docs](https://docs.docksal.io/en/master/tools/xdebug) on using Xdebug for web and cli PHP debugging.
 
 ## Customizing Startup
 
-To run a custom startup script anytime the `cli` container has started create a `startup.sh` file within the
+To run a custom startup script anytime the `cli` container has started, create a `startup.sh` file within the
 `.docksal/services/cli` directory. Additionally, make sure that the file is executable as well so that the container
 does not run into issues when attempting to execute the file.
 
 ## Customized Cron Configuration
 
 Cron can be configured by making sure there is a `crontab` file located within `.docksal/services/cli`. The file should
-be filled out accordingly such that it follows the standard crontab format. For more information click [here](http://www.nncron.ru/help/EN/working/cron-format.htm).
+follow the [standard crontab format](http://www.nncron.ru/help/EN/working/cron-format.htm).
 
 ## Secrets and integrations
 
