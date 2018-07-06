@@ -42,14 +42,14 @@ RUN set -xe; \
 	# backports repo
 	echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/backports.list; \
 	# blackfire.io repo
-	curl -sSL https://packagecloud.io/gpg.key | apt-key add -; \
+	curl -fsSL https://packagecloud.io/gpg.key | apt-key add -; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
-	curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
+	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
 	echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
 	echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
 	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
-	curl -sSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
+	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
 	echo 'deb https://packages.microsoft.com/debian/8/prod jessie main' | tee /etc/apt/sources.list.d/mssql.list;
 
 # Additional packages
@@ -100,11 +100,11 @@ RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
 	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
 	# https://github.com/tianon/gosu
-	curl -sSL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu; \
+	curl -fsSL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu; \
 	chown root:"$(id -gn docker)" /usr/local/bin/gosu; \
 	chmod +sx /usr/local/bin/gosu; \
 	# gomplate (to process configuration templates in startup.sh)
-	curl -sSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
+	curl -fsSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
 	chmod +x /usr/local/bin/gomplate
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
@@ -237,21 +237,21 @@ ENV COMPOSER_VERSION=1.6.3 \
 	PLATFORMSH_CLI_VERSION=3.33.5
 RUN set -xe; \
 	# Composer
-	curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
+	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
 	# Drush 8 (default)
-	curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
+	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
 	# Drush Launcher
-	curl -sSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
+	curl -fsSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console
-	curl -sSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
+	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Wordpress CLI
-	curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
+	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Magento2 Code Generator
-	curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen; \
+	curl -fsSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen; \
 	# Blackfire CLI
-	curl -sSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
+	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
-	curl -sSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp mg2-codegen blackfire platform);
 
@@ -259,11 +259,11 @@ RUN set -xe; \
 ENV NODE_VERSION=8.x
 RUN set -xe; \
 	# Node.js repo
-	curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -; \
+	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -; \
 	echo "deb https://deb.nodesource.com/node_${NODE_VERSION} jessie main" | sudo tee /etc/apt/sources.list.d/nodesource.list; \
 	echo "deb-src https://deb.nodesource.com/node_${NODE_VERSION} jessie main" | sudo tee -a /etc/apt/sources.list.d/nodesource.list; \
 	# yarn repo
-	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
+	curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
 	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
 	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
 		nodejs \
