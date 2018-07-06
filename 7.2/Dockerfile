@@ -229,6 +229,7 @@ RUN set -xe; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
+# PHP tools (installed globally)
 ENV COMPOSER_VERSION=1.6.3 \
 	DRUSH_VERSION=8.1.16 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
@@ -291,31 +292,31 @@ ENV BUNDLE_PATH .bundler
 
 # All further RUN commands will run as the "docker" user
 USER docker
-ENV HOME /home/docker
+ARG HOME=/home/docker
 
-# Install Composer based dependencies
-ENV PATH=$PATH:$HOME/.composer/vendor/bin
-ENV PATH=$PATH:$HOME/.terminus/vendor/bin \
+# PHP tools (installed as user)
+ENV PATH=$PATH:$HOME/.composer/vendor/bin \
 	TERMINUS_VERSION=1.8.1
 RUN set -xe; \
+	\
+	# Composer based dependencies
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
-	# Drush modules
-	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	drush cc drush; \
-	# Drupal Coder w/ a matching version of PHP_CodeSniffer
-	composer global require drupal/coder >/dev/null; \
-	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
+	# Install cgr to use it in-place of `composer global require`
+	composer global require consolidation/cgr >/dev/null; \
 	# Composer parallel install plugin
 	composer global require hirak/prestissimo >/dev/null; \
+	# Drupal Coder w/ a matching version of PHP_CodeSniffer
+	cgr drupal/coder >/dev/null; \
+	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
 	# Terminus
-	# Installed in a dedicated directory to avoid dependency conflicts.
-	echo "\n"'PATH="$PATH:$HOME/.terminus/vendor/bin"' >> $HOME/.profile; \
-	mkdir -p $HOME/.terminus; \
-	# Run in a subshell since we are doing directory switching
-	(cd $HOME/.terminus && composer require pantheon-systems/terminus:${TERMINUS_VERSION}); \
+	cgr pantheon-systems/terminus:${TERMINUS_VERSION} >/dev/null; \
 	# Cleanup
-	composer clear-cache
+	composer clear-cache; \
+	\
+	# Drush modules
+	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
+	drush cc drush
 
 USER root
 
