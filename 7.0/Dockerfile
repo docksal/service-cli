@@ -11,6 +11,7 @@ RUN set -xe; \
 FROM php:7.0-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
 RUN set -xe; \
