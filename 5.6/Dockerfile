@@ -18,7 +18,8 @@ RUN set -xe; \
 
 # Install basic packages
 RUN set -xe; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
 		apt-transport-https \
 		ca-certificates \
 		curl \
@@ -54,7 +55,8 @@ RUN set -xe; \
 	# Create man direcotries, otherwise some packages may not install (e.g. postgresql-client)
 	# This should be a temporary workaround until fixed upstream: https://github.com/debuerreotype/debuerreotype/issues/10
 	mkdir -p /usr/share/man/man1 /usr/share/man/man7; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
 		cron \
 		dnsutils \
 		git-lfs \
@@ -81,7 +83,7 @@ RUN set -xe; \
 		zsh \
 	;\
 	# More recent version of git to get composer's git cache.
-	apt-get -y --force-yes --no-install-recommends -t jessie-backports install git >/dev/null ;\
+	apt-get -y --no-install-recommends -t jessie-backports install git >/dev/null ;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
@@ -138,7 +140,8 @@ RUN set -xe; \
 		libxslt1-dev \
 		zlib1g-dev \
 	"; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
 		libc-client2007e \
@@ -254,7 +257,8 @@ RUN set -xe; \
 	# yarn repo
 	curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
 	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
 		nodejs \
 		yarn \
 	;\
@@ -262,7 +266,8 @@ RUN set -xe; \
 
 # Ruby
 RUN set -xe; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
 		ruby-full \
 		rlwrap \
 	;\
