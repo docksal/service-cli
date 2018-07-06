@@ -52,9 +52,9 @@ _healthcheck_wait ()
 		# Give the container 30s to become ready
 		elapsed=$((elapsed + delay))
 		if ((elapsed > timeout)); then
-			echo-error "$container_name heathcheck failed" \
+			echo "$container_name heathcheck failed" \
 				"Container did not enter a healthy state within the expected amount of time." \
-				"Try ${yellow}fin restart${NC}"
+				"Try fin restart"
 			exit 1
 		fi
 	done
@@ -83,6 +83,38 @@ _healthcheck_wait ()
 	run docker logs "$NAME"
 	echo "$output" | grep "Cloud9 is up and running"
 	unset output
+
+	run curl -i "http://test.docksal:3000/ide.html"
+	[[ "${output}" =~ "HTTP/1.1 200 OK" ]] &&
+	[[ "${output}" =~ "Cloud9" ]]
+
+	### Cleanup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+}
+
+@test "Cloud 9 IDE on Different Port" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	C9PORT=2000
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests/docroot:/var/www/docroot \
+		-e C9PORT \
+		-p 192.168.64.100:${C9PORT}:${C9PORT} \
+		"$IMAGE"
+	_healthcheck_wait
+
+	### Tests ###
+
+	run docker logs "$NAME"
+	echo "$output" | grep "Cloud9 is up and running"
+	unset output
+
+	run curl -i "http://test.docksal:${C9PORT}/ide.html"
+	[[ "${output}" =~ "HTTP/1.1 200 OK" ]] &&
+	[[ "${output}" =~ "Cloud9" ]]
 
 	### Cleanup ###
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
