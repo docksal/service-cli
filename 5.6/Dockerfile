@@ -44,7 +44,7 @@ RUN set -xe; \
 	# backports repo
 	echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/backports.list; \
 	# blackfire.io repo
-	curl -fssL https://packagecloud.io/gpg.key | apt-key add -; \
+	curl -fsSL https://packagecloud.io/gpg.key | apt-key add -; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
