@@ -91,13 +91,18 @@ RUN set -xe; \
 	useradd -m -s /bin/bash -u 1000 -g 1000 -G sudo -p docker docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Install gosu and give access to the docker user primary group to use it.
-# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
-# https://github.com/tianon/gosu
+ENV GOSU_VERSION=1.10 \
+	GOMPLATE_VERSION=2.4.0
 RUN set -xe; \
-	curl -sSL "https://github.com/tianon/gosu/releases/download/1.10/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu; \
+	# Install gosu and give access to the docker user primary group to use it.
+	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
+	# https://github.com/tianon/gosu
+	curl -sSL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu; \
 	chown root:"$(id -gn docker)" /usr/local/bin/gosu; \
-	chmod +sx /usr/local/bin/gosu
+	chmod +sx /usr/local/bin/gosu; \
+	# gomplate (to process configuration templates in startup.sh)
+	curl -sSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
+	chmod +x /usr/local/bin/gomplate
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
 # http://docs.docker.com/examples/running_ssh_service/
@@ -213,11 +218,12 @@ RUN set -xe; \
 ENV COMPOSER_VERSION=1.6.3 \
 	DRUSH_VERSION=8.1.16 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
+	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8 \
 	DRUPAL_CONSOLE_VERSION=1.7.0 \
 	WPCLI_VERSION=1.5.0 \
 	MG_CODEGEN_VERSION=1.10 \
 	BLACKFIRE_VERSION=1.15.0 \
-	GOMPLATE_VERSION=2.4.0
+	PLATFORMSH_CLI_VERSION=3.33.5
 RUN set -xe; \
 	# Composer
 	curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -232,11 +238,11 @@ RUN set -xe; \
 	# Magento2 Code Generator
 	curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen; \
 	# Blackfire CLI
-	curl -sSL https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64 -o /usr/local/bin/blackfire; \
-	# gomplate
-	curl -sSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
-	# Make all binaries executable in one shot
-	cd /usr/local/bin && chmod +x composer drush8 drush drupal wp mg2-codegen blackfire gomplate;
+	curl -sSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
+	# Platform.sh CLI
+	curl -sSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	# Make all downloaded binaries executable in one shot
+	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp mg2-codegen blackfire platform);
 
 # Node.js
 ENV NODE_VERSION=8.x
@@ -272,12 +278,9 @@ USER docker
 ENV HOME /home/docker
 
 # Install Composer based dependencies
-ENV PATH=$PATH:$HOME/.composer/vendor/bin \
-	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8
+ENV PATH=$PATH:$HOME/.composer/vendor/bin
 ENV PATH=$PATH:$HOME/.terminus/vendor/bin \
 	TERMINUS_VERSION=1.8.1
-ENV PATH=$PATH:$HOME/.platformsh \
-	PLATFORMSH_CLI_VERSION=3.33.5
 RUN set -xe; \
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
@@ -295,8 +298,6 @@ RUN set -xe; \
 	mkdir -p $HOME/.terminus; \
 	# Run in a subshell since we are doing directory switching
 	(cd $HOME/.terminus && composer require pantheon-systems/terminus:${TERMINUS_VERSION}); \
-	mkdir -p $HOME/.platformsh; \
-	(cd $HOME/.platformsh && curl -o platform -L "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" && chmod 755 platform); \
 	# Cleanup
 	composer clear-cache
 
