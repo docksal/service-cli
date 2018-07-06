@@ -236,7 +236,6 @@ ENV COMPOSER_VERSION=1.6.3 \
 	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8 \
 	DRUPAL_CONSOLE_VERSION=1.7.0 \
 	WPCLI_VERSION=1.5.0 \
-	MG_CODEGEN_VERSION=1.10 \
 	BLACKFIRE_VERSION=1.15.0 \
 	PLATFORMSH_CLI_VERSION=3.33.5
 RUN set -xe; \
@@ -250,14 +249,12 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
-	# Magento2 Code Generator
-	curl -fsSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen; \
 	# Blackfire CLI
 	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp mg2-codegen blackfire platform);
+	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
 # Node.js
 ENV NODE_VERSION=8.x
@@ -296,6 +293,7 @@ ARG HOME=/home/docker
 
 # PHP tools (installed as user)
 ENV PATH=$PATH:$HOME/.composer/vendor/bin \
+	MG_CODEGEN_VERSION=1.10 \
 	TERMINUS_VERSION=1.8.1
 RUN set -xe; \
 	\
@@ -309,6 +307,8 @@ RUN set -xe; \
 	# Drupal Coder w/ a matching version of PHP_CodeSniffer
 	cgr drupal/coder >/dev/null; \
 	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
+	# Magento2 Code Generator
+	cgr staempfli/magento2-code-generator:${MG_CODEGEN_VERSION} >/dev/null; \
 	# Terminus
 	cgr pantheon-systems/terminus:${TERMINUS_VERSION} >/dev/null; \
 	# Cleanup
