@@ -184,7 +184,7 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Drupal Console version
-	run docker exec -u docker "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_LAUNCHER_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 

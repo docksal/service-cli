@@ -224,19 +224,19 @@ ENV COMPOSER_VERSION=1.6.3 \
 	DRUSH_VERSION=8.1.16 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
 	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8 \
-	DRUPAL_CONSOLE_VERSION=1.7.0 \
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.7.0 \
 	WPCLI_VERSION=1.5.0 \
 	BLACKFIRE_VERSION=1.15.0 \
 	PLATFORMSH_CLI_VERSION=3.33.5
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
-	# Drush 8 (default)
+	# Drush 8 (global fallback)
 	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
 	# Drush Launcher
 	curl -fsSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
-	# Drupal Console
-	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
+	# Drupal Console Launcher
+	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_LAUNCHER_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Blackfire CLI
