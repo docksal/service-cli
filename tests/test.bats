@@ -184,7 +184,7 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Drupal Console version
-	run docker exec -u docker "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_LAUNCHER_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -194,9 +194,10 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Magento 2 Code Generator version
-	# TODO: this should not require running with sudo - sudo should be removed ones the following issues is addressed:
-	# https://github.com/staempfli/magento2-code-generator/issues/11
-	run docker exec -u docker "$NAME" bash -c 'sudo mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
+	# TODO: this needs to be replaced with the actual version check
+	# See https://github.com/staempfli/magento2-code-generator/issues/15
+	#run docker exec -u docker "$NAME" bash -c 'mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
 	[[ ${status} == 0 ]]
 	unset output
 
