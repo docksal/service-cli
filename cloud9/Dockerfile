@@ -8,7 +8,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Run as docker, so we don't have to fix permissions
 USER docker
 
-ENV C9SDK_PATH=/home/docker/c9sdk
+ENV C9SDK_PATH=/home/docker/c9sdk\
+	C9PORT=3000
+
 # Cloud9 IDE and dependencies
 RUN set -x; \
 	buildDeps=" \
