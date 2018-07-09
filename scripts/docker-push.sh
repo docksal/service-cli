@@ -20,7 +20,7 @@ is_release ()
 # Check whether the current build is for a pull request
 is_pr ()
 {
-	[[ "${TRAVIS_PULL_REQUEST}" == "false" ]]
+	[[ "${TRAVIS_PULL_REQUEST}" != "false" ]]
 }
 
 is_latest ()
