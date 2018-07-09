@@ -31,16 +31,17 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
     - Acquia Cloud API commands
   - drupal console launcher
   - terminus (Pantheon)
+  - platform (Platform.sh)
   - wp-cli
 - ruby
   - ruby
   - gem
   - bundler
 - nodejs
-  - nvm
-  - nodejs (via nvm)
+  - nodejs
   - npm, yarn
 - python
+- cron
 
 Other notable tools:
 
@@ -76,8 +77,18 @@ cli
     ...
 ```
 
-See [docs](https://docs.docksal.io/en/master/tools/xdebug) on using Xdebug for web and cli PHP debugging.
+[See docs](https://docs.docksal.io/en/master/tools/xdebug) on using Xdebug for web and cli PHP debugging.
 
+## Customizing Startup
+
+To run a custom startup script anytime the `cli` container has started, create a `startup.sh` file within the
+`.docksal/services/cli` directory. Additionally, make sure that the file is executable as well so that the container
+does not run into issues when attempting to execute the file.
+
+## Customized Cron Configuration
+
+Cron can be configured by making sure there is a `crontab` file located within `.docksal/services/cli`. The file should
+follow the [standard crontab format](http://www.nncron.ru/help/EN/working/cron-format.htm).
 
 ## Secrets and integrations
 
@@ -107,3 +118,10 @@ Credentials used to authenticate [Terminus](https://pantheon.io/docs/terminus) w
 Stored in `/home/docker/.terminus/` inside `cli`.
 
 Terminus is installed and available globally in `cli`.
+
+`SECRET_PLATFORMSH_CLI_TOKEN`
+
+Credentials used to authenticate with the [Platform.sh CLI](https://github.com/platformsh/platformsh-cli) tool.
+Stored in `/home/docker/.platform` inside `cli`.
+
+Platform CLI is installed and available globally in `cli`.

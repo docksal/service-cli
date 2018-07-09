@@ -43,6 +43,20 @@ render_tmpl ()
 	fi
 }
 
+# Helper function to loop through all environment variables prefixed with SECRET_ and
+# convert to the equivalent variable without SECRET. (ex SECRET_TERMINUS_TOKEN has a variable
+# called TERMINUS_TOKEN.
+convert_secrets ()
+{
+	eval 'secrets=(${!SECRET_@})'
+	for secret_key in "${secrets[@]}"
+	do
+		secret_value=${!secret_key}
+		key=${secret_key#SECRET_}
+		echo "export ${key}=\"${secret_value}\";" | sudo -u docker tee -a ~/.docksalrc
+	done
+}
+
 terminus_login ()
 {
 	echo-debug "Authenticating with Pantheon..."
@@ -59,6 +73,12 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 # Terminus authentication
 [[ "$SECRET_TERMINUS_TOKEN" ]] && terminus_login
 
+# Convert all Environment Variables Prefixed with SECRET_
+convert_secrets
+
+# Source Docksalrc for when someone runs bash in the container
+echo "source ~/.docksalrc" | sudo -u docker tee -a ~/.bashrc
+
 # Docker user uid/gid mapping to the host user uid/gid
 [[ "$HOST_UID" != "" ]] && [[ "$HOST_GID" != "" ]] && uid_gid_reset
 
@@ -68,20 +88,31 @@ render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 # Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
 # To not bloat the image size, permissions on the home folder are reset at runtime.
 echo-debug "Resetting permissions on $HOME_DIR and /var/www..."
-chown "$HOST_UID:$HOST_GID" -R "$HOME_DIR"
+chown "${HOST_UID-:1000}:${HOST_GID:-1000}" -R "$HOME_DIR"
 # Docker resets the project root folder permissions to 0:0 when cli is recreated (e.g. an env variable updated).
-# We apply a fix/workaround for this at startup.
-chown "$HOST_UID:$HOST_GID" /var/www
+# We apply a fix/workaround for this at startup (non-recursive).
+chown "${HOST_UID-:1000}:${HOST_GID:-1000}" /var/www
 
 # Initialization steps completed. Create a pid file to mark the container as healthy
 echo-debug "Preliminary initialization completed"
 touch /var/run/cli
 
+# If crontab file is found within project add contents to user crontab file.
+if [[ -f ${PROJECT_ROOT}/.docksal/services/cli/crontab ]]; then
+	cat ${PROJECT_ROOT}/.docksal/services/cli/crontab | crontab -u docker -
+fi
+
+if [[ -x ${PROJECT_ROOT}/.docksal/services/cli/startup.sh ]]; then
+	echo-debug "Running Custom Startup Script..."
+	${PROJECT_ROOT}/.docksal/services/cli/startup.sh
+	echo-debug "Custom Startup Script Complete..."
+fi
+
 # Execute passed CMD arguments
 echo-debug "Executing the requested command..."
 # Service mode (run as root)
 if [[ "$1" == "supervisord" ]]; then
-	exec gosu root supervisord -c /etc/supervisor/conf.d/supervisord.conf
+	exec gosu root supervisord -c /etc/supervisor/supervisord.conf
 # Command mode (run as docker user)
 else
 	# This makes sure the environment is set up correctly for the docker user

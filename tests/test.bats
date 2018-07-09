@@ -101,7 +101,7 @@ _healthcheck_wait ()
 	phpInfo=$(docker exec -u docker "$NAME" php -i)
 
 	output=$(echo "$phpInfo" | grep "PHP Version")
-	echo "$output" | grep "${PHP_VERSION}"
+	echo "$output" | grep "${VERSION}"
 	unset output
 
 	output=$(echo "$phpInfo" | grep "memory_limit")
@@ -184,7 +184,7 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Drupal Console version
-	run docker exec -u docker "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_LAUNCHER_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -194,9 +194,10 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Magento 2 Code Generator version
-	# TODO: this should not require running with sudo - sudo should be removed ones the following issues is addressed:
-	# https://github.com/staempfli/magento2-code-generator/issues/11
-	run docker exec -u docker "$NAME" bash -c 'sudo mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
+	# TODO: this needs to be replaced with the actual version check
+	# See https://github.com/staempfli/magento2-code-generator/issues/15
+	#run docker exec -u docker "$NAME" bash -c 'mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -c 'mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -212,6 +213,11 @@ _healthcheck_wait ()
 
 	# Check Terminus version
 	run docker exec -u docker "$NAME" bash -c 'terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check Platform CLI version
+	run docker exec -u docker "$NAME" bash -c 'platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -257,4 +263,120 @@ _healthcheck_wait ()
 	### Cleanup ###
 	fin rm -f
 	rm -f .docksal/docksal-local.env
+}
+
+@test "Check Custom Startup Script Works" {
+	[[ $SKIP == 1 ]] && skip
+
+	cd ../tests
+	echo "CLI_IMAGE=\"${IMAGE}\"" > .docksal/docksal-local.env
+	fin reset -f
+
+	run fin exec -T 'cat /tmp/test-startup.txt'
+	[[ ${status} == 0 ]] &&
+	[[ "${output}" =~ "I ran properly" ]]
+}
+
+@test "Check Platform.sh Integration" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests:/var/www \
+		-e SECRET_PLATFORMSH_CLI_TOKEN \
+		"$IMAGE"
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Confirm output is not empty and token is passed to container
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_PLATFORMSH_CLI_TOKEN}"'
+	[[ "${output}" != "" ]]
+	unset output
+
+	# Confirm token passed to container was converted without SECRET_
+	run fin exec 'echo ${PLATFORMSH_CLI_TOKEN}'
+	[[ "${output}" != "" ]]
+	unset output
+
+	# Confirm Authentication
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; platform auth:info -n'
+	[[ ${status} == 0 ]] &&
+	[[ ! "${output}" =~ "Invalid API token" ]] &&
+	[[ "${output}" =~ "Docksal App" ]] &&
+	unset output
+
+	### Cleanup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+}
+
+@test "Check Pantheon Integration" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests:/var/www \
+		-e SECRET_TERMINUS_TOKEN \
+		"$IMAGE"
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Confirm output is not empty and token is passed to container
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_TERMINUS_TOKEN}"'
+	[[ "${output}" =~ "${SECRET_TERMINUS_TOKEN}" ]]
+	unset output
+
+	# Confirm Authentication
+	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; terminus auth:whoami'
+	[[ ${status} == 0 ]] &&
+	[[ ! "${output}" =~ "You are not logged in." ]] &&
+	[[ "${output}" =~ "developer@docksal.io" ]] &&
+	unset output
+
+	### Cleanup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+}
+
+@test "Custom Cron Integration" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	docker run --name "$NAME" -d \
+		-v /home/docker \
+		-v $(pwd)/../tests:/var/www \
+		"$IMAGE"
+	_healthcheck_wait
+
+	### Tests ###
+	# Confirm output from cron is working
+
+	# Create tmp date file
+	docker exec -it -u docker "$NAME" bash -c 'echo "The current date is $(date)" > /tmp/date.txt; chmod 0777 /tmp/date.txt'
+
+	# Confirm File created and exists
+	run docker exec -it -u docker "$NAME" bash -c 'cat /tmp/date.txt'
+	[[ "${output}" =~ "The current date is " ]]
+	OLD_OUTPUT="${output}"
+	unset output
+
+	# Sleep for 60 Seconds so cron can run again.
+	sleep 60
+
+	# Confirm cron has ran and file contents has changed
+	run docker exec -it -u docker "$NAME" bash -c 'cat /tmp/date.txt'
+	[[ "${output}" =~ "The current date is " ]]
+	NEW_OUTPUT="${output}"
+	unset output
+
+	# Confirm First Test is not the same as old test
+	[[ "${OLD_OUTPUT}" != "${NEW_OUTPUT}" ]]
+
+	### Cleanup ###
+	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
