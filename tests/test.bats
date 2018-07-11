@@ -343,41 +343,30 @@ _healthcheck_wait ()
 	make clean
 }
 
-@test "Custom Cron Integration" {
+@test "Check cron" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	docker run --name "$NAME" -d \
-		-v /home/docker \
-		-v $(pwd)/../tests:/var/www \
-		"$IMAGE"
+	make start
 	_healthcheck_wait
 
 	### Tests ###
 	# Confirm output from cron is working
 
-	# Create tmp date file
-	docker exec -it -u docker "$NAME" bash -c 'echo "The current date is $(date)" > /tmp/date.txt; chmod 0777 /tmp/date.txt'
-
-	# Confirm File created and exists
-	run docker exec -it -u docker "$NAME" bash -c 'cat /tmp/date.txt'
-	[[ "${output}" =~ "The current date is " ]]
-	OLD_OUTPUT="${output}"
+	# Create tmp date file and confirm it's empty
+	docker exec -u docker "$NAME" bash -lc 'touch /tmp/date.txt'
+	run docker exec -u docker "$NAME" bash -lc 'cat /tmp/date.txt'
+	[[ "${output}" == "" ]]
 	unset output
 
-	# Sleep for 60 Seconds so cron can run again.
+	# Sleep for 60 seconds so cron can run again.
 	sleep 60
 
 	# Confirm cron has ran and file contents has changed
-	run docker exec -it -u docker "$NAME" bash -c 'cat /tmp/date.txt'
+	run docker exec -u docker "$NAME" bash -lc 'tail -1 /tmp/date.txt'
 	[[ "${output}" =~ "The current date is " ]]
-	NEW_OUTPUT="${output}"
 	unset output
 
-	# Confirm First Test is not the same as old test
-	[[ "${OLD_OUTPUT}" != "${NEW_OUTPUT}" ]]
-
 	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	make clean
 }

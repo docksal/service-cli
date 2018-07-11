@@ -110,6 +110,7 @@ chown "${HOST_UID-:1000}:${HOST_GID:-1000}" /var/www
 
 # If crontab file is found within project add contents to user crontab file.
 if [[ -f ${PROJECT_ROOT}/.docksal/services/cli/crontab ]]; then
+	echo-debug "Loading crontab..."
 	cat ${PROJECT_ROOT}/.docksal/services/cli/crontab | crontab -u docker -
 fi
 
