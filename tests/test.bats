@@ -277,69 +277,70 @@ _healthcheck_wait ()
 	[[ "${output}" =~ "I ran properly" ]]
 }
 
-@test "Check Platform.sh Integration" {
+@test "Check Platform.sh integration" {
 	[[ $SKIP == 1 ]] && skip
 
+	# Confirm secret is not empty
+	[[ "${SECRET_PLATFORMSH_CLI_TOKEN}" != "" ]]
+
 	### Setup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	docker run --name "$NAME" -d \
-		-v /home/docker \
-		-v $(pwd)/../tests:/var/www \
-		-e SECRET_PLATFORMSH_CLI_TOKEN \
-		"$IMAGE"
+	make start -e ENV='-e SECRET_PLATFORMSH_CLI_TOKEN'
 	_healthcheck_wait
 
 	### Tests ###
 
-	# Confirm output is not empty and token is passed to container
-	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_PLATFORMSH_CLI_TOKEN}"'
-	[[ "${output}" != "" ]]
+	# Confirm token was passed to the container
+	run docker exec -u docker "${NAME}" bash -lc 'echo SECRET_PLATFORMSH_CLI_TOKEN: ${SECRET_PLATFORMSH_CLI_TOKEN}'
+	[[ "${output}" == "SECRET_PLATFORMSH_CLI_TOKEN: ${SECRET_PLATFORMSH_CLI_TOKEN}" ]]
 	unset output
 
-	# Confirm token passed to container was converted without SECRET_
-	run fin exec 'echo ${PLATFORMSH_CLI_TOKEN}'
-	[[ "${output}" != "" ]]
+	# Confirm the SECRET_ prefix was stripped
+	run docker exec -u docker "${NAME}" bash -lc 'echo PLATFORMSH_CLI_TOKEN: ${SECRET_PLATFORMSH_CLI_TOKEN}'
+	[[ "${output}" == "PLATFORMSH_CLI_TOKEN: ${SECRET_PLATFORMSH_CLI_TOKEN}" ]]
 	unset output
 
-	# Confirm Authentication
-	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; platform auth:info -n'
-	[[ ${status} == 0 ]] &&
-	[[ ! "${output}" =~ "Invalid API token" ]] &&
-	[[ "${output}" =~ "Docksal App" ]] &&
+	# Confirm authentication works
+	run docker exec -u docker "${NAME}" bash -lc 'platform auth:info -n'
+	[[ ${status} == 0 ]]
+	[[ ! "${output}" =~ "Invalid API token" ]]
+	[[ "${output}" =~ "developer@docksal.io" ]]
 	unset output
 
 	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	make clean
 }
 
-@test "Check Pantheon Integration" {
+@test "Check Pantheon integration" {
 	[[ $SKIP == 1 ]] && skip
 
+	# Confirm secret is not empty
+	[[ "${SECRET_TERMINUS_TOKEN}" != "" ]]
+
 	### Setup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	docker run --name "$NAME" -d \
-		-v /home/docker \
-		-v $(pwd)/../tests:/var/www \
-		-e SECRET_TERMINUS_TOKEN \
-		"$IMAGE"
+	make start -e ENV='-e SECRET_TERMINUS_TOKEN'
 	_healthcheck_wait
 
 	### Tests ###
 
-	# Confirm output is not empty and token is passed to container
-	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; echo "${SECRET_TERMINUS_TOKEN}"'
-	[[ "${output}" =~ "${SECRET_TERMINUS_TOKEN}" ]]
+	# Confirm token was passed to the container
+	run docker exec -u docker "${NAME}" bash -lc 'echo SECRET_TERMINUS_TOKEN: ${SECRET_TERMINUS_TOKEN}'
+	[[ "${output}" == "SECRET_TERMINUS_TOKEN: ${SECRET_TERMINUS_TOKEN}" ]]
 	unset output
 
-	# Confirm Authentication
-	run docker exec -it -u docker "$NAME" bash -c 'source $HOME/.docksalrc >/dev/null 2>&1; terminus auth:whoami'
-	[[ ${status} == 0 ]] &&
-	[[ ! "${output}" =~ "You are not logged in." ]] &&
-	[[ "${output}" =~ "developer@docksal.io" ]] &&
+	# Confirm the SECRET_ prefix was stripped
+	run docker exec -u docker "${NAME}" bash -lc 'echo TERMINUS_TOKEN: ${TERMINUS_TOKEN}'
+	[[ "${output}" == "TERMINUS_TOKEN: ${SECRET_TERMINUS_TOKEN}" ]]
+	unset output
+
+	# Confirm authentication works
+	run docker exec -u docker "${NAME}" bash -lc 'terminus auth:whoami'
+	[[ ${status} == 0 ]]
+	[[ ! "${output}" =~ "You are not logged in." ]]
+	[[ "${output}" =~ "developer@docksal.io" ]]
 	unset output
 
 	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	make clean
 }
 
 @test "Custom Cron Integration" {
