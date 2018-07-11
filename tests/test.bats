@@ -62,10 +62,8 @@ _healthcheck_wait ()
 	return 0
 }
 
-
-# Global skip
-# Uncomment below, then comment skip in the test you want to debug. When done, reverse.
-#SKIP=1
+# To work on a specific test:
+# run `export SKIP=1` locally, then comment skip in the test you want to debug
 
 @test "Bare service" {
 	[[ $SKIP == 1 ]] && skip
@@ -113,7 +111,7 @@ _healthcheck_wait ()
 	unset output
 
 	# Check PHP modules
-	run bash -c "docker exec '${NAME}' php -m | diff php-modules.txt -"
+	run bash -lc "docker exec -u docker '${NAME}' php -m | diff php-modules.txt -"
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -121,88 +119,80 @@ _healthcheck_wait ()
 	docker rm -vf "$NAME" >/dev/null 2>&1 || true
 }
 
+# Examples of using Makefile commands
+# make start, make exec, make clean
 @test "Configuration overrides" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	docker run --name "$NAME" -d \
-		-v /home/docker \
-		-v $(pwd)/../tests:/var/www \
-		-e XDEBUG_ENABLED=1 \
-		"$IMAGE"
+	make start -e ENV='-e XDEBUG_ENABLED=1'
 	_healthcheck_wait
 
 	### Tests ###
 
 	# Check PHP FPM settings overrides
-	run docker exec -u docker "$NAME" /var/www/scripts/test-php-fpm.sh index.php
+	run make exec -e CMD='/var/www/scripts/test-php-fpm.sh index.php'
 	echo "$output" | grep "memory_limit" | grep "512M"
 	unset output
 
 	# Check xdebug was enabled
-	run docker exec -u docker "$NAME" php -m
+	run make exec -e CMD='php -m'
 	echo "$output" | grep -e "^xdebug$"
 	unset output
 
 	# Check PHP CLI overrides
-	run docker exec -u docker "$NAME" php -i
+	run make exec -e CMD='php -i'
 	echo "$output" | grep "memory_limit => 128M => 128M"
 	unset output
 
 	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	make clean
 }
 
 @test "Check binaries and versions" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	docker run --name "$NAME" -d \
-		-v /home/docker \
-		-v $(pwd)/../tests:/var/www \
-		-e XDEBUG_ENABLED=1 \
-		"$IMAGE"
+	make start
 	_healthcheck_wait
 
 	### Tests ###
 
 	# Check Composer version
-	run docker exec -u docker "$NAME" bash -c 'composer --version | grep "^Composer version ${COMPOSER_VERSION} "'
+	run docker exec -u docker "$NAME" bash -lc 'composer --version | grep "^Composer version ${COMPOSER_VERSION} "'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drush Launcher version
-	run docker exec -u docker "$NAME" bash -c 'drush --version | grep "^Drush Launcher Version: ${DRUSH_LAUNCHER_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^Drush Launcher Version: ${DRUSH_LAUNCHER_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drush version
-	run docker exec -u docker "$NAME" bash -c 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
+	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drupal Console version
-	run docker exec -u docker "$NAME" bash -c 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_LAUNCHER_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_LAUNCHER_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Wordpress CLI version
-	run docker exec -u docker "$NAME" bash -c 'wp --version | grep "^WP-CLI ${WPCLI_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'wp --version | grep "^WP-CLI ${WPCLI_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Magento 2 Code Generator version
 	# TODO: this needs to be replaced with the actual version check
 	# See https://github.com/staempfli/magento2-code-generator/issues/15
-	#run docker exec -u docker "$NAME" bash -c 'mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
-	run docker exec -u docker "$NAME" bash -c 'mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
+	#run docker exec -u docker "$NAME" bash -lc 'mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Blackfire CLI version
-	run docker exec -u docker "$NAME" bash -c 'blackfire version | grep "^blackfire ${BLACKFIRE_VERSION} "'
+	run docker exec -u docker "$NAME" bash -lc 'blackfire version | grep "^blackfire ${BLACKFIRE_VERSION} "'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -212,57 +202,63 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Terminus version
-	run docker exec -u docker "$NAME" bash -c 'terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Platform CLI version
-	run docker exec -u docker "$NAME" bash -c 'platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
+	run docker exec -u docker "$NAME" bash -lc 'platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	make clean
 }
 
 @test "Check config templates" {
 	[[ $SKIP == 1 ]] && skip
 
-	### Setup ###
-	cd ../tests
-	echo "CLI_IMAGE=\"${IMAGE}\"" > .docksal/docksal-local.env
-	fin reset -f
+	# Source and allexport (set -a) variables from docksal.env
+	set -a; source $(pwd)/../tests/.docksal/docksal.env; set +a
 
-	### Tests ###
-
-	# Load environment variables from docksal.env and confirm then are not empty
-	source .docksal/docksal.env
+	# Config variables were loaded
 	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
 	[[ "${SECRET_ACAPI_KEY}" != "" ]]
 	[[ "${SECRET_SSH_PRIVATE_KEY}" != "" ]]
 
+	### Setup ###
+	make start -e ENV="\
+		-e SECRET_ACAPI_EMAIL \
+		-e SECRET_ACAPI_KEY \
+		-e SECRET_SSH_PRIVATE_KEY \
+	"
+	_healthcheck_wait
+
+	### Tests ###
+
 	# Check Acquia Cloud API conf
-	run fin exec 'echo ${SECRET_ACAPI_EMAIL}'
+	run make exec -e CMD='echo ${SECRET_ACAPI_EMAIL}'
 	[[ "${output}" != "" ]]
 	unset output
-	run fin exec 'echo ${SECRET_ACAPI_KEY}'
+	run make exec -e CMD='echo ${SECRET_ACAPI_KEY}'
 	[[ "${output}" != "" ]]
 	unset output
-	run fin exec 'grep "${SECRET_ACAPI_EMAIL}" "$HOME/.acquia/cloudapi.conf" && grep "${SECRET_ACAPI_KEY}" "$HOME/.acquia/cloudapi.conf"'
+	# TODO: figure out how to properly use 'make exec' here (escape quotes)
+	run docker exec -u docker "${NAME}" bash -lc 'grep "${SECRET_ACAPI_EMAIL}" ${HOME}/.acquia/cloudapi.conf && grep "${SECRET_ACAPI_KEY}" ${HOME}/.acquia/cloudapi.conf'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check private SSH key
-	run fin exec 'echo ${SECRET_SSH_PRIVATE_KEY}'
+	run make exec -e CMD='echo ${SECRET_SSH_PRIVATE_KEY}'
 	[[ "${output}" != "" ]]
 	unset output
-	run fin exec 'echo "${SECRET_SSH_PRIVATE_KEY}" | diff $HOME/.ssh/id_rsa -'
+	# TODO: figure out how to properly use 'make exec' here (escape quotes)
+	run docker exec -u docker "${NAME}" bash -lc 'echo "${SECRET_SSH_PRIVATE_KEY}" | diff ${HOME}/.ssh/id_rsa -'
 	[[ ${status} == 0 ]]
 	unset output
 
 	### Cleanup ###
-	fin rm -f
-	rm -f .docksal/docksal-local.env
+	make clean
 }
 
 @test "Check custom startup script" {

@@ -131,15 +131,11 @@ if [[ -x ${PROJECT_ROOT}/.docksal/services/cli/startup.sh ]]; then
 fi
 
 # Execute passed CMD arguments
-echo-debug "Executing the requested command..."
+echo-debug "Passing execution to: $*"
 # Service mode (run as root)
 if [[ "$1" == "supervisord" ]]; then
 	exec gosu root supervisord -c /etc/supervisor/supervisord.conf
 # Command mode (run as docker user)
 else
-	# This makes sure the environment is set up correctly for the docker user
-	DOCKSALRC='source $HOME/.docksalrc >/dev/null 2>&1'
-	# Launch the passed command in an non-interactive bash session under docker user
-	# $@ does not work here. $* has to be used.
-	exec gosu docker bash -c "$DOCKSALRC; exec $*"
+	exec gosu docker "$@"
 fi

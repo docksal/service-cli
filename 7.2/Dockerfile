@@ -324,7 +324,6 @@ USER root
 COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 # Copy configs and scripts
 COPY --chown=docker:docker config/.acquia $HOME/.acquia
-COPY --chown=docker:docker config/.docksalrc $HOME/.docksalrc
 COPY --chown=docker:docker config/.drush $HOME/.drush
 COPY --chown=docker:docker config/.ssh $HOME/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
