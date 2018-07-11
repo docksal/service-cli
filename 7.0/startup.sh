@@ -118,10 +118,16 @@ fi
 echo-debug "Preliminary initialization completed."
 touch /var/run/cli
 
+# Execute a custom startup script if present
 if [[ -x ${PROJECT_ROOT}/.docksal/services/cli/startup.sh ]]; then
-	echo-debug "Running Custom Startup Script..."
+	echo-debug "Running custom startup script..."
+	# TODO: should we source the script instead?
 	${PROJECT_ROOT}/.docksal/services/cli/startup.sh
-	echo-debug "Custom Startup Script Complete..."
+	if [[ $? == 0 ]]; then
+		echo-debug "Custom startup script executed successfully."
+	else
+		echo-debug "ERROR: Custom startup script execution failed."
+	fi
 fi
 
 # Execute passed CMD arguments
