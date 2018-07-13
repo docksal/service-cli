@@ -254,23 +254,6 @@ RUN set -xe; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
-# Node.js
-ENV NODE_VERSION=8.x
-RUN set -xe; \
-	# Node.js repo
-	curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -; \
-	echo "deb https://deb.nodesource.com/node_${NODE_VERSION} jessie main" | sudo tee /etc/apt/sources.list.d/nodesource.list; \
-	echo "deb-src https://deb.nodesource.com/node_${NODE_VERSION} jessie main" | sudo tee -a /etc/apt/sources.list.d/nodesource.list; \
-	# yarn repo
-	curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
-	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list; \
-	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		nodejs \
-		yarn \
-	;\
-	apt-get clean; rm -rf /var/lib/apt/lists/*;
-
 # Ruby
 RUN set -xe; \
 	apt-get update >/dev/null; \
@@ -315,6 +298,22 @@ RUN set -xe; \
 	# Drush modules
 	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
 	drush cc drush
+
+# Node.js (installed as user)
+ENV \
+	NVM_VERSION=0.33.11 \
+	NODE_VERSION=8.11.3 \
+	YARN_VERSION=1.8.0
+# Don't use -x here, as nvm prints too much stuff
+RUN set -e; \
+	# NVM and a defaut Node.js version
+	export PROFILE="$HOME/.profile"; \
+	curl -fsSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash >/dev/null; \
+	# Reload profile to load nvm (needed by Yarn installation below)
+	. $HOME/.profile; \
+	# Yarn
+	export YARN_PROFILE="$HOME/.profile"; \
+	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
 
 USER root
 

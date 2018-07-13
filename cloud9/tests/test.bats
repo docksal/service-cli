@@ -62,28 +62,22 @@ _healthcheck_wait ()
 	return 0
 }
 
-
-# Global skip
-# Uncomment below, then comment skip in the test you want to debug. When done, reverse.
-#SKIP=1
+# To work on a specific test:
+# run `export SKIP=1` locally, then comment skip in the test you want to debug
 
 @test "Cloud 9 IDE" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	docker run --name "$NAME" -d \
-		-v /home/docker \
-		-v $(pwd)/../tests/docroot:/var/www/docroot \
-		"$IMAGE"
+	make start
 	_healthcheck_wait
 
 	### Tests ###
 
-	run docker logs "$NAME"
+	run make logs
 	echo "$output" | grep "Cloud9 is up and running"
 	unset output
 
 	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	make clean
 }
