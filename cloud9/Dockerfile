@@ -25,11 +25,19 @@ RUN \
 		tmux \
 	;\
 	\
-	git clone https://github.com/c9/core.git ${C9SDK_PATH}; \
+	# Cloud9 installation is a mess.
+	# Using the installer script on its own results in "unable to install pty.js module" at runtime.
+	# This can be addressed by using the link.sh script, however
+	# link.sh fails if c9/core is installed in ~/.c9. It complains but then works fine if another directory is used (e.g. ~/c9sdk)
+	# So we end up with c9 stuff installed in two places (~/.c9 and ~/c9sdk), but at least it works this way.
+	# TODO: revise c9 installation
+	git clone --depth=1 https://github.com/c9/core.git ${C9SDK_PATH} >/dev/null; \
 	curl -s -L https://raw.githubusercontent.com/c9/install/master/link.sh | bash; \
-	${C9SDK_PATH}/scripts/install-sdk.sh; \
+	${C9SDK_PATH}/scripts/install-sdk.sh >/dev/null; \
 	\
 	# Cleanup
+	# This saves ~30MB of space. c9 throws some non-critical errors during startup (but still works).
+	# TODO: may need to revise this
 	rm -rf ${C9SDK_PATH}/.git; \
 	npm cache clean --force; \
 	sudo apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
