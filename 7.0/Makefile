@@ -36,7 +36,7 @@ exec-it:
 	@docker exec -u docker -it $(NAME) bash -ilc "$(CMD)"
 
 shell:
-	@docker exec -u docker -it $(NAME) bash
+	@docker exec -u docker -it $(NAME) bash -il
 
 stop:
 	docker stop $(NAME)
