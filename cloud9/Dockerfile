@@ -20,7 +20,7 @@ RUN \
 		make \
 	";\
 	sudo apt-get update; \
-	sudo apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	sudo apt-get -y --no-install-recommends install >/dev/null \
 		$buildDeps \
 		tmux \
 	;\
