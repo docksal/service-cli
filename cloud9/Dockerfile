@@ -8,9 +8,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Run as docker, so we don't have to fix permissions
 USER docker
 
-ENV C9SDK_PATH=/home/docker/c9sdk
+ARG HOME=/home/docker
+ENV C9SDK_PATH=$HOME/c9sdk
 # Cloud9 IDE and dependencies
-RUN set -x; \
+RUN \
+	# Always source user profile when provisioning as user (necessary for nvm/etc. to load)
+	. $HOME/.profile; \
+	set -xe; \
 	buildDeps=" \
 		g++ \
 		make \
