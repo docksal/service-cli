@@ -7,7 +7,7 @@ env:
   global:
     - REPO=docksal/cli
     - LATEST_VERSION=7.2
-    - DOCKSAL_VERSION=master
+    - DOCKSAL_VERSION=develop
   matrix:
     - VERSION=5.6
     - VERSION=7.0
@@ -19,6 +19,7 @@ before_install:
   - sudo apt-get install libfcgi0ldbl  # cgi-fcgi binary used in tests
 
 install:
+  # Install Docksal to have a matching versions of Docker on the build host
   - curl -fsSL https://get.docksal.io | DOCKSAL_VERSION=${DOCKSAL_VERSION} bash
   - fin version
   - fin sysinfo
