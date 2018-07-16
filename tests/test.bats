@@ -149,7 +149,7 @@ _healthcheck_wait ()
 	make clean
 }
 
-@test "Check binaries and versions" {
+@test "Check PHP tools and versions" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
@@ -191,16 +191,6 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
-	# Check Blackfire CLI version
-	run docker exec -u docker "$NAME" bash -lc 'blackfire version | grep "^blackfire ${BLACKFIRE_VERSION} "'
-	[[ ${status} == 0 ]]
-	unset output
-
-	# Check mhsendmail (does not have a flag to report its versions...)
-	run docker exec -u docker "$NAME" which mhsendmail
-	echo "$output" | grep "/usr/local/bin/mhsendmail"
-	unset output
-
 	# Check Terminus version
 	run docker exec -u docker "$NAME" bash -lc 'terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
 	[[ ${status} == 0 ]]
@@ -209,6 +199,57 @@ _healthcheck_wait ()
 	# Check Platform CLI version
 	run docker exec -u docker "$NAME" bash -lc 'platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
 	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "Check NodeJS tools and versions" {
+	#[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+	_healthcheck_wait
+
+	### Tests ###
+
+	# nvm
+	run docker exec -u docker "$NAME" bash -lc 'nvm --version | grep "${NVM_VERSION}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# nodejs
+	run docker exec -u docker "$NAME" bash -lc 'node --version | grep "${NODE_VERSION}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# yarn
+	run docker exec -u docker "$NAME" bash -lc 'yarn --version | grep "${YARN_VERSION}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "Check misc tools and versions" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Check Blackfire CLI version
+	run docker exec -u docker "$NAME" bash -lc 'blackfire version | grep "^blackfire ${BLACKFIRE_VERSION} "'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check mhsendmail (does not have a flag to report its versions...)
+	run docker exec -u docker "$NAME" which mhsendmail
+	echo "$output" | grep "/usr/local/bin/mhsendmail"
 	unset output
 
 	### Cleanup ###
