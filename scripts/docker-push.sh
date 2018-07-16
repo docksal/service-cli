@@ -37,10 +37,12 @@ tag_and_push ()
 	local target=$2
 
 	# Base image
+	echo "Pushing ${target} image ..."
 	docker tag ${source} ${target}
 	docker push ${target}
 
 	# Cloud9 flavor
+	echo "Pushing ${target}-ide image ..."
 	docker tag ${source}-ide ${target}-ide
 	docker push ${target}-ide
 }
@@ -76,6 +78,7 @@ tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG}
 # Special case for the "latest" tag
 # Push (base image only) on stable and release builds
 if is_latest && (is_stable || is_release); then
+	echo "Pushing ${REPO}:${IMAGE_TAG_LATEST} image ..."
 	docker tag ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_LATEST}
 	docker push ${REPO}:${IMAGE_TAG_LATEST}
 fi
