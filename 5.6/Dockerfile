@@ -11,6 +11,7 @@ RUN set -xe; \
 FROM php:5.6-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
 RUN set -xe; \
@@ -18,7 +19,8 @@ RUN set -xe; \
 
 # Install basic packages
 RUN set -xe; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
 		apt-transport-https \
 		ca-certificates \
 		curl \
@@ -42,22 +44,20 @@ RUN set -xe; \
 	# backports repo
 	echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/backports.list; \
 	# blackfire.io repo
-	curl -sSL https://packagecloud.io/gpg.key | apt-key add -; \
+	curl -fsSL https://packagecloud.io/gpg.key | apt-key add -; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
-	curl -sSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
+	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
 	echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
-	echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
-	# yarn repo
-	curl -sSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
-	echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+	echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list;
 
 # Additional packages
 RUN set -xe; \
 	# Create man direcotries, otherwise some packages may not install (e.g. postgresql-client)
 	# This should be a temporary workaround until fixed upstream: https://github.com/debuerreotype/debuerreotype/issues/10
 	mkdir -p /usr/share/man/man1 /usr/share/man/man7; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
 		cron \
 		dnsutils \
 		git-lfs \
@@ -82,10 +82,9 @@ RUN set -xe; \
 		unzip \
 		zip \
 		zsh \
-		yarn \
 	;\
 	# More recent version of git to get composer's git cache.
-	apt-get -y --force-yes --no-install-recommends -t jessie-backports install git >/dev/null ;\
+	apt-get -y --no-install-recommends -t jessie-backports install git >/dev/null ;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
@@ -95,13 +94,18 @@ RUN set -xe; \
 	useradd -m -s /bin/bash -u 1000 -g 1000 -G sudo -p docker docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Install gosu and give access to the docker user primary group to use it.
-# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
-# https://github.com/tianon/gosu
+ENV GOSU_VERSION=1.10 \
+	GOMPLATE_VERSION=2.4.0
 RUN set -xe; \
-	curl -sSL "https://github.com/tianon/gosu/releases/download/1.10/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu; \
+	# Install gosu and give access to the docker user primary group to use it.
+	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
+	# https://github.com/tianon/gosu
+	curl -fsSL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu; \
 	chown root:"$(id -gn docker)" /usr/local/bin/gosu; \
-	chmod +sx /usr/local/bin/gosu
+	chmod +sx /usr/local/bin/gosu; \
+	# gomplate (to process configuration templates in startup.sh)
+	curl -fsSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
+	chmod +x /usr/local/bin/gomplate
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
 # http://docs.docker.com/examples/running_ssh_service/
@@ -114,7 +118,7 @@ RUN set -xe; \
 	echo "export VISIBLE=now" >> /etc/profile
 ENV NOTVISIBLE "in users profile"
 
-# Install PHP extentions
+# PHP
 RUN set -xe; \
 	buildDeps=" \
 		freetds-dev \
@@ -137,7 +141,8 @@ RUN set -xe; \
 		libxslt1-dev \
 		zlib1g-dev \
 	"; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
 		libc-client2007e \
@@ -214,102 +219,100 @@ RUN set -xe; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
-# Copy mhsendmail binary from stage 1
-COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
-
+# PHP tools (installed globally)
 ENV COMPOSER_VERSION=1.6.3 \
 	DRUSH_VERSION=8.1.16 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CONSOLE_VERSION=1.7.0 \
+	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8 \
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.7.0 \
 	WPCLI_VERSION=1.5.0 \
-	MG_CODEGEN_VERSION=1.10 \
 	BLACKFIRE_VERSION=1.15.0 \
-	GOMPLATE_VERSION=2.4.0
+	PLATFORMSH_CLI_VERSION=3.33.5
 RUN set -xe; \
 	# Composer
-	curl -sSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
-	# Drush 8 (default)
-	curl -sSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
+	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
+	# Drush 8 (global fallback)
+	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
 	# Drush Launcher
-	curl -sSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
-	# Drupal Console
-	curl -sSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
+	curl -fsSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
+	# Drupal Console Launcher
+	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_LAUNCHER_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Wordpress CLI
-	curl -sSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
-	# Magento2 Code Generator
-	curl -sSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen; \
+	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Blackfire CLI
-	curl -sSL https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64 -o /usr/local/bin/blackfire; \
-	# gomplate
-	curl -sSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
-	# Make all binaries executable in one shot
-	chmod +x /usr/local/bin/*
+	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
+	# Platform.sh CLI
+	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	# Make all downloaded binaries executable in one shot
+	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
-# Other language packages and dependencies
+# Ruby
 RUN set -xe; \
-	apt-get update >/dev/null; apt-get -y --force-yes --no-install-recommends install >/dev/null \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
 		ruby-full \
-		rlwrap; \
-		#build-essential; \
+		rlwrap \
+	;\
 	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*
-
-# bundler
-RUN gem install bundler >/dev/null
+	apt-get clean; rm -rf /var/lib/apt/lists/*; \
+	# bundler
+	gem install bundler >/dev/null
 # Home directory for bundle installs
 ENV BUNDLE_PATH .bundler
 
 # All further RUN commands will run as the "docker" user
 USER docker
-ENV HOME /home/docker
+ARG HOME=/home/docker
 
-# Install nvm and a default node version
-ENV NVM_VERSION=0.33.8 \
-	NODE_VERSION=8.11.0 \
-	NVM_DIR=$HOME/.nvm
-# Don't use -x here - node/nvm stuff prints just too much stuff
-RUN set -e; \
-	curl -sSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash; \
-	. $NVM_DIR/nvm.sh; \
-	nvm install $NODE_VERSION >/dev/null; \
-	nvm alias default $NODE_VERSION; \
-	# Install global node packages
-	npm install -g npm >/dev/null; \
-	# Cleanup
-	nvm clear-cache && npm cache clear --force; \
-	# Fix npm complaining about permissions and not being able to update
-	sudo rm -rf $HOME/.config
-
-# Install Composer based dependencies
+# PHP tools (installed as user)
 ENV PATH=$PATH:$HOME/.composer/vendor/bin \
-	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8
-ENV PATH=$PATH:$HOME/.terminus/vendor/bin \
-	TERMINUS_VERSION=1.8.0
+	MG_CODEGEN_VERSION=1.10 \
+	TERMINUS_VERSION=1.8.1
 RUN set -xe; \
+	\
+	# Composer based dependencies
 	# Add composer bin directory to PATH
 	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
-	# Drush modules
-	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	drush cc drush; \
-	# Drupal Coder w/ a matching version of PHP_CodeSniffer
-	composer global require drupal/coder >/dev/null; \
-	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
+	# Install cgr to use it in-place of `composer global require`
+	composer global require consolidation/cgr >/dev/null; \
 	# Composer parallel install plugin
 	composer global require hirak/prestissimo >/dev/null; \
+	# Drupal Coder w/ a matching version of PHP_CodeSniffer
+	cgr drupal/coder >/dev/null; \
+	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
+	# Magento2 Code Generator
+	cgr staempfli/magento2-code-generator:${MG_CODEGEN_VERSION} >/dev/null; \
 	# Terminus
-	# Installed in a dedicated directory to avoid dependency conflicts.
-	echo "\n"'PATH="$PATH:$HOME/.terminus/vendor/bin"' >> $HOME/.profile; \
-	mkdir -p $HOME/.terminus; \
-	# Run in a subshell since we are doing directory switching
-	(cd $HOME/.terminus && composer require pantheon-systems/terminus:${TERMINUS_VERSION}); \
+	cgr pantheon-systems/terminus:${TERMINUS_VERSION} >/dev/null; \
 	# Cleanup
-	composer clear-cache
+	composer clear-cache; \
+	\
+	# Drush modules
+	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
+	drush cc drush
+
+# Node.js (installed as user)
+ENV \
+	NVM_VERSION=0.33.11 \
+	NODE_VERSION=8.11.3 \
+	YARN_VERSION=1.8.0
+# Don't use -x here, as nvm prints too much stuff
+RUN set -e; \
+	# NVM and a defaut Node.js version
+	export PROFILE="$HOME/.profile"; \
+	curl -fsSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash >/dev/null; \
+	# Reload profile to load nvm (needed by Yarn installation below)
+	. $HOME/.profile; \
+	# Yarn
+	export YARN_PROFILE="$HOME/.profile"; \
+	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
 
 USER root
 
+# Copy mhsendmail binary from stage 1
+COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 # Copy configs and scripts
 COPY --chown=docker:docker config/.acquia $HOME/.acquia
-COPY --chown=docker:docker config/.docksalrc $HOME/.docksalrc
 COPY --chown=docker:docker config/.drush $HOME/.drush
 COPY --chown=docker:docker config/.ssh $HOME/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
