@@ -68,6 +68,7 @@ RUN set -xe; \
 		# html2text binary - used for self-testing (php-fpm)
 		html2text \
 		imagemagick \
+		iputils-ping \
 		less \
 		# cgi-fcgi binary - used for self-testing (php-fpm)
 		libfcgi-bin \
