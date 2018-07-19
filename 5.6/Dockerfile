@@ -60,6 +60,7 @@ RUN set -xe; \
 	apt-get -y --no-install-recommends install >/dev/null \
 		cron \
 		dnsutils \
+		git \
 		git-lfs \
 		ghostscript \
 		# html2text binary - used for self-testing (php-fpm)
@@ -84,8 +85,6 @@ RUN set -xe; \
 		zip \
 		zsh \
 	;\
-	# More recent version of git to get composer's git cache.
-	apt-get -y --no-install-recommends -t jessie-backports install git >/dev/null ;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
