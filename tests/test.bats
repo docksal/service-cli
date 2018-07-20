@@ -65,6 +65,53 @@ _healthcheck_wait ()
 # To work on a specific test:
 # run `export SKIP=1` locally, then comment skip in the test you want to debug
 
+@test "Essential binaries" {
+	#[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+	_healthcheck_wait
+
+	### Tests ###
+
+	# List of binaries to check
+	binaries='\
+		cat \
+		convert \
+		curl \
+		dig \
+		g++ \
+		ghostscript \
+		git \
+		git-lfs \
+		gcc \
+		html2text \
+		less \
+		make \
+		mc \
+		more \
+		mysql \
+		nano \
+		nslookup \
+		ping \
+		psql \
+		pv \
+		rsync \
+		sudo \
+		unzip \
+		wget \
+		zip \
+	'
+
+	# Check all binaries in a single shot
+	run make exec -e CMD="type $(echo ${binaries} | xargs)"
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
 @test "Bare service" {
 	[[ $SKIP == 1 ]] && skip
 
@@ -206,7 +253,7 @@ _healthcheck_wait ()
 }
 
 @test "Check NodeJS tools and versions" {
-	#[[ $SKIP == 1 ]] && skip
+	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
 	make start
