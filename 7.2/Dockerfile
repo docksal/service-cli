@@ -87,7 +87,6 @@ RUN set -xe; \
 		supervisor \
 		unzip \
 		zip \
-		zsh \
 	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
