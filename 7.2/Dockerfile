@@ -22,8 +22,9 @@ RUN set -xe; \
 	apt-get update >/dev/null; \
 	apt-get -y --no-install-recommends install >/dev/null \
 		apt-transport-https \
-		ca-certificates \
-		curl \
+		# ca-certificates and curl come from upstream
+		#ca-certificates \
+		#curl \
 		gnupg \
 		locales \
 		wget \
@@ -123,8 +124,9 @@ ENV NOTVISIBLE "in users profile"
 
 # PHP
 RUN set -xe; \
+	# Note: essential build tools (g++, gcc, make, etc) are included upstream as persistent packages.
+	# See https://github.com/docker-library/php/blob/4af0a8734a48ab84ee96de513aabc45418b63dc5/7.2/stretch/fpm/Dockerfile#L18-L37
 	buildDeps=" \
-		g++ \
 		libc-client2007e-dev \
 		libfreetype6-dev \
 		libgpgme11-dev \
