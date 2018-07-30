@@ -47,8 +47,8 @@ RUN set -xe; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
-	echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
+	echo 'deb https://packagecloud.io/github/git-lfs/debian stretch main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
+	echo 'deb-src https://packagecloud.io/github/git-lfs/debian stretch main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
 	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
 	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
 	echo 'deb https://packages.microsoft.com/debian/8/prod jessie main' | tee /etc/apt/sources.list.d/mssql.list;
