@@ -14,6 +14,12 @@ env:
     - VERSION=7.1
     - VERSION=7.2
 
+# Skip building master.
+# Stable image tags are pushed during release tag builds so that stable and release tags match on Docker Hub.
+branches:
+  except:
+  - master
+
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install libfcgi0ldbl  # cgi-fcgi binary used in tests
