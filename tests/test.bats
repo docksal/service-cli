@@ -66,7 +66,7 @@ _healthcheck_wait ()
 # run `export SKIP=1` locally, then comment skip in the test you want to debug
 
 @test "Essential binaries" {
-	#[[ $SKIP == 1 ]] && skip
+	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
 	make start
@@ -445,8 +445,8 @@ _healthcheck_wait ()
 	[[ "${output}" == "" ]]
 	unset output
 
-	# Sleep for 60 seconds so cron can run again.
-	sleep 60
+	# Sleep for 60+1 seconds so cron can run again.
+	sleep 61
 
 	# Confirm cron has ran and file contents has changed
 	run docker exec -u docker "$NAME" bash -lc 'tail -1 /tmp/date.txt'
