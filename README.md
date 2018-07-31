@@ -19,10 +19,10 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 ## Versions and image tag naming convention
 
 - Stable versions
-  - `2.3-php5.6`, `php5.6` - PHP 5.6
-  - `2.3-php7.0`, `php7.0` - PHP 7.0
-  - `2.3-php7.1`, `php7.1` - PHP 7.1
-  - `2.3-php7.2`, `php7.2`, `latest` - PHP 7.2
+  - `2.4-php5.6`, `php5.6` - PHP 5.6
+  - `2.4-php7.0`, `php7.0` - PHP 7.0
+  - `2.4-php7.1`, `php7.1` - PHP 7.1
+  - `2.4-php7.2`, `php7.2`, `latest` - PHP 7.2
 - Development versions
   - `edge-php5.6` - PHP 5.6
   - `edge-php7.0` - PHP 7.0
@@ -181,10 +181,10 @@ Platform CLI is installed and available globally in `cli`.
 Starting with version 2.3, there is the `ide` flavor of the images, which comes with Cloud9 pre-installed, e.g.:
 
 ```
-2.3-php5.6-ide
-2.3-php7.0-ide
-2.3-php7.1-ide
-2.3-php7.2-ide
+2.4-php5.6-ide
+2.4-php7.0-ide
+2.4-php7.1-ide
+2.4-php7.2-ide
 ``` 
 
 [See docs](https://docs.docksal.io/en/master/tools/cloud9/) for using Cloud 9 in Docksal.
