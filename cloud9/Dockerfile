@@ -15,13 +15,8 @@ RUN \
 	# Always source user profile when provisioning as user (necessary for nvm/etc. to load)
 	. $HOME/.profile; \
 	set -xe; \
-	buildDeps=" \
-		g++ \
-		make \
-	";\
 	sudo apt-get update; \
 	sudo apt-get -y --no-install-recommends install >/dev/null \
-		$buildDeps \
 		tmux \
 	;\
 	\

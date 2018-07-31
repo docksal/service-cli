@@ -98,10 +98,10 @@ convert_secrets
 # Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
 # To not bloat the image size, permissions on the home folder are reset at runtime.
 echo-debug "Resetting permissions on $HOME_DIR and /var/www..."
-chown "${HOST_UID-:1000}:${HOST_GID:-1000}" -R "$HOME_DIR"
+chown "${HOST_UID:-1000}:${HOST_GID:-1000}" -R "$HOME_DIR"
 # Docker resets the project root folder permissions to 0:0 when cli is recreated (e.g. an env variable updated).
 # We apply a fix/workaround for this at startup (non-recursive).
-chown "${HOST_UID-:1000}:${HOST_GID:-1000}" /var/www
+chown "${HOST_UID:-1000}:${HOST_GID:-1000}" /var/www
 
 # Automatically authenticate with Pantheon in Terminus token is present
 # Note: this has to happen after th home directory permissions are reset,

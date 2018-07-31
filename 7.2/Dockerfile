@@ -22,8 +22,9 @@ RUN set -xe; \
 	apt-get update >/dev/null; \
 	apt-get -y --no-install-recommends install >/dev/null \
 		apt-transport-https \
-		ca-certificates \
-		curl \
+		# ca-certificates and curl come from upstream
+		#ca-certificates \
+		#curl \
 		gnupg \
 		locales \
 		wget \
@@ -41,18 +42,16 @@ ENV LC_ALL C.UTF-8
 # Enable additional repos
 RUN set -xe; \
 	sed -i 's/main/main contrib non-free/' /etc/apt/sources.list; \
-	# backports repo
-	echo "deb http://ftp.debian.org/debian jessie-backports main" | tee /etc/apt/sources.list.d/backports.list; \
 	# blackfire.io repo
 	curl -fsSL https://packagecloud.io/gpg.key | apt-key add -; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
-	echo 'deb-src https://packagecloud.io/github/git-lfs/debian/ jessie main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
+	echo 'deb https://packagecloud.io/github/git-lfs/debian stretch main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
+	echo 'deb-src https://packagecloud.io/github/git-lfs/debian stretch main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
 	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
 	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-	echo 'deb https://packages.microsoft.com/debian/8/prod jessie main' | tee /etc/apt/sources.list.d/mssql.list;
+	echo 'deb https://packages.microsoft.com/debian/9/prod stretch main' | tee /etc/apt/sources.list.d/mssql.list;
 
 # Additional packages
 RUN set -xe; \
@@ -63,11 +62,13 @@ RUN set -xe; \
 	apt-get -y --no-install-recommends install >/dev/null \
 		cron \
 		dnsutils \
+		git \
 		git-lfs \
 		ghostscript \
 		# html2text binary - used for self-testing (php-fpm)
 		html2text \
 		imagemagick \
+		iputils-ping \
 		less \
 		# cgi-fcgi binary - used for self-testing (php-fpm)
 		libfcgi-bin \
@@ -84,10 +85,7 @@ RUN set -xe; \
 		supervisor \
 		unzip \
 		zip \
-		zsh \
 	;\
-	# More recent version of git to get composer's git cache.
-	apt-get -y --no-install-recommends -t jessie-backports install git >/dev/null ;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
@@ -123,8 +121,9 @@ ENV NOTVISIBLE "in users profile"
 
 # PHP
 RUN set -xe; \
+	# Note: essential build tools (g++, gcc, make, etc) are included upstream as persistent packages.
+	# See https://github.com/docker-library/php/blob/4af0a8734a48ab84ee96de513aabc45418b63dc5/7.2/stretch/fpm/Dockerfile#L18-L37
 	buildDeps=" \
-		g++ \
 		libc-client2007e-dev \
 		libfreetype6-dev \
 		libgpgme11-dev \
