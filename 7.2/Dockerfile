@@ -32,12 +32,10 @@ RUN set -xe; \
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
-# Set timezone and locale
+# Set en_US.UTF-8 as the default locale
 RUN set -xe; \
-	dpkg-reconfigure locales; \
-	locale-gen C.UTF-8; \
-	/usr/sbin/update-locale LANG=C.UTF-8
-ENV LC_ALL C.UTF-8
+	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+ENV LC_ALL en_US.utf8
 
 # Enable additional repos
 RUN set -xe; \
