@@ -79,6 +79,17 @@ terminus_login ()
 	fi
 }
 
+# Git settings
+git_settings ()
+{
+	if [[ "$GIT_USER_EMAIL" != "" ]] && [[ "$GIT_USER_NAME" != "" ]]; then
+		# These must run as the docker user
+		echo-debug "Configuring git..."
+		gosu docker git config --global user.email "${GIT_USER_EMAIL}"
+		gosu docker git config --global user.name "${GIT_USER_NAME}"
+	fi
+}
+
 # Process templates
 # Private SSH key
 render_tmpl "$HOME_DIR/.ssh/id_rsa"
@@ -113,6 +124,9 @@ if [[ -f ${PROJECT_ROOT}/.docksal/services/cli/crontab ]]; then
 	echo-debug "Loading crontab..."
 	cat ${PROJECT_ROOT}/.docksal/services/cli/crontab | crontab -u docker -
 fi
+
+# Apply git settings
+git_settings
 
 # Initialization steps completed. Create a pid file to mark the container as healthy
 echo-debug "Preliminary initialization completed."

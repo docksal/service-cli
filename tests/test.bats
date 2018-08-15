@@ -456,3 +456,25 @@ _healthcheck_wait ()
 	### Cleanup ###
 	make clean
 }
+
+@test "Git settings" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start -e ENV='-e GIT_USER_EMAIL=git@example.com -e GIT_USER_NAME="Docksal CLI"'
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Check git settings were applied
+	run docker exec -u docker "$NAME" bash -lc 'git config --get --global user.email'
+	[[ "${output}" == "git@example.com" ]]
+	unset output
+
+	run docker exec -u docker "$NAME" bash -lc 'git config --get --global user.name'
+	[[ "${output}" == "Docksal CLI" ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}

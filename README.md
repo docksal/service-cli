@@ -173,6 +173,17 @@ Stored in `/home/docker/.platform` inside `cli`.
 Platform CLI is installed and available globally in `cli`.
 
 
+## Git configuration
+
+When working with git from within the image, it will ask for the `user.email` and `user.name` set before you can commit.
+These can be passed as environment variables and will be applied at the container startup.
+
+```
+GIT_USER_EMAIL="git@example.com"
+GIT_USER_NAME="Docksal CLI"
+``` 
+
+
 <a name="ide"></a>
 ## Web based IDE (Cloud9)
 
