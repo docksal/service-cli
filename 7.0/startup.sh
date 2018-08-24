@@ -30,10 +30,9 @@ xdebug_enable ()
 
 add_ssh_key ()
 {
-	if [[ "$SECRET_SSH_PRIVATE_KEY" != "" ]]; then
-		render_tmpl "$HOME_DIR/.ssh/id_rsa"
-		chmod 0600 "$HOME_DIR/.ssh/id_rsa"
-	fi
+	echo-debug "Adding a private SSH key from SECRET_SSH_PRIVATE_KEY..."
+	render_tmpl "$HOME_DIR/.ssh/id_rsa"
+	chmod 0600 "$HOME_DIR/.ssh/id_rsa"
 }
 
 # Helper function to render configs from go templates using gomplate
@@ -98,9 +97,9 @@ git_settings ()
 	fi
 }
 
-# Process templates
-# Private SSH key
-add_ssh_key
+# Inject a private SSH key if provided
+[[ "$SECRET_SSH_PRIVATE_KEY" != "" ]] && add_ssh_key
+
 # Acquia Cloud API config
 render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 
