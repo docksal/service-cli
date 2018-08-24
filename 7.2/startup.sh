@@ -28,6 +28,14 @@ xdebug_enable ()
 	sudo ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
+add_ssh_key ()
+{
+	if [[ "$SECRET_SSH_PRIVATE_KEY" != "" ]]; then
+		render_tmpl "$HOME_DIR/.ssh/id_rsa"
+		chmod 0600 "$HOME_DIR/.ssh/id_rsa"
+	fi
+}
+
 # Helper function to render configs from go templates using gomplate
 render_tmpl ()
 {
@@ -92,8 +100,7 @@ git_settings ()
 
 # Process templates
 # Private SSH key
-render_tmpl "$HOME_DIR/.ssh/id_rsa"
-chmod 0600 "$HOME_DIR/.ssh/id_rsa"
+add_ssh_key
 # Acquia Cloud API config
 render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
 
