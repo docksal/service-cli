@@ -147,9 +147,18 @@ Below is the list of secrets currently supported.
 
 `SECRET_SSH_PRIVATE_KEY`
 
-Use to pass a private SSH key. The key is stored in `/home/docker/.ssh/id_rsa` inside `cli` and will be considered 
+Use to pass a private SSH key. The key will be stored in `/home/docker/.ssh/id_rsa` inside `cli` and will be considered 
 by the SSH client **in addition** to the keys loaded in `docksal-ssh-agent` when establishing a SSH connection 
 from within `cli`.
+
+This is useful when you need a project stack to inherit a private SSH key that is not shared with other project stacks 
+on the same host (e.g. in shared CI environments).
+
+The value must be base64 encoded, i.e:
+
+```bash
+cat /path/to/some_key_rsa | base64
+```
 
 `SECRET_ACAPI_EMAIL` and `SECRET_ACAPI_KEY`
 

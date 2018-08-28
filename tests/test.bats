@@ -341,7 +341,7 @@ _healthcheck_wait ()
 	[[ "${output}" != "" ]]
 	unset output
 	# TODO: figure out how to properly use 'make exec' here (escape quotes)
-	run docker exec -u docker "${NAME}" bash -lc 'echo "${SECRET_SSH_PRIVATE_KEY}" | diff ${HOME}/.ssh/id_rsa -'
+	run docker exec -u docker "${NAME}" bash -lc 'echo "${SECRET_SSH_PRIVATE_KEY}" | base64 -d | diff ${HOME}/.ssh/id_rsa -'
 	[[ ${status} == 0 ]]
 	unset output
 
