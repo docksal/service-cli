@@ -69,15 +69,30 @@ convert_secrets ()
 	done
 }
 
-# Pantheon authentication
+# Acquia Cloud API login
+acquia_login ()
+{
+	echo-debug "Authenticating with Acquia..."
+	# This has to be done using the docker user via su to load the user environment
+	# Note: Using 'su -l' to initiate a login session and have .profile sourced for the docker user
+	local command="drush ac-api-login --email='${ACAPI_EMAIL}' --key='${ACAPI_KEY}' --endpoint='https://cloudapi.acquia.com/v1' && drush ac-site-list"
+	local output=$(su -l docker -c "${command}" 2>&1)
+	if [[ $? != 0 ]]; then
+		echo-debug "ERROR: Acquia authentication failed."
+		echo
+		echo "$output"
+		echo
+	fi
+}
+
+# Pantheon (terminus) login
 terminus_login ()
 {
 	echo-debug "Authenticating with Pantheon..."
 	# This has to be done using the docker user via su to load the user environment
-	# Note: 'su -' = 'su -l' = 'su --login'
-	local output
-	output=$(sudo su - docker -c "terminus auth:login --machine-token='${TERMINUS_TOKEN}'" 2>&1)
-	 #>/dev/null 2>&1
+	# Note: Using 'su -l' to initiate a login session and have .profile sourced for the docker user
+	local command="terminus auth:login --machine-token='${TERMINUS_TOKEN}'"
+	local output=$(su -l docker -c "${command}" 2>&1)
 	if [[ $? != 0 ]]; then
 		echo-debug "ERROR: Pantheon authentication failed."
 		echo
@@ -100,9 +115,6 @@ git_settings ()
 # Inject a private SSH key if provided
 [[ "$SECRET_SSH_PRIVATE_KEY" != "" ]] && add_ssh_key
 
-# Acquia Cloud API config
-render_tmpl "$HOME_DIR/.acquia/cloudapi.conf"
-
 # Convert all Environment Variables Prefixed with SECRET_
 convert_secrets
 
@@ -120,9 +132,11 @@ chown "${HOST_UID:-1000}:${HOST_GID:-1000}" -R "$HOME_DIR"
 # We apply a fix/workaround for this at startup (non-recursive).
 chown "${HOST_UID:-1000}:${HOST_GID:-1000}" /var/www
 
-# Automatically authenticate with Pantheon in Terminus token is present
-# Note: this has to happen after th home directory permissions are reset,
-# otherwise the docker user may not have write access to /home/.terminus, where the auth session data is stored.
+# These have to happen after the home directory permissions are reset,
+# otherwise the docker user may not have write access to /home/docker, where the auth session data is stored.
+# Acquia Cloud API config
+[[ "$ACAPI_EMAIL" != "" ]] && [[ "$ACAPI_KEY" != "" ]] && acquia_login
+# Automatically authenticate with Pantheon if Terminus token is present
 [[ "$TERMINUS_TOKEN" != "" ]] && terminus_login
 
 # If crontab file is found within project add contents to user crontab file.
