@@ -230,7 +230,6 @@ RUN set -xe; \
 ENV COMPOSER_VERSION=1.6.3 \
 	DRUSH_VERSION=8.1.16 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.7.0 \
 	WPCLI_VERSION=1.5.0 \
 	BLACKFIRE_VERSION=1.15.0 \
@@ -269,17 +268,19 @@ ENV BUNDLE_PATH .bundler
 
 # All further RUN commands will run as the "docker" user
 USER docker
-ARG HOME=/home/docker
 
 # PHP tools (installed as user)
-ENV PATH=$PATH:$HOME/.composer/vendor/bin \
-	MG_CODEGEN_VERSION=1.10 \
+ENV MG_CODEGEN_VERSION=1.10 \
 	TERMINUS_VERSION=1.8.1
 RUN set -xe; \
 	\
+	# Set drush8 as a global fallback for Drush Launcher
+	echo "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin directory to PATH
-	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
+	echo "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
+	# Reload updated PATH from profile to make composer/drush/etc. visible below
+	. $HOME/.profile; \
 	# Install cgr to use it in-place of `composer global require`
 	composer global require consolidation/cgr >/dev/null; \
 	# Composer parallel install plugin
