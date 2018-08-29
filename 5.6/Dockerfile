@@ -310,8 +310,8 @@ USER root
 # Copy mhsendmail binary from stage 1
 COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 # Copy configs and scripts
-COPY --chown=docker:docker config/.drush $HOME/.drush
-COPY --chown=docker:docker config/.ssh $HOME/.ssh
+COPY --chown=docker:docker config/.drush /home/docker/.drush
+COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
