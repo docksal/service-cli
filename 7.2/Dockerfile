@@ -262,9 +262,9 @@ RUN set -xe; \
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*; \
 	# bundler
-	gem install bundler >/dev/null
-# Home directory for bundle installs
-ENV BUNDLE_PATH .bundler
+	gem install bundler >/dev/null; \
+	# Have bundler install gems locally (./.bundle) by default
+	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile
 
 # All further RUN commands will run as the "docker" user
 USER docker
