@@ -33,10 +33,12 @@ install:
 script:
   # Build the base image
   - cd ${TRAVIS_BUILD_DIR}/${VERSION}
-  - travis_retry make && make test  # Retry builds, as pecl.php.net tends to time out often
+  - travis_retry make  # Retry builds, as pecl.php.net tends to time out often
+  - make test
   # Build the Cloud9 flavor
   - cd ${TRAVIS_BUILD_DIR}/cloud9
-  - travis_retry make && make test
+  - travis_retry make
+  - make test
 
 after_success:
   - docker image ls
