@@ -25,7 +25,7 @@ uid_gid_reset ()
 xdebug_enable ()
 {
 	echo-debug "Enabling xdebug..."
-	sudo ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
+	ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
 add_ssh_key ()
