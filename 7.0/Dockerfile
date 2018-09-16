@@ -207,6 +207,7 @@ RUN set -xe; \
 		redis \
 		sqlsrv \
 		xdebug \
+		apcu \
 	;\
 	docker-php-ext-enable \
 		gnupg \
@@ -215,6 +216,7 @@ RUN set -xe; \
 		pdo_sqlsrv \
 		redis \
 		sqlsrv \
+		apcu \
 	;\
 	# Disable xdebug by default
 	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
