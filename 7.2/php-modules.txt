@@ -1,4 +1,5 @@
 [PHP Modules]
+apcu
 bcmath
 blackfire
 bz2
