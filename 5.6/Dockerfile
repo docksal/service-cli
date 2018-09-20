@@ -193,6 +193,8 @@ RUN set -xe; \
 	;\
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \
+		# apcu-4.0.11 is the last version with php5 support
+		apcu-4.0.11 \
 		gnupg \
 		imagick \
 		memcache \
@@ -200,16 +202,14 @@ RUN set -xe; \
 		ssh2 \
 		# xdebug-2.5.5 is the last version with php5 support
 		xdebug-2.5.5 \
-		# apcu-4.0.11 is the last version with php5 support
-		apcu-4.0.11 \
 	;\
 	docker-php-ext-enable \
+		apcu \
 		gnupg \
 		imagick \
 		memcache \
 		redis \
 		ssh2 \
-		apcu \
 	;\
 	# Disable xdebug by default
 	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \

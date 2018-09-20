@@ -202,6 +202,7 @@ RUN set -xe; \
 	;\
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \
+		apcu \
 		gnupg \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
@@ -209,16 +210,15 @@ RUN set -xe; \
 		pdo_sqlsrv \
 		redis \
 		sqlsrv \
-		apcu \
 	;\
 	docker-php-ext-enable \
+		apcu \
 		gnupg \
 		imagick \
 		memcached \
 		pdo_sqlsrv \
 		redis \
 		sqlsrv \
-		apcu \
 	;\
 	# Disable xdebug by default
 	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
