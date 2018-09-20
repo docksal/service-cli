@@ -199,6 +199,7 @@ RUN set -xe; \
 	;\
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \
+		apcu \
 		gnupg \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
@@ -209,6 +210,7 @@ RUN set -xe; \
 		xdebug \
 	;\
 	docker-php-ext-enable \
+		apcu \
 		gnupg \
 		imagick \
 		memcached \

@@ -193,6 +193,8 @@ RUN set -xe; \
 	;\
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \
+		# apcu-4.0.11 is the last version with php5 support
+		apcu-4.0.11 \
 		gnupg \
 		imagick \
 		memcache \
@@ -202,6 +204,7 @@ RUN set -xe; \
 		xdebug-2.5.5 \
 	;\
 	docker-php-ext-enable \
+		apcu \
 		gnupg \
 		imagick \
 		memcache \
