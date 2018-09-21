@@ -310,38 +310,20 @@ _healthcheck_wait ()
 	set -a; source $(pwd)/../tests/.docksal/docksal.env; set +a
 
 	# Config variables were loaded
-	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
-	[[ "${SECRET_ACAPI_KEY}" != "" ]]
 	[[ "${SECRET_SSH_PRIVATE_KEY}" != "" ]]
 
 	### Setup ###
-	make start -e ENV="\
-		-e SECRET_ACAPI_EMAIL \
-		-e SECRET_ACAPI_KEY \
-		-e SECRET_SSH_PRIVATE_KEY \
-	"
+	make start -e ENV="-e SECRET_SSH_PRIVATE_KEY"
 	_healthcheck_wait
 
 	### Tests ###
-
-	# Check Acquia Cloud API conf
-	run make exec -e CMD='echo ${SECRET_ACAPI_EMAIL}'
-	[[ "${output}" != "" ]]
-	unset output
-	run make exec -e CMD='echo ${SECRET_ACAPI_KEY}'
-	[[ "${output}" != "" ]]
-	unset output
-	# TODO: figure out how to properly use 'make exec' here (escape quotes)
-	run docker exec -u docker "${NAME}" bash -lc 'grep "${SECRET_ACAPI_EMAIL}" ${HOME}/.acquia/cloudapi.conf && grep "${SECRET_ACAPI_KEY}" ${HOME}/.acquia/cloudapi.conf'
-	[[ ${status} == 0 ]]
-	unset output
 
 	# Check private SSH key
 	run make exec -e CMD='echo ${SECRET_SSH_PRIVATE_KEY}'
 	[[ "${output}" != "" ]]
 	unset output
 	# TODO: figure out how to properly use 'make exec' here (escape quotes)
-	run docker exec -u docker "${NAME}" bash -lc 'echo "${SECRET_SSH_PRIVATE_KEY}" | diff ${HOME}/.ssh/id_rsa -'
+	run docker exec -u docker "${NAME}" bash -lc 'echo "${SECRET_SSH_PRIVATE_KEY}" | base64 -d | diff ${HOME}/.ssh/id_rsa -'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -358,6 +340,45 @@ _healthcheck_wait ()
 	run docker exec -u docker "${NAME}" cat /tmp/test-startup.txt
 	[[ ${status} == 0 ]]
 	[[ "${output}" =~ "I ran properly" ]]
+
+	### Cleanup ###
+	make clean
+}
+
+@test "Check Acquia integration" {
+	[[ $SKIP == 1 ]] && skip
+
+	# Confirm secret is not empty
+	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
+	[[ "${SECRET_ACAPI_KEY}" != "" ]]
+
+	### Setup ###
+	make start -e ENV='-e SECRET_ACAPI_EMAIL -e SECRET_ACAPI_KEY'
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Confirm secrets were passed to the container
+	run docker exec -u docker "${NAME}" bash -lc 'echo SECRET_ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}'
+	[[ "${output}" == "SECRET_ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}" ]]
+	unset output
+	run docker exec -u docker "${NAME}" bash -lc 'echo SECRET_ACAPI_KEY: ${SECRET_ACAPI_KEY}'
+	[[ "${output}" == "SECRET_ACAPI_KEY: ${SECRET_ACAPI_KEY}" ]]
+	unset output
+
+	# Confirm the SECRET_ prefix was stripped
+	run docker exec -u docker "${NAME}" bash -lc 'echo ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}'
+	[[ "${output}" == "ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}" ]]
+	unset output
+	run docker exec -u docker "${NAME}" bash -lc 'echo ACAPI_KEY: ${SECRET_ACAPI_KEY}'
+	[[ "${output}" == "ACAPI_KEY: ${SECRET_ACAPI_KEY}" ]]
+	unset output
+
+	# Confirm authentication works
+	run docker exec -u docker "${NAME}" bash -lc 'drush ac-site-list'
+	[[ ${status} == 0 ]]
+	[[ ! "${output}" =~ "Not authorized" ]]
+	unset output
 
 	### Cleanup ###
 	make clean
@@ -451,6 +472,28 @@ _healthcheck_wait ()
 	# Confirm cron has ran and file contents has changed
 	run docker exec -u docker "$NAME" bash -lc 'tail -1 /tmp/date.txt'
 	[[ "${output}" =~ "The current date is " ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "Git settings" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start -e ENV='-e GIT_USER_EMAIL=git@example.com -e GIT_USER_NAME="Docksal CLI"'
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Check git settings were applied
+	run docker exec -u docker "$NAME" bash -lc 'git config --get --global user.email'
+	[[ "${output}" == "git@example.com" ]]
+	unset output
+
+	run docker exec -u docker "$NAME" bash -lc 'git config --get --global user.name'
+	[[ "${output}" == "Docksal CLI" ]]
 	unset output
 
 	### Cleanup ###

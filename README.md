@@ -147,9 +147,18 @@ Below is the list of secrets currently supported.
 
 `SECRET_SSH_PRIVATE_KEY`
 
-Use to pass a private SSH key. The key is stored in `/home/docker/.ssh/id_rsa` inside `cli` and will be considered 
+Use to pass a private SSH key. The key will be stored in `/home/docker/.ssh/id_rsa` inside `cli` and will be considered 
 by the SSH client **in addition** to the keys loaded in `docksal-ssh-agent` when establishing a SSH connection 
 from within `cli`.
+
+This is useful when you need a project stack to inherit a private SSH key that is not shared with other project stacks 
+on the same host (e.g. in shared CI environments).
+
+The value must be base64 encoded, i.e:
+
+```bash
+cat /path/to/some_key_rsa | base64
+```
 
 `SECRET_ACAPI_EMAIL` and `SECRET_ACAPI_KEY`
 
@@ -171,6 +180,17 @@ Credentials used to authenticate with the [Platform.sh CLI](https://github.com/p
 Stored in `/home/docker/.platform` inside `cli`.
 
 Platform CLI is installed and available globally in `cli`.
+
+
+## Git configuration
+
+When working with git from within the image, it will ask for the `user.email` and `user.name` set before you can commit.
+These can be passed as environment variables and will be applied at the container startup.
+
+```
+GIT_USER_EMAIL="git@example.com"
+GIT_USER_NAME="Docksal CLI"
+``` 
 
 
 <a name="ide"></a>

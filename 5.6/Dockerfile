@@ -32,12 +32,10 @@ RUN set -xe; \
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
-# Set timezone and locale
+# Set en_US.UTF-8 as the default locale
 RUN set -xe; \
-	dpkg-reconfigure locales; \
-	locale-gen C.UTF-8; \
-	/usr/sbin/update-locale LANG=C.UTF-8
-ENV LC_ALL C.UTF-8
+	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+ENV LC_ALL en_US.utf8
 
 # Enable additional repos
 RUN set -xe; \
@@ -195,6 +193,8 @@ RUN set -xe; \
 	;\
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \
+		# apcu-4.0.11 is the last version with php5 support
+		apcu-4.0.11 \
 		gnupg \
 		imagick \
 		memcache \
@@ -204,6 +204,7 @@ RUN set -xe; \
 		xdebug-2.5.5 \
 	;\
 	docker-php-ext-enable \
+		apcu \
 		gnupg \
 		imagick \
 		memcache \
@@ -222,7 +223,6 @@ RUN set -xe; \
 ENV COMPOSER_VERSION=1.6.3 \
 	DRUSH_VERSION=8.1.16 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.7.0 \
 	WPCLI_VERSION=1.5.0 \
 	BLACKFIRE_VERSION=1.15.0 \
@@ -255,23 +255,25 @@ RUN set -xe; \
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*; \
 	# bundler
-	gem install bundler >/dev/null
-# Home directory for bundle installs
-ENV BUNDLE_PATH .bundler
+	gem install bundler >/dev/null; \
+	# Have bundler install gems locally (./.bundle) by default
+	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile
 
 # All further RUN commands will run as the "docker" user
 USER docker
-ARG HOME=/home/docker
 
 # PHP tools (installed as user)
-ENV PATH=$PATH:$HOME/.composer/vendor/bin \
-	MG_CODEGEN_VERSION=1.10 \
+ENV MG_CODEGEN_VERSION=1.10 \
 	TERMINUS_VERSION=1.8.1
 RUN set -xe; \
 	\
+	# Set drush8 as a global fallback for Drush Launcher
+	echo "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin directory to PATH
-	echo "\n"'PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
+	echo "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
+	# Reload updated PATH from profile to make composer/drush/etc. visible below
+	. $HOME/.profile; \
 	# Install cgr to use it in-place of `composer global require`
 	composer global require consolidation/cgr >/dev/null; \
 	# Composer parallel install plugin
@@ -311,9 +313,8 @@ USER root
 # Copy mhsendmail binary from stage 1
 COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 # Copy configs and scripts
-COPY --chown=docker:docker config/.acquia $HOME/.acquia
-COPY --chown=docker:docker config/.drush $HOME/.drush
-COPY --chown=docker:docker config/.ssh $HOME/.ssh
+COPY --chown=docker:docker config/.drush /home/docker/.drush
+COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
