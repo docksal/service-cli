@@ -287,7 +287,7 @@ RUN set -xe; \
 	composer global require hirak/prestissimo >/dev/null; \
 	# Drupal Coder w/ a matching version of PHP_CodeSniffer
 	cgr drupal/coder >/dev/null; \
-	phpcs --config-set installed_paths $HOME/.composer/vendor/drupal/coder/coder_sniffer; \
+	phpcs --config-set installed_paths $HOME/.composer/global/drupal/coder/vendor/drupal/coder/coder_sniffer; \
 	# Magento2 Code Generator
 	cgr staempfli/magento2-code-generator:${MG_CODEGEN_VERSION} >/dev/null; \
 	# Terminus
