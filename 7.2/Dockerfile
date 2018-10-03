@@ -94,7 +94,7 @@ RUN set -xe; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 ENV GOSU_VERSION=1.10 \
-	GOMPLATE_VERSION=2.4.0
+	GOMPLATE_VERSION=3.0.0
 RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
 	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
@@ -229,13 +229,13 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.6.3 \
-	DRUSH_VERSION=8.1.16 \
+ENV COMPOSER_VERSION=1.7.2 \
+	DRUSH_VERSION=8.1.17 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.7.0 \
-	WPCLI_VERSION=1.5.0 \
-	BLACKFIRE_VERSION=1.15.0 \
-	PLATFORMSH_CLI_VERSION=3.33.5
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.8.0 \
+	WPCLI_VERSION=2.0.1 \
+	BLACKFIRE_VERSION=1.20.0 \
+	PLATFORMSH_CLI_VERSION=3.35.1
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -272,8 +272,8 @@ RUN set -xe; \
 USER docker
 
 # PHP tools (installed as user)
-ENV MG_CODEGEN_VERSION=1.10 \
-	TERMINUS_VERSION=1.8.1
+ENV MG_CODEGEN_VERSION=1.10.2 \
+	TERMINUS_VERSION=1.9.0
 RUN set -xe; \
 	\
 	# Set drush8 as a global fallback for Drush Launcher
@@ -304,8 +304,8 @@ RUN set -xe; \
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.33.11 \
-	NODE_VERSION=8.11.3 \
-	YARN_VERSION=1.8.0
+	NODE_VERSION=8.12.0 \
+	YARN_VERSION=1.12.0
 # Don't use -x here, as nvm prints too much stuff
 RUN set -e; \
 	# NVM and a defaut Node.js version
