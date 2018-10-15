@@ -499,3 +499,26 @@ _healthcheck_wait ()
 	### Cleanup ###
 	make clean
 }
+
+@test "PHPCS Coding standards check" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Check git settings were applied
+	run docker exec -u docker "$NAME" bash -lc 'phpcs -i'
+	[[ "${output}" =~ "Drupal" ]]
+	[[ "${output}" =~ "DrupalPractice" ]]
+	[[ "${output}" =~ "WordPress-VIP" ]]
+	[[ "${output}" =~ "WordPress-Extra" ]]
+	[[ "${output}" =~ "WordPress-Docs" ]]
+	[[ "${output}" =~ "WordPress" ]]
+	[[ "${output}" =~ "WordPress-Core" ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
