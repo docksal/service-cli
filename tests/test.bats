@@ -504,11 +504,12 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
+	make start
 	_healthcheck_wait
 
 	### Tests ###
 
-	# Check git settings were applied
+	# Check PHPCS libraries loaded
 	run docker exec -u docker "$NAME" bash -lc 'phpcs -i'
 	[[ "${output}" =~ "Drupal" ]]
 	[[ "${output}" =~ "DrupalPractice" ]]
