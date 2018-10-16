@@ -499,3 +499,22 @@ _healthcheck_wait ()
 	### Cleanup ###
 	make clean
 }
+
+@test "PHPCS Coding standards check" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Check PHPCS libraries loaded
+	run docker exec -u docker "$NAME" bash -lc 'phpcs -i'
+	[[ "${output}" =~ "Drupal, DrupalPractice" ]]
+	[[ "${output}" =~ "WordPress-Extra, WordPress-Docs, WordPress, WordPress-VIP and WordPress-Core" ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
