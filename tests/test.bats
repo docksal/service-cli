@@ -280,6 +280,42 @@ _healthcheck_wait ()
 	make clean
 }
 
+@test "Check Ruby version" {
+    [[ $SKIP == 1 ]] && skip
+
+    ### Setup ###
+    make start
+    _healthcheck_wait
+
+    ### Tests ###
+
+    # nvm
+    run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VER}"'
+    [[ ${status} == 0 ]]
+    unset output
+
+    ### Cleanup ###
+    make clean
+}
+
+@test "Check Python version" {
+    [[ $SKIP == 1 ]] && skip
+
+    ### Setup ###
+    make start
+    _healthcheck_wait
+
+    ### Tests ###
+
+    # nvm
+    run docker exec -u docker "$NAME" bash -lc 'python --version 2>&1 | grep "${PYTHON_VER}"'
+    [[ ${status} == 0 ]]
+    unset output
+
+    ### Cleanup ###
+    make clean
+}
+
 @test "Check misc tools and versions" {
 	[[ $SKIP == 1 ]] && skip
 

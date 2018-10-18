@@ -83,6 +83,7 @@ RUN set -xe; \
 		supervisor \
 		unzip \
 		zip \
+		virtualenv \
 	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
@@ -254,20 +255,6 @@ RUN set -xe; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
-# Ruby
-RUN set -xe; \
-	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		ruby-full \
-		rlwrap \
-	;\
-	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*; \
-	# bundler
-	gem install bundler >/dev/null; \
-	# Have bundler install gems locally (./.bundle) by default
-	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile
-
 # All further RUN commands will run as the "docker" user
 USER docker
 
@@ -316,6 +303,36 @@ RUN set -e; \
 	# Yarn
 	export YARN_PROFILE="$HOME/.profile"; \
 	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
+
+# Ruby (installed as user)
+ENV RUBY_VER=2.2.10
+
+RUN set -xe; \
+        curl -sSL https://rvm.io/mpapis.asc | gpg --import -; \
+        curl -sSL https://get.rvm.io | bash -s stable; \
+        bash -lc 'rvm install ruby-${RUBY_VER}'; \
+        bash -lc 'gem install bundler'; \
+        # Have bundler install gems locally (./.bundle) by default
+	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile; \
+        bash -lc 'rvm cleanup all'; \
+        bash -lc 'rvm gemset globalcache enable'
+
+# Python (installed as user)
+ENV PYTHON_VER=2.7.7
+
+RUN set -xe; \
+        mkdir -p ${HOME}/tmp; \
+        cd ${HOME}/tmp; \
+        curl -sSL https://www.python.org/ftp/python/${PYTHON_VER}/Python-${PYTHON_VER}.tgz -o Python-${PYTHON_VER}.tgz; \
+        tar xzf Python-${PYTHON_VER}.tgz; \
+        cd Python-${PYTHON_VER}; \
+        ./configure --prefix=$HOME/.python >/dev/null; \
+        make >/dev/null; \
+        make install >/dev/null; \
+        cd ${HOME}; \
+        rm -rf tmp; \
+        virtualenv .ve -p $HOME/.python/bin/python; \
+        echo '[[ -s "$HOME/.ve/bin/activate" ]] && source "$HOME/.ve/bin/activate" # Activate python virtual env*' >>$HOME/.profile
 
 USER root
 
