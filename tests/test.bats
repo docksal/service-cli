@@ -547,8 +547,13 @@ _healthcheck_wait ()
 
 	# Check PHPCS libraries loaded
 	run docker exec -u docker "$NAME" bash -lc 'phpcs -i'
-	[[ "${output}" =~ "Drupal, DrupalPractice" ]]
-	[[ "${output}" =~ "WordPress-Extra, WordPress-Docs, WordPress, WordPress-VIP and WordPress-Core" ]]
+	[[ "${output}" =~ (" DrupalPractice "|" DrupalPractice,"|" DrupalPractice"$) ]]
+	[[ "${output}" =~ (" Drupal "|" Drupal,"|" Drupal"$) ]]
+	[[ "${output}" =~ (" WordPress-VIP "|" WordPress-VIP,"|" WordPress-VIP"$) ]]
+	[[ "${output}" =~ (" WordPress-Core "|" WordPress-Core,"|" WordPress-Core"$) ]]
+	[[ "${output}" =~ (" WordPress-Extra "|" WordPress-Extra,"|" WordPress-Extra"$) ]]
+	[[ "${output}" =~ (" WordPress-Docs "|" WordPress-Docs,"|" WordPress-Docs"$) ]]
+	[[ "${output}" =~ (" WordPress "|" WordPress,"|" WordPress"$) ]]
 	unset output
 
 	### Cleanup ###
