@@ -28,6 +28,7 @@ RUN set -xe; \
 		gnupg \
 		locales \
 		wget \
+		libssl1.0-dev \
 	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
