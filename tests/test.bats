@@ -280,7 +280,30 @@ _healthcheck_wait ()
 	make clean
 }
 
-@test "Check Ruby version" {
+@test "Check Ruby tools and versions" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+	_healthcheck_wait
+
+	### Tests ###
+
+	# rvm
+	run docker exec -u docker "$NAME" bash -lc 'rvm --version 2>&1 | grep "${RVM_VERSION}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# ruby
+	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VER}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "Check Python tools and versions" {
     [[ $SKIP == 1 ]] && skip
 
     ### Setup ###
@@ -289,25 +312,12 @@ _healthcheck_wait ()
 
     ### Tests ###
 
-    # nvm
-    run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VER}"'
+    # pyenv
+    run docker exec -u docker "$NAME" bash -lc 'pyenv --version 2>&1 | grep "${PYENV_VER}"'
     [[ ${status} == 0 ]]
     unset output
 
-    ### Cleanup ###
-    make clean
-}
-
-@test "Check Python version" {
-    [[ $SKIP == 1 ]] && skip
-
-    ### Setup ###
-    make start
-    _healthcheck_wait
-
-    ### Tests ###
-
-    # nvm
+    # pyenv
     run docker exec -u docker "$NAME" bash -lc 'python --version 2>&1 | grep "${PYTHON_VER}"'
     [[ ${status} == 0 ]]
     unset output

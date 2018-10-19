@@ -83,7 +83,6 @@ RUN set -xe; \
 		supervisor \
 		unzip \
 		zip \
-		virtualenv \
 	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
@@ -305,34 +304,36 @@ RUN set -e; \
 	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
 
 # Ruby (installed as user)
-ENV RUBY_VER=2.2.10
+ENV \
+        RVM_VERSION=1.29.4 \
+        RUBY_VER=2.2.10
 
 RUN set -xe; \
         curl -sSL https://rvm.io/mpapis.asc | gpg --import -; \
-        curl -sSL https://get.rvm.io | bash -s stable; \
+        git clone -b ${RVM_VERSION} https://github.com/rvm/rvm.git $HOME/tmp; \
+        cd $HOME/tmp; \
+        ./install --auto-dotfiles; \
+        cd $HOME; \
+        rm -rf tmp; \
         bash -lc 'rvm install ruby-${RUBY_VER}'; \
-        bash -lc 'gem install bundler'; \
         # Have bundler install gems locally (./.bundle) by default
-	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile; \
+        echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile; \
+        bash -lc 'gem install bundler'; \
         bash -lc 'rvm cleanup all'; \
         bash -lc 'rvm gemset globalcache enable'
 
 # Python (installed as user)
-ENV PYTHON_VER=2.7.7
+ENV \
+        PYENV_VER=20160726 \
+        PYTHON_VER=2.7.7
 
 RUN set -xe; \
-        mkdir -p ${HOME}/tmp; \
-        cd ${HOME}/tmp; \
-        curl -sSL https://www.python.org/ftp/python/${PYTHON_VER}/Python-${PYTHON_VER}.tgz -o Python-${PYTHON_VER}.tgz; \
-        tar xzf Python-${PYTHON_VER}.tgz; \
-        cd Python-${PYTHON_VER}; \
-        ./configure --prefix=$HOME/.python >/dev/null; \
-        make >/dev/null; \
-        make install >/dev/null; \
-        cd ${HOME}; \
-        rm -rf tmp; \
-        virtualenv .ve -p $HOME/.python/bin/python; \
-        echo '[[ -s "$HOME/.ve/bin/activate" ]] && source "$HOME/.ve/bin/activate" # Activate python virtual env*' >>$HOME/.profile
+        git clone -b v${PYENV_VER} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
+        echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bash_profile; \
+        echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bash_profile; \
+        echo 'eval "$(pyenv init -)"' >> $HOME/.bash_profile; \
+        bash -lc 'pyenv install ${PYTHON_VER}'; \
+        bash -lc 'pyenv global ${PYTHON_VER}'
 
 USER root
 
