@@ -518,3 +518,21 @@ _healthcheck_wait ()
 	### Cleanup ###
 	make clean
 }
+
+@test "Check Drush Backdrop Commands" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+	_healthcheck_wait
+
+	### Tests ###
+
+	# Check Drush Backdrop command loaded
+	run docker exec -u docker "$NAME" bash -lc 'drush help backdrop-core-status'
+	[[ "${output}" =~ "Provides a birds-eye view of the current Backdrop installation, if any." ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
