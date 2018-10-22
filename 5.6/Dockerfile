@@ -265,7 +265,7 @@ USER docker
 # PHP tools (installed as user)
 ENV MG_CODEGEN_VERSION=1.10.2 \
 	TERMINUS_VERSION=1.9.0 \
-	BACKDROP_DRUSH=0.0.6
+	DRUSH_BACKDROP_VERSION=0.0.6
 RUN set -xe; \
 	\
 	# Set drush8 as a global fallback for Drush Launcher
@@ -291,7 +291,7 @@ RUN set -xe; \
 	\
 	# Drush modules
 	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/drush/archive/${BACKDROP_DRUSH}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
+	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/drush/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
 	drush cc drush
 
 # Node.js (installed as user)

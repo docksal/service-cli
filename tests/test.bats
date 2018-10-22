@@ -528,7 +528,7 @@ _healthcheck_wait ()
 
 	### Tests ###
 
-	# Check PHPCS libraries loaded
+	# Check Drush Backdrop command loaded
 	run docker exec -u docker "$NAME" bash -lc 'drush help backdrop-core-status'
 	[[ "${output}" =~ "Provides a birds-eye view of the current Backdrop installation, if any." ]]
 	unset output
