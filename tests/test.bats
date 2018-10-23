@@ -147,6 +147,8 @@ _healthcheck_wait ()
 
 	output=$(echo "$phpInfo" | grep "PHP Version")
 	echo "$output" | grep "${VERSION}"
+	# Confirm WebP support enabled for GD
+	echo "$output" | grep "WebP Support => enabled"
 	unset output
 
 	output=$(echo "$phpInfo" | grep "memory_limit")
