@@ -73,7 +73,7 @@ Then `nvm use 10.7.0` to use it in the current session or `nvm alias default 10.
 
 Python is installed via `pyenv` in the docker user's profile inside the image (`/home/docker/.pyenv`).
 
-By default this image use python v2.7.7
+By default this image use python v3.7.0
 
 If you need a different version, use `pyenv` to install it, e.g, `pyenv install 2.7.8`.
 
@@ -87,7 +87,7 @@ Then `pyenv local 2.7.8` to use it in the current session or `pyenv global 2.7.8
 
 Ruby is installed via `rvm` in the docker user's profile inside the image (`/home/docker/.rvm`).
 
-By default this image use ruby v2.2.10
+By default this image use ruby v2.5.3
 
 If you need a different version, use `rvm` to install it, e.g, `rvm install 2.5.1`.
 

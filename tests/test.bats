@@ -304,23 +304,23 @@ _healthcheck_wait ()
 }
 
 @test "Check Python tools and versions" {
-    [[ $SKIP == 1 ]] && skip
+        [[ $SKIP == 1 ]] && skip
 
-    ### Setup ###
-    make start
-    _healthcheck_wait
+        ### Setup ###
+        make start
+        _healthcheck_wait
 
-    ### Tests ###
+        ### Tests ###
 
-    # pyenv
-    run docker exec -u docker "$NAME" bash -lc 'pyenv --version 2>&1 | grep "${PYENV_VER}"'
-    [[ ${status} == 0 ]]
-    unset output
+        # pyenv
+        run docker exec -u docker "$NAME" bash -lc 'pyenv --version 2>&1 | grep "${_PYENV_VERSION}"'
+        [[ ${status} == 0 ]]
+        unset output
 
-    # pyenv
-    run docker exec -u docker "$NAME" bash -lc 'python --version 2>&1 | grep "${PYTHON_VER}"'
-    [[ ${status} == 0 ]]
-    unset output
+        # pyenv
+        run docker exec -u docker "$NAME" bash -lc 'python --version 2>&1 | grep "${PYTHON_VERSION}"'
+        [[ ${status} == 0 ]]
+        unset output
 
     ### Cleanup ###
     make clean

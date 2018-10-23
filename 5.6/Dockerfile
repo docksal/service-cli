@@ -28,7 +28,6 @@ RUN set -xe; \
 		gnupg \
 		locales \
 		wget \
-		libssl1.0-dev \
 	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
@@ -299,16 +298,12 @@ RUN set -e; \
 # Ruby (installed as user)
 ENV \
 	RVM_VERSION=1.29.4 \
-	RUBY_VER=2.2.10
+	RUBY_VERSION=2.5.3
 
 RUN set -xe; \
         curl -sSL https://rvm.io/mpapis.asc | gpg --import -; \
-	git clone -b ${RVM_VERSION} https://github.com/rvm/rvm.git $HOME/tmp; \
-	cd $HOME/tmp; \
-	./install --auto-dotfiles; \
-	cd $HOME; \
-	rm -rf tmp; \
-        bash -lc 'rvm install ruby-${RUBY_VER}'; \
+	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION}/binscripts/rvm-installer | bash -s -- --version ${RVM_VERSION}; \
+        bash -lc 'rvm install ruby-${RUBY_VERSION}'; \
 	# Have bundler install gems locally (./.bundle) by default
 	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile; \
         bash -lc 'gem install bundler'; \
@@ -317,16 +312,18 @@ RUN set -xe; \
 
 # Python (installed as user)
 ENV \
-	PYENV_VER=20160726 \
-	PYTHON_VER=2.7.7
+# Don not rename variable $_PYENV_VERSION to $PYENV_VERSION!!! pyenv use PYENV_VERSION variable for setting default PYTHON version, NOT PYENV version! Wrong PYENV_VERSION value will broke python!
+	_PYENV_VERSION=1.2.7 \
+	PYTHON_VERSION=3.7.0
 
 RUN set -xe; \
-	git clone -b v${PYENV_VER} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
-	echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bash_profile; \
-	echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bash_profile; \
-	echo 'eval "$(pyenv init -)"' >> $HOME/.bash_profile; \
-	bash -lc 'pyenv install ${PYTHON_VER}'; \
-	bash -lc 'pyenv global ${PYTHON_VER}'
+	git clone --depth 1 -b v${_PYENV_VERSION} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
+	rm -rf $HOME/.pyenv/.git; \
+	echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.profile; \
+	echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.profile; \
+	echo 'eval "$(pyenv init -)"' >> $HOME/.profile; \
+	bash -lc 'pyenv install ${PYTHON_VERSION}'; \
+	bash -lc 'pyenv global ${PYTHON_VERSION}'
 
 USER root
 
