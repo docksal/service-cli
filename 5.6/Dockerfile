@@ -80,7 +80,6 @@ RUN set -xe; \
 		supervisor \
 		unzip \
 		zip \
-		virtualenv \
 	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
