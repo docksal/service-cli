@@ -1,2 +1,2 @@
 require:
-- /home/docker/.wp-cli/cli-config.php
+  - /home/docker/.wp-cli/cli-config.php
