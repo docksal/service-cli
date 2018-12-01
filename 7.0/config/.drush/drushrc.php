@@ -304,6 +304,11 @@ $options['dump-dir'] = '/tmp';
 // Set a predetermined username and password when using site-install.
 # $command_specific['site-install'] = array('account-name' => 'alice', 'account-pass' => 'secret');
 
+// Set the Default URI to the Virtual Host
+$options['uri'] = getenv('VIRTUAL_HOST');
+// Set the Document Root of the Project
+$options['root'] = '/var/www/' . getenv('DOCROOT');
+
 /**
  * Load a drushrc file from the 'drush' folder at the root of the current
  * git repository.  Example script below by Grayside.  Customize as desired.

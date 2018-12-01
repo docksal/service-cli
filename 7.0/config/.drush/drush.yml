@@ -1,0 +1,5 @@
+options:
+  uri: 'http://${env.VIRTUAL_HOST}'
+  root: '/var/www/${env.DOCROOT}'
+ssh:
+  options: '-o LogLevel=QUIET -t '
