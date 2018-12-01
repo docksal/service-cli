@@ -1,0 +1,2 @@
+require:
+- /home/docker/.wp-cli/cli-config.php
