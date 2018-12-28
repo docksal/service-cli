@@ -13,6 +13,7 @@ env:
     - VERSION=7.0
     - VERSION=7.1
     - VERSION=7.2
+    - VERSION=7.3
 
 # Skip building master.
 # Stable image tags are pushed during release tag builds so that stable and release tags match on Docker Hub.
