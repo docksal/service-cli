@@ -176,6 +176,7 @@ RUN set -xe; \
 	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
+	docker-php-ext-configure >/dev/null zip --with-libzip; \
 	\
 	docker-php-ext-install >/dev/null -j$(nproc) \
 		bcmath \
