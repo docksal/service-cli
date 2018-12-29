@@ -164,7 +164,6 @@ RUN set -xe; \
 		libpq5 \
 		libssh2-1 \
 		libxslt1.1 \
-		libzip \
 		msodbcsql17 \
 		zlib1g \
 	;\
