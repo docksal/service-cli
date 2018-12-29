@@ -138,6 +138,7 @@ RUN set -xe; \
 		libpq-dev \
 		libssh2-1-dev \
 		libxslt1-dev \
+		libzip-dev \
 		unixodbc-dev \
 		zlib1g-dev \
 	"; \
@@ -163,6 +164,7 @@ RUN set -xe; \
 		libpq5 \
 		libssh2-1 \
 		libxslt1.1 \
+		libzip \
 		msodbcsql17 \
 		zlib1g \
 	;\
