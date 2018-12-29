@@ -164,7 +164,9 @@ RUN set -xe; \
 		libpq5 \
 		libssh2-1 \
 		libxslt1.1 \
+		libzip4 \
 		msodbcsql17 \
+		unixodbc-dev \
 		zlib1g \
 	;\
 	# SSH2 must be installed from source
@@ -209,18 +211,20 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		pdo_sqlsrv \
+		# SQLSRV Is currently not supported in 7.3
+		#pdo_sqlsrv \
 		redis \
-		sqlsrv \
+		#sqlsrv \
 	;\
 	docker-php-ext-enable \
 		apcu \
 		gnupg \
 		imagick \
 		memcached \
-		pdo_sqlsrv \
+		# SQLSRV Is currently not supported in 7.3
+		#pdo_sqlsrv \
 		redis \
-		sqlsrv \
+		#sqlsrv \
 	;\
 	# Disable xdebug by default
 	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
