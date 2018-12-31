@@ -139,8 +139,6 @@ RUN set -xe; \
 		libssh2-1-dev \
 		libxslt1-dev \
 		libzip-dev \
-		unixodbc-dev \
-		zlib1g-dev \
 	"; \
 	apt-get update >/dev/null; \
 	# Necessary for msodbcsql17 (MSSQL)
@@ -167,7 +165,6 @@ RUN set -xe; \
 		libzip4 \
 		msodbcsql17 \
 		unixodbc-dev \
-		zlib1g \
 	;\
 	# SSH2 must be installed from source
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
@@ -331,6 +328,7 @@ USER root
 COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 # Copy configs and scripts
 COPY --chown=docker:docker config/.drush /home/docker/.drush
+COPY --chown=docker:docker config/.terminus /home/docker/.terminus
 COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
