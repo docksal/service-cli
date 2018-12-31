@@ -247,20 +247,6 @@ RUN set -xe; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
-# Ruby
-RUN set -xe; \
-	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		ruby-full \
-		rlwrap \
-	;\
-	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*; \
-	# bundler
-	gem install bundler >/dev/null; \
-	# Have bundler install gems locally (./.bundle) by default
-	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile
-
 # All further RUN commands will run as the "docker" user
 USER docker
 
@@ -311,6 +297,36 @@ RUN set -e; \
 	# Yarn
 	export YARN_PROFILE="$HOME/.profile"; \
 	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
+
+# Ruby (installed as user)
+ENV \
+	RVM_VERSION=1.29.4 \
+	RUBY_VERSION=2.5.3
+
+RUN set -xe; \
+        curl -sSL https://rvm.io/mpapis.asc | gpg --import -; \
+	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION}/binscripts/rvm-installer | bash -s -- --version ${RVM_VERSION}; \
+        bash -lc 'rvm install ruby-${RUBY_VERSION}'; \
+	# Have bundler install gems locally (./.bundle) by default
+	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile; \
+        bash -lc 'gem install bundler'; \
+        bash -lc 'rvm cleanup all'; \
+        bash -lc 'rvm gemset globalcache enable'
+
+# Python (installed as user)
+ENV \
+# Don not rename variable $_PYENV_VERSION to $PYENV_VERSION!!! pyenv use PYENV_VERSION variable for setting default PYTHON version, NOT PYENV version! Wrong PYENV_VERSION value will broke python!
+	_PYENV_VERSION=1.2.7 \
+	PYTHON_VERSION=3.7.0
+
+RUN set -xe; \
+	git clone --depth 1 -b v${_PYENV_VERSION} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
+	rm -rf $HOME/.pyenv/.git; \
+	echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.profile; \
+	echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.profile; \
+	echo 'eval "$(pyenv init -)"' >> $HOME/.profile; \
+	bash -lc 'pyenv install ${PYTHON_VERSION}'; \
+	bash -lc 'pyenv global ${PYTHON_VERSION}'
 
 USER root
 

@@ -280,6 +280,52 @@ _healthcheck_wait ()
 	make clean
 }
 
+@test "Check Ruby tools and versions" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+	_healthcheck_wait
+
+	### Tests ###
+
+	# rvm
+	run docker exec -u docker "$NAME" bash -lc 'rvm --version 2>&1 | grep "${RVM_VERSION}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# ruby
+	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VER}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "Check Python tools and versions" {
+        [[ $SKIP == 1 ]] && skip
+
+        ### Setup ###
+        make start
+        _healthcheck_wait
+
+        ### Tests ###
+
+        # pyenv
+        run docker exec -u docker "$NAME" bash -lc 'pyenv --version 2>&1 | grep "${_PYENV_VERSION}"'
+        [[ ${status} == 0 ]]
+        unset output
+
+        # pyenv
+        run docker exec -u docker "$NAME" bash -lc 'python --version 2>&1 | grep "${PYTHON_VERSION}"'
+        [[ ${status} == 0 ]]
+        unset output
+
+    ### Cleanup ###
+    make clean
+}
+
 @test "Check misc tools and versions" {
 	[[ $SKIP == 1 ]] && skip
 
@@ -515,8 +561,13 @@ _healthcheck_wait ()
 
 	# Check PHPCS libraries loaded
 	run docker exec -u docker "$NAME" bash -lc 'phpcs -i'
-	[[ "${output}" =~ "Drupal, DrupalPractice" ]]
-	[[ "${output}" =~ "WordPress-Extra, WordPress-Docs, WordPress, WordPress-VIP and WordPress-Core" ]]
+	[[ "${output}" =~ (" DrupalPractice "|" DrupalPractice,"|" DrupalPractice"$) ]]
+	[[ "${output}" =~ (" Drupal "|" Drupal,"|" Drupal"$) ]]
+	[[ "${output}" =~ (" WordPress-VIP "|" WordPress-VIP,"|" WordPress-VIP"$) ]]
+	[[ "${output}" =~ (" WordPress-Core "|" WordPress-Core,"|" WordPress-Core"$) ]]
+	[[ "${output}" =~ (" WordPress-Extra "|" WordPress-Extra,"|" WordPress-Extra"$) ]]
+	[[ "${output}" =~ (" WordPress-Docs "|" WordPress-Docs,"|" WordPress-Docs"$) ]]
+	[[ "${output}" =~ (" WordPress "|" WordPress,"|" WordPress"$) ]]
 	unset output
 
 	### Cleanup ###
