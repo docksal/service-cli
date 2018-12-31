@@ -154,7 +154,7 @@ touch /var/run/cli
 if [[ -x ${PROJECT_ROOT}/.docksal/services/cli/startup.sh ]]; then
 	echo-debug "Running custom startup script..."
 	# TODO: should we source the script instead?
-	${PROJECT_ROOT}/.docksal/services/cli/startup.sh
+	su -l docker -c "${PROJECT_ROOT}/.docksal/services/cli/startup.sh"
 	if [[ $? == 0 ]]; then
 		echo-debug "Custom startup script executed successfully."
 	else
