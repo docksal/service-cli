@@ -88,9 +88,11 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 RUN set -xe; \
-	# Create a regular user/group "docker" (uid = 1000, gid = 1000 ) with access to sudo
+	# Create a regular user/group "docker" (uid = 1000, gid = 1000 )
 	groupadd docker -g 1000; \
-	useradd -m -s /bin/bash -u 1000 -g 1000 -G sudo -p docker docker; \
+	useradd -m -s /bin/bash -u 1000 -g 1000 -p docker docker; \
+	# Give the docker user sudo access
+	usermod -a -G sudo docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 ENV GOSU_VERSION=1.10 \
