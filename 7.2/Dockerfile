@@ -313,7 +313,7 @@ ENV \
 	RUBY_VERSION=2.5.3
 
 RUN set -xe; \
-        curl -sSL https://rvm.io/mpapis.asc | gpg --import -; \
+        curl -sSL https://rvm.io/mpapis.asc | gpg --no-tty --import -; \
 	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION}/binscripts/rvm-installer | bash -s -- --version ${RVM_VERSION}; \
         bash -lc 'rvm install ruby-${RUBY_VERSION}'; \
 	# Have bundler install gems locally (./.bundle) by default
