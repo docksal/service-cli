@@ -88,9 +88,11 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 RUN set -xe; \
-	# Create a regular user/group "docker" (uid = 1000, gid = 1000 ) with access to sudo
+	# Create a regular user/group "docker" (uid = 1000, gid = 1000 )
 	groupadd docker -g 1000; \
-	useradd -m -s /bin/bash -u 1000 -g 1000 -G sudo -p docker docker; \
+	useradd -m -s /bin/bash -u 1000 -g 1000 -p docker docker; \
+	# Give the docker user sudo access
+	usermod -a -G sudo docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 ENV GOSU_VERSION=1.10 \
@@ -321,6 +323,36 @@ RUN set -e; \
 	# Yarn
 	export YARN_PROFILE="$HOME/.profile"; \
 	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
+
+# Ruby (installed as user)
+ENV \
+	RVM_VERSION=1.29.4 \
+	RUBY_VERSION=2.5.3
+
+RUN set -xe; \
+        curl -sSL https://rvm.io/mpapis.asc | gpg --no-tty --import -; \
+	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION}/binscripts/rvm-installer | bash -s -- --version ${RVM_VERSION}; \
+        bash -lc 'rvm install ruby-${RUBY_VERSION}'; \
+	# Have bundler install gems locally (./.bundle) by default
+	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile; \
+        bash -lc 'gem install bundler'; \
+        bash -lc 'rvm cleanup all'; \
+        bash -lc 'rvm gemset globalcache enable'
+
+# Python (installed as user)
+ENV \
+# Don not rename variable $_PYENV_VERSION to $PYENV_VERSION!!! pyenv use PYENV_VERSION variable for setting default PYTHON version, NOT PYENV version! Wrong PYENV_VERSION value will broke python!
+	_PYENV_VERSION=1.2.7 \
+	PYTHON_VERSION=3.7.0
+
+RUN set -xe; \
+	git clone --depth 1 -b v${_PYENV_VERSION} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
+	rm -rf $HOME/.pyenv/.git; \
+	echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.profile; \
+	echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.profile; \
+	echo 'eval "$(pyenv init -)"' >> $HOME/.profile; \
+	bash -lc 'pyenv install ${PYTHON_VERSION}'; \
+	bash -lc 'pyenv global ${PYTHON_VERSION}'
 
 USER root
 
