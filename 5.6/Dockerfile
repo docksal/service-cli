@@ -337,18 +337,23 @@ RUN set -e; \
 
 # Python (installed as user)
 ENV \
-# Don not rename variable $_PYENV_VERSION to $PYENV_VERSION!!! pyenv use PYENV_VERSION variable for setting default PYTHON version, NOT PYENV version! Wrong PYENV_VERSION value will broke python!
-	_PYENV_VERSION=1.2.7 \
-	PYTHON_VERSION=3.7.0
-
+	PYENV_VERSION_INSTALL=1.2.7
+#	PYTHON_VERSION_INSTALL=3.7.0
 RUN set -xe; \
-	git clone --depth 1 -b v${_PYENV_VERSION} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
+	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
 	rm -rf $HOME/.pyenv/.git; \
-	echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.profile; \
-	echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.profile; \
-	echo 'eval "$(pyenv init -)"' >> $HOME/.profile; \
-	bash -lc 'pyenv install ${PYTHON_VERSION}'; \
-	bash -lc 'pyenv global ${PYTHON_VERSION}'
+	{ \
+		echo ''; \
+		echo 'export PYENV_ROOT="$HOME/.pyenv"'; \
+		echo 'export PATH="$PYENV_ROOT/bin:$PATH"'; \
+		echo 'eval "$(pyenv init -)"'; \
+	} >> $HOME/.profile
+# Disabled for now - uses too much space (~200MB).
+# The upsteam Debian 9 image ships with Python 2.7 out of the box, so we'll stick with that by default.
+#	# Reload $HOME/.profile to apply settings for the current shell
+#	. $HOME/.profile; \
+#	pyenv install ${PYTHON_VERSION_INSTALL}; \
+#	pyenv global ${PYTHON_VERSION_INSTALL}
 
 USER root
 SHELL ["/bin/sh", "-c"]
