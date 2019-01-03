@@ -311,18 +311,38 @@ RUN set -e; \
 
 # Ruby (installed as user)
 ENV \
-	RVM_VERSION=1.29.4 \
-	RUBY_VERSION=2.5.3
-
-RUN set -xe; \
-        curl -sSL https://rvm.io/mpapis.asc | gpg --import -; \
-	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION}/binscripts/rvm-installer | bash -s -- --version ${RVM_VERSION}; \
-        bash -lc 'rvm install ruby-${RUBY_VERSION}'; \
+	RVM_VERSION_INSTALL=1.29.6 \
+	RUBY_VERSION_INSTALL=2.6.0
+# Don't use -x here, as the output may be excessive
+RUN set -e; \
+	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
+	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
+	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
+	\
+	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
+	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
+	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION_INSTALL}/binscripts/rvm-installer | bash -s -- --ignore-dotfiles --version ${RVM_VERSION_INSTALL}; \
+	{ \
+		echo ''; \
+		echo 'export PATH="$PATH:$HOME/.rvm/bin"'; \
+		echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'; \
+	} >> $HOME/.profile; \
+	# Reload $HOME/.profile to apply settings for the current shell
+	. $HOME/.profile; \
+	\
+	# rvm.io does not currently have ruby binaries for Debian 9, so Ruby is compiled from source, which requires a bunch
+	# of extra dependencies installed (rvm installs these automatically), which bloat this image:
+	# rvm/ruby required packages: gawk, automake, bison, libffi-dev, libgdbm-dev, libncurses5-dev, libsqlite3-dev, libtool, libyaml-dev, sqlite3, zlib1g-dev, libgmp-dev, libreadline-dev, libssl-dev
+	rvm install ruby-${RUBY_VERSION_INSTALL}; \
+	rvm use ruby-${RUBY_VERSION_INSTALL} --default; \
+	\
+	gem install bundler; \
 	# Have bundler install gems locally (./.bundle) by default
-	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile; \
-        bash -lc 'gem install bundler'; \
-        bash -lc 'rvm cleanup all'; \
-        bash -lc 'rvm gemset globalcache enable'
+	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile; \
+	\
+	rvm cleanup all; \
+	rvm gemset globalcache enable
 
 # Python (installed as user)
 ENV \
