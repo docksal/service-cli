@@ -249,18 +249,20 @@ RUN set -xe; \
 
 # All further RUN commands will run as the "docker" user
 USER docker
+SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
 ENV MG_CODEGEN_VERSION=1.10.2 \
 	TERMINUS_VERSION=1.9.0 \
 	DRUSH_BACKDROP_VERSION=0.0.6
-RUN set -xe; \
+# Don't use -x here, as the output may be excessive
+RUN set -e; \
 	\
 	# Set drush8 as a global fallback for Drush Launcher
-	echo "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
+	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin directory to PATH
-	echo "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
+	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
 	# Reload updated PATH from profile to make composer/drush/etc. visible below
 	. $HOME/.profile; \
 	# Install cgr to use it in-place of `composer global require`
@@ -287,7 +289,7 @@ ENV \
 	NVM_VERSION=0.33.11 \
 	NODE_VERSION=8.12.0 \
 	YARN_VERSION=1.12.0
-# Don't use -x here, as nvm prints too much stuff
+# Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
 	export PROFILE="$HOME/.profile"; \
@@ -329,6 +331,7 @@ RUN set -xe; \
 	bash -lc 'pyenv global ${PYTHON_VERSION}'
 
 USER root
+SHELL ["/bin/sh", "-c"]
 
 # Copy mhsendmail binary from stage 1
 COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
