@@ -1,7 +1,6 @@
-language: generic
+dist: xenial
 
-services:
-  - docker
+language: minimal
 
 env:
   global:
