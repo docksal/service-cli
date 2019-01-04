@@ -294,8 +294,8 @@ RUN set -e; \
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.33.11 \
-	NODE_VERSION=8.12.0 \
-	YARN_VERSION=1.12.0
+	NODE_VERSION=10.15.0 \
+	YARN_VERSION=1.13.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
