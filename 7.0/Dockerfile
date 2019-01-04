@@ -82,6 +82,7 @@ RUN set -xe; \
 		sudo \
 		supervisor \
 		unzip \
+		webp \
 		zip \
 	;\
 	# Cleanup
