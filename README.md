@@ -19,14 +19,14 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 ## Versions and image tag naming convention
 
 - Stable versions
-  - `2.4-php5.6`, `php5.6` - PHP 5.6
-  - `2.4-php7.0`, `php7.0` - PHP 7.0
-  - `2.4-php7.1`, `php7.1` - PHP 7.1
-  - `2.4-php7.2`, `php7.2`, `latest` - PHP 7.2
-  - `2.4-php7.3`, `php7.3` - PHP 7.3
+  - `2.6-php5.6`, `php5.6` - PHP 5.6 (deprecated, will be removed in v2.7)
+  - `2.6-php7.0`, `php7.0` - PHP 7.0 (deprecated, will be removed in v2.7)
+  - `2.6-php7.1`, `php7.1` - PHP 7.1
+  - `2.6-php7.2`, `php7.2`, `latest` - PHP 7.2
+  - `2.6-php7.3`, `php7.3` - PHP 7.3
 - Development versions
-  - `edge-php5.6` - PHP 5.6
-  - `edge-php7.0` - PHP 7.0
+  - `edge-php5.6` - PHP 5.6 (deprecated, will be removed in v2.7)
+  - `edge-php7.0` - PHP 7.0 (deprecated, will be removed in v2.7)
   - `edge-php7.1` - PHP 7.1
   - `edge-php7.2` - PHP 7.2
   - `edge-php7.3` - PHP 7.3
