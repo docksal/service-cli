@@ -82,6 +82,7 @@ RUN set -xe; \
 		sudo \
 		supervisor \
 		unzip \
+		webp \
 		zip \
 	;\
 	# Cleanup
@@ -138,7 +139,9 @@ RUN set -xe; \
 		libmhash-dev \
 		libpng-dev \
 		libpq-dev \
+		libwebp-dev \
 		libssh2-1-dev \
+		libxpm-dev \
 		libxslt1-dev \
 		unixodbc-dev \
 		zlib1g-dev \
@@ -165,13 +168,19 @@ RUN set -xe; \
 		libpq5 \
 		libssh2-1 \
 		libxslt1.1 \
+		libxpm4 \
 		msodbcsql17 \
 		zlib1g \
 	;\
 	# SSH2 must be installed from source
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
 	\
-	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
+	docker-php-ext-configure >/dev/null gd \
+		--with-freetype-dir=/usr/include/ \
+		--with-jpeg-dir=/usr/include/ \
+		--with-webp-dir=/usr/include/ \
+		--with-png-dir=/usr/include/ \
+		--with-xpm-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
