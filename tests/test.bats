@@ -34,9 +34,6 @@ _healthcheck ()
 }
 
 # Waits for containers to become healthy
-# For reasoning why we are not using  `depends_on` `condition` see here:
-# https://github.com/docksal/docksal/issues/225#issuecomment-306604063
-# TODO: make this universal. Currently hardcoded for cli only.
 _healthcheck_wait ()
 {
 	# Wait for cli to become ready by watching its health status
@@ -52,9 +49,7 @@ _healthcheck_wait ()
 		# Give the container 30s to become ready
 		elapsed=$((elapsed + delay))
 		if ((elapsed > timeout)); then
-			echo-error "$container_name heathcheck failed" \
-				"Container did not enter a healthy state within the expected amount of time." \
-				"Try ${yellow}fin restart${NC}"
+			echo "$container_name heathcheck failed"
 			exit 1
 		fi
 	done
@@ -285,6 +280,52 @@ _healthcheck_wait ()
 	make clean
 }
 
+@test "Check Ruby tools and versions" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+	_healthcheck_wait
+
+	### Tests ###
+
+	# rvm
+	run docker exec -u docker "$NAME" bash -lc 'rvm --version 2>&1 | grep "${RVM_VERSION_INSTALL}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# ruby
+	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VERSION_INSTALL}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "Check Python tools and versions" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+	_healthcheck_wait
+
+	### Tests ###
+
+	# pyenv
+	run docker exec -u docker "$NAME" bash -lc 'pyenv --version 2>&1 | grep "${PYENV_VERSION_INSTALL}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# pyenv
+	run docker exec -u docker "$NAME" bash -lc 'python --version 2>&1 | grep "${PYTHON_VERSION_INSTALL}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
 @test "Check misc tools and versions" {
 	[[ $SKIP == 1 ]] && skip
 
@@ -345,6 +386,10 @@ _healthcheck_wait ()
 	run docker exec -u docker "${NAME}" cat /tmp/test-startup.txt
 	[[ ${status} == 0 ]]
 	[[ "${output}" =~ "I ran properly" ]]
+
+	run docker exec -u docker "${NAME}" cat /tmp/test-startup-terminus.txt
+	[[ ${status} == 0 ]]
+	[[ "${output}" =~ "/home/docker/.composer/vendor/bin/terminus" ]]
 
 	### Cleanup ###
 	make clean
@@ -516,8 +561,13 @@ _healthcheck_wait ()
 
 	# Check PHPCS libraries loaded
 	run docker exec -u docker "$NAME" bash -lc 'phpcs -i'
-	[[ "${output}" =~ "Drupal, DrupalPractice" ]]
-	[[ "${output}" =~ "WordPress-Extra, WordPress-Docs, WordPress, WordPress-VIP and WordPress-Core" ]]
+	[[ "${output}" =~ (" DrupalPractice "|" DrupalPractice,"|" DrupalPractice"$) ]]
+	[[ "${output}" =~ (" Drupal "|" Drupal,"|" Drupal"$) ]]
+	[[ "${output}" =~ (" WordPress-VIP "|" WordPress-VIP,"|" WordPress-VIP"$) ]]
+	[[ "${output}" =~ (" WordPress-Core "|" WordPress-Core,"|" WordPress-Core"$) ]]
+	[[ "${output}" =~ (" WordPress-Extra "|" WordPress-Extra,"|" WordPress-Extra"$) ]]
+	[[ "${output}" =~ (" WordPress-Docs "|" WordPress-Docs,"|" WordPress-Docs"$) ]]
+	[[ "${output}" =~ (" WordPress "|" WordPress,"|" WordPress"$) ]]
 	unset output
 
 	### Cleanup ###

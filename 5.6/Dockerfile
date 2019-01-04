@@ -85,9 +85,11 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 RUN set -xe; \
-	# Create a regular user/group "docker" (uid = 1000, gid = 1000 ) with access to sudo
+	# Create a regular user/group "docker" (uid = 1000, gid = 1000 )
 	groupadd docker -g 1000; \
-	useradd -m -s /bin/bash -u 1000 -g 1000 -G sudo -p docker docker; \
+	useradd -m -s /bin/bash -u 1000 -g 1000 -p docker docker; \
+	# Give the docker user sudo access
+	usermod -a -G sudo docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 ENV GOSU_VERSION=1.10 \
@@ -252,34 +254,22 @@ RUN set -xe; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
-# Ruby
-RUN set -xe; \
-	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		ruby-full \
-		rlwrap \
-	;\
-	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*; \
-	# bundler
-	gem install bundler >/dev/null; \
-	# Have bundler install gems locally (./.bundle) by default
-	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile
-
 # All further RUN commands will run as the "docker" user
 USER docker
+SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
 ENV MG_CODEGEN_VERSION=1.10.2 \
 	TERMINUS_VERSION=1.9.0 \
 	DRUSH_BACKDROP_VERSION=0.0.6
-RUN set -xe; \
+# Don't use -x here, as the output may be excessive
+RUN set -e; \
 	\
 	# Set drush8 as a global fallback for Drush Launcher
-	echo "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
+	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin directory to PATH
-	echo "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
+	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
 	# Reload updated PATH from profile to make composer/drush/etc. visible below
 	. $HOME/.profile; \
 	# Install cgr to use it in-place of `composer global require`
@@ -306,7 +296,7 @@ ENV \
 	NVM_VERSION=0.33.11 \
 	NODE_VERSION=8.12.0 \
 	YARN_VERSION=1.12.0
-# Don't use -x here, as nvm prints too much stuff
+# Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
 	export PROFILE="$HOME/.profile"; \
@@ -317,12 +307,69 @@ RUN set -e; \
 	export YARN_PROFILE="$HOME/.profile"; \
 	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
 
+# Ruby (installed as user)
+ENV \
+	RVM_VERSION_INSTALL=1.29.6 \
+	RUBY_VERSION_INSTALL=2.6.0
+# Don't use -x here, as the output may be excessive
+RUN set -e; \
+	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
+	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
+	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
+	\
+	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
+	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
+	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION_INSTALL}/binscripts/rvm-installer | bash -s -- --ignore-dotfiles --version ${RVM_VERSION_INSTALL}; \
+	{ \
+		echo ''; \
+		echo 'export PATH="$PATH:$HOME/.rvm/bin"'; \
+		echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'; \
+	} >> $HOME/.profile; \
+	# Reload $HOME/.profile to apply settings for the current shell
+	. $HOME/.profile; \
+	\
+	# rvm.io does not currently have ruby binaries for Debian 9, so Ruby is compiled from source, which requires a bunch
+	# of extra dependencies installed (rvm installs these automatically), which bloat this image:
+	# rvm/ruby required packages: gawk, automake, bison, libffi-dev, libgdbm-dev, libncurses5-dev, libsqlite3-dev, libtool, libyaml-dev, sqlite3, zlib1g-dev, libgmp-dev, libreadline-dev, libssl-dev
+	rvm install ruby-${RUBY_VERSION_INSTALL}; \
+	rvm use ruby-${RUBY_VERSION_INSTALL} --default; \
+	\
+	gem install bundler; \
+	# Have bundler install gems locally (./.bundle) by default
+	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile; \
+	\
+	rvm cleanup all; \
+	rvm gemset globalcache enable
+
+# Python (installed as user)
+ENV \
+	PYENV_VERSION_INSTALL=1.2.7
+#	PYTHON_VERSION_INSTALL=3.7.0
+RUN set -xe; \
+	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
+	rm -rf $HOME/.pyenv/.git; \
+	{ \
+		echo ''; \
+		echo 'export PYENV_ROOT="$HOME/.pyenv"'; \
+		echo 'export PATH="$PYENV_ROOT/bin:$PATH"'; \
+		echo 'eval "$(pyenv init -)"'; \
+	} >> $HOME/.profile
+# Disabled for now - uses too much space (~200MB).
+# The upsteam Debian 9 image ships with Python 2.7 out of the box, so we'll stick with that by default.
+#	# Reload $HOME/.profile to apply settings for the current shell
+#	. $HOME/.profile; \
+#	pyenv install ${PYTHON_VERSION_INSTALL}; \
+#	pyenv global ${PYTHON_VERSION_INSTALL}
+
 USER root
+SHELL ["/bin/sh", "-c"]
 
 # Copy mhsendmail binary from stage 1
 COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 # Copy configs and scripts
 COPY --chown=docker:docker config/.drush /home/docker/.drush
+COPY --chown=docker:docker config/.terminus /home/docker/.terminus
 COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh

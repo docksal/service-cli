@@ -8,7 +8,7 @@ RUN set -xe; \
   go get github.com/mailhog/mhsendmail
 
 # Build the image
-FROM php:7.2-fpm
+FROM php:7.3-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
@@ -82,7 +82,6 @@ RUN set -xe; \
 		sudo \
 		supervisor \
 		unzip \
-		webp \
 		zip \
 	;\
 	# Cleanup
@@ -139,12 +138,9 @@ RUN set -xe; \
 		libmhash-dev \
 		libpng-dev \
 		libpq-dev \
-		libwebp-dev \
 		libssh2-1-dev \
-		libxpm-dev \
 		libxslt1-dev \
-		unixodbc-dev \
-		zlib1g-dev \
+		libzip-dev \
 	"; \
 	apt-get update >/dev/null; \
 	# Necessary for msodbcsql17 (MSSQL)
@@ -168,23 +164,19 @@ RUN set -xe; \
 		libpq5 \
 		libssh2-1 \
 		libxslt1.1 \
+		libzip4 \
 		msodbcsql17 \
-		zlib1g \
 	;\
 	# SSH2 must be installed from source
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
 	# XDEBUG must be installed from source
 	git clone https://github.com/xdebug/xdebug.git /usr/src/php/ext/xdebug && rm -rf /usr/src/php/ext/xdebug/.git; \
 	\
-	docker-php-ext-configure >/dev/null gd \
-		--with-freetype-dir=/usr/include/ \
-		--with-jpeg-dir=/usr/include/ \
-		--with-webp-dir=/usr/include/ \
-		--with-png-dir=/usr/include/ \
-		--with-xpm-dir=/usr/include/; \
+	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
+	docker-php-ext-configure >/dev/null zip --with-libzip; \
 	\
 	docker-php-ext-install >/dev/null -j$(nproc) \
 		bcmath \
@@ -217,18 +209,20 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		pdo_sqlsrv \
+		# sqlsrv is currently not supported in PHP 7.3
+		#pdo_sqlsrv \
 		redis \
-		sqlsrv \
+		#sqlsrv \
 	;\
 	docker-php-ext-enable \
 		apcu \
 		gnupg \
 		imagick \
 		memcached \
-		pdo_sqlsrv \
+		# sqlsrv is currently not supported in PHP 7.3
+		#pdo_sqlsrv \
 		redis \
-		sqlsrv \
+		#sqlsrv \
 	;\
 	# Disable xdebug by default
 	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
