@@ -166,7 +166,6 @@ RUN set -xe; \
 		libxslt1.1 \
 		libzip4 \
 		msodbcsql17 \
-		unixodbc-dev \
 	;\
 	# SSH2 must be installed from source
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
@@ -210,7 +209,7 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		# SQLSRV Is currently not supported in 7.3
+		# sqlsrv is currently not supported in PHP 7.3
 		#pdo_sqlsrv \
 		redis \
 		#sqlsrv \
@@ -220,7 +219,7 @@ RUN set -xe; \
 		gnupg \
 		imagick \
 		memcached \
-		# SQLSRV Is currently not supported in 7.3
+		# sqlsrv is currently not supported in PHP 7.3
 		#pdo_sqlsrv \
 		redis \
 		#sqlsrv \
@@ -259,34 +258,22 @@ RUN set -xe; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
-# Ruby
-RUN set -xe; \
-	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		ruby-full \
-		rlwrap \
-	;\
-	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*; \
-	# bundler
-	gem install bundler >/dev/null; \
-	# Have bundler install gems locally (./.bundle) by default
-	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile
-
 # All further RUN commands will run as the "docker" user
 USER docker
+SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
 ENV MG_CODEGEN_VERSION=1.10.2 \
 	TERMINUS_VERSION=1.9.0 \
 	DRUSH_BACKDROP_VERSION=0.0.6
-RUN set -xe; \
+# Don't use -x here, as the output may be excessive
+RUN set -e; \
 	\
 	# Set drush8 as a global fallback for Drush Launcher
-	echo "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
+	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin directory to PATH
-	echo "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
+	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
 	# Reload updated PATH from profile to make composer/drush/etc. visible below
 	. $HOME/.profile; \
 	# Install cgr to use it in-place of `composer global require`
@@ -313,7 +300,7 @@ ENV \
 	NVM_VERSION=0.33.11 \
 	NODE_VERSION=8.12.0 \
 	YARN_VERSION=1.12.0
-# Don't use -x here, as nvm prints too much stuff
+# Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
 	export PROFILE="$HOME/.profile"; \
@@ -326,35 +313,61 @@ RUN set -e; \
 
 # Ruby (installed as user)
 ENV \
-	RVM_VERSION=1.29.4 \
-	RUBY_VERSION=2.5.3
-
-RUN set -xe; \
-        curl -sSL https://rvm.io/mpapis.asc | gpg --no-tty --import -; \
-	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION}/binscripts/rvm-installer | bash -s -- --version ${RVM_VERSION}; \
-        bash -lc 'rvm install ruby-${RUBY_VERSION}'; \
+	RVM_VERSION_INSTALL=1.29.6 \
+	RUBY_VERSION_INSTALL=2.6.0
+# Don't use -x here, as the output may be excessive
+RUN set -e; \
+	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
+	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
+	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
+	\
+	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
+	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
+	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION_INSTALL}/binscripts/rvm-installer | bash -s -- --ignore-dotfiles --version ${RVM_VERSION_INSTALL}; \
+	{ \
+		echo ''; \
+		echo 'export PATH="$PATH:$HOME/.rvm/bin"'; \
+		echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'; \
+	} >> $HOME/.profile; \
+	# Reload $HOME/.profile to apply settings for the current shell
+	. $HOME/.profile; \
+	\
+	# rvm.io does not currently have ruby binaries for Debian 9, so Ruby is compiled from source, which requires a bunch
+	# of extra dependencies installed (rvm installs these automatically), which bloat this image:
+	# rvm/ruby required packages: gawk, automake, bison, libffi-dev, libgdbm-dev, libncurses5-dev, libsqlite3-dev, libtool, libyaml-dev, sqlite3, zlib1g-dev, libgmp-dev, libreadline-dev, libssl-dev
+	rvm install ruby-${RUBY_VERSION_INSTALL}; \
+	rvm use ruby-${RUBY_VERSION_INSTALL} --default; \
+	\
+	gem install bundler; \
 	# Have bundler install gems locally (./.bundle) by default
-	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile; \
-        bash -lc 'gem install bundler'; \
-        bash -lc 'rvm cleanup all'; \
-        bash -lc 'rvm gemset globalcache enable'
+	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile; \
+	\
+	rvm cleanup all; \
+	rvm gemset globalcache enable
 
 # Python (installed as user)
 ENV \
-# Don not rename variable $_PYENV_VERSION to $PYENV_VERSION!!! pyenv use PYENV_VERSION variable for setting default PYTHON version, NOT PYENV version! Wrong PYENV_VERSION value will broke python!
-	_PYENV_VERSION=1.2.7 \
-	PYTHON_VERSION=3.7.0
-
+	PYENV_VERSION_INSTALL=1.2.7
+#	PYTHON_VERSION_INSTALL=3.7.0
 RUN set -xe; \
-	git clone --depth 1 -b v${_PYENV_VERSION} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
+	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
 	rm -rf $HOME/.pyenv/.git; \
-	echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.profile; \
-	echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.profile; \
-	echo 'eval "$(pyenv init -)"' >> $HOME/.profile; \
-	bash -lc 'pyenv install ${PYTHON_VERSION}'; \
-	bash -lc 'pyenv global ${PYTHON_VERSION}'
+	{ \
+		echo ''; \
+		echo 'export PYENV_ROOT="$HOME/.pyenv"'; \
+		echo 'export PATH="$PYENV_ROOT/bin:$PATH"'; \
+		echo 'eval "$(pyenv init -)"'; \
+	} >> $HOME/.profile
+# Disabled for now - uses too much space (~200MB).
+# The upsteam Debian 9 image ships with Python 2.7 out of the box, so we'll stick with that by default.
+#	# Reload $HOME/.profile to apply settings for the current shell
+#	. $HOME/.profile; \
+#	pyenv install ${PYTHON_VERSION_INSTALL}; \
+#	pyenv global ${PYTHON_VERSION_INSTALL}
 
 USER root
+SHELL ["/bin/sh", "-c"]
 
 # Copy mhsendmail binary from stage 1
 COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
