@@ -160,6 +160,8 @@ RUN set -xe; \
 		libpq5 \
 		libssh2-1 \
 		libsybdb5 \
+		libxpm4 \
+		libvpx4 \
 		libxslt1.1 \
 		zlib1g \
 	;\
