@@ -23,11 +23,13 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
   - `2.4-php7.0`, `php7.0` - PHP 7.0
   - `2.4-php7.1`, `php7.1` - PHP 7.1
   - `2.4-php7.2`, `php7.2`, `latest` - PHP 7.2
+  - `2.4-php7.3`, `php7.3` - PHP 7.3
 - Development versions
   - `edge-php5.6` - PHP 5.6
   - `edge-php7.0` - PHP 7.0
   - `edge-php7.1` - PHP 7.1
   - `edge-php7.2` - PHP 7.2
+  - `edge-php7.3` - PHP 7.3
 
 
 ## Supported languages and tools
@@ -221,6 +223,7 @@ Starting with version 2.3, there is the `ide` flavor of the images, which comes 
 2.4-php7.0-ide
 2.4-php7.1-ide
 2.4-php7.2-ide
+2.4-php7.3-ide
 ``` 
 
 [See docs](https://docs.docksal.io/en/master/tools/cloud9/) for using Cloud 9 in Docksal.
