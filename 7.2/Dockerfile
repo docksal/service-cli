@@ -134,8 +134,8 @@ RUN set -xe; \
 		libssh2-1-dev \
 		libxpm-dev \
 		libxslt1-dev \
+		libzip-dev \
 		unixodbc-dev \
-		zlib1g-dev \
 	"; \
 	apt-get update >/dev/null; \
 	# Necessary for msodbcsql17 (MSSQL)
@@ -160,8 +160,8 @@ RUN set -xe; \
 		libssh2-1 \
 		libxpm4 \
 		libxslt1.1 \
+		libzip4 \
 		msodbcsql17 \
-		zlib1g \
 	;\
 	# SSH2 must be installed from source
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
@@ -177,6 +177,7 @@ RUN set -xe; \
 	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
+	docker-php-ext-configure >/dev/null zip --with-libzip; \
 	\
 	docker-php-ext-install >/dev/null -j$(nproc) \
 		bcmath \
