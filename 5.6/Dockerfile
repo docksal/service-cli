@@ -302,14 +302,19 @@ RUN set -e; \
 
 # Ruby (installed as user)
 ENV \
-	RVM_VERSION_INSTALL=1.29.6 \
+	RVM_VERSION_INSTALL=1.29.7 \
 	RUBY_VERSION_INSTALL=2.6.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
 	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+	# Import and trust rvm keys
+	# mpapis@gmail.com
 	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
+	echo 409B6B1796C275462A1703113804BB82D39DC0E3:6: | gpg --batch --import-ownertrust; \
+	# piotr.kuczynski@gmail.com
 	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
+	echo 7D2BAF1CF37B13E2069D6956105BD0E739499BDB:6: | gpg --batch --import-ownertrust; \
 	\
 	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
 	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
