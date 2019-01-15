@@ -1,13 +1,3 @@
-# Build mhsendmail
-FROM golang:1.8.3 as mhbuild
-ENV MHSENDMAIL_VERSION=0.2.0
-RUN set -xe; \
-  go get -d github.com/mailhog/mhsendmail; \
-  cd /go/src/github.com/mailhog/mhsendmail; \
-  git checkout tags/v${MHSENDMAIL_VERSION}; \
-  go get github.com/mailhog/mhsendmail
-
-# Build the image
 FROM php:7.3-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -71,6 +61,7 @@ RUN set -xe; \
 		# cgi-fcgi binary - used for self-testing (php-fpm)
 		libfcgi-bin \
 		mc \
+		msmtp \
 		mysql-client \
 		nano \
 		openssh-client \
@@ -378,8 +369,6 @@ RUN set -xe; \
 USER root
 SHELL ["/bin/sh", "-c"]
 
-# Copy mhsendmail binary from stage 1
-COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
 # Copy configs and scripts
 COPY --chown=docker:docker config/.drush /home/docker/.drush
 COPY --chown=docker:docker config/.terminus /home/docker/.terminus
