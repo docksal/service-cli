@@ -129,7 +129,7 @@ _healthcheck_wait ()
 	output=$(echo "$output" | sed -E 's/[[:space:]]{2,}/ => /g')
 	echo "$output" | grep "memory_limit => 256M => 256M"
 	# sendmail_path, being long, gets printed on two lines. We grep the first line only
-	echo "$output" | grep "sendmail_path => /usr/local/bin/mhsendmail --smtp-addr=mail: /usr/local/bin/mhsendmail --smtp-addr=mail:"
+	echo "$output" | grep "sendmail_path => /usr/bin/msmtp -t --host=mail -- /usr/bin/msmtp -t --host=mail --"
 	# Cleanup output after each "run"
 	unset output
 
@@ -154,7 +154,7 @@ _healthcheck_wait ()
 	unset output
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
-	echo "$output" | grep "sendmail_path => /usr/local/bin/mhsendmail --smtp-addr=mail:1025 => /usr/local/bin/mhsendmail --smtp-addr=mail:1025"
+	echo "$output" | grep "sendmail_path => /usr/bin/msmtp -t --host=mail --port=1025 => /usr/bin/msmtp -t --host=mail --port=1025"
 	unset output
 
 	# Check PHP modules
@@ -340,9 +340,9 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
-	# Check mhsendmail (does not have a flag to report its versions...)
-	run docker exec -u docker "$NAME" which mhsendmail
-	echo "$output" | grep "/usr/local/bin/mhsendmail"
+	# Check msmtp
+	run docker exec -u docker "$NAME" which msmtp
+	echo "$output" | grep "/usr/bin/msmtp"
 	unset output
 
 	### Cleanup ###
