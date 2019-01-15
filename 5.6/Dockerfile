@@ -31,7 +31,7 @@ ENV LC_ALL en_US.utf8
 RUN set -xe; \
 	sed -i 's/main/main contrib non-free/' /etc/apt/sources.list; \
 	# blackfire.io repo
-	curl -fsSL https://packagecloud.io/gpg.key | apt-key add -; \
+	curl -fsSL https://packages.blackfire.io/gpg.key | apt-key add -; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
