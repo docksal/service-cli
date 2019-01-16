@@ -233,13 +233,13 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.7.2 \
-	DRUSH_VERSION=8.1.17 \
+ENV COMPOSER_VERSION=1.8.0 \
+	DRUSH_VERSION=8.1.18 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.8.0 \
 	WPCLI_VERSION=2.0.1 \
-	BLACKFIRE_VERSION=1.20.0 \
-	PLATFORMSH_CLI_VERSION=3.35.1
+	BLACKFIRE_VERSION=1.22.0 \
+	PLATFORMSH_CLI_VERSION=3.38.1
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -265,7 +265,7 @@ SHELL ["/bin/bash", "-c"]
 # PHP tools (installed as user)
 ENV MG_CODEGEN_VERSION=1.10.2 \
 	TERMINUS_VERSION=1.9.0 \
-	DRUSH_BACKDROP_VERSION=0.0.6
+	DRUSH_BACKDROP_VERSION=0.1.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
@@ -297,7 +297,7 @@ RUN set -e; \
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.33.11 \
+	NVM_VERSION=0.34.0 \
 	NODE_VERSION=10.15.0 \
 	YARN_VERSION=1.13.0
 # Don't use -x here, as the output may be excessive
@@ -353,7 +353,7 @@ RUN set -e; \
 
 # Python (installed as user)
 ENV \
-	PYENV_VERSION_INSTALL=1.2.7
+	PYENV_VERSION_INSTALL=1.2.9
 #	PYTHON_VERSION_INSTALL=3.7.0
 RUN set -xe; \
 	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
