@@ -193,7 +193,6 @@ RUN set -xe; \
 		soap \
 		sockets \
 		ssh2 \
-		xdebug \
 		xsl \
 		zip \
 	;\
@@ -209,6 +208,8 @@ RUN set -xe; \
 		redis \
 		#sqlsrv \
 		ssh2-1.1.2 \
+		# There is currently no stable pecl release of xdebug for PHP 7.3
+		xdebug-2.7.0beta1 \
 	;\
 	docker-php-ext-enable \
 		apcu \
@@ -221,8 +222,6 @@ RUN set -xe; \
 		#sqlsrv \
 		ssh2 \
 	;\
-	# Disable xdebug by default
-	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \

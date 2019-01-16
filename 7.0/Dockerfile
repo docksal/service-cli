@@ -220,8 +220,6 @@ RUN set -xe; \
 		sqlsrv \
 		ssh2 \
 	;\
-	# Disable xdebug by default
-	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \
