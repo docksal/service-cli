@@ -191,7 +191,6 @@ RUN set -xe; \
 		pgsql \
 		soap \
 		sockets \
-		ssh2 \
 		xsl \
 		zip \
 	;\
