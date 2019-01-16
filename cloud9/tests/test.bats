@@ -65,7 +65,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 	# This is a dirty hack to get tests to pass on Travis.
 	# TODO: This should be replaced with a proper Cloud9 healthcheck in Dockerfile
 	sleep 10

@@ -65,7 +65,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -117,7 +119,9 @@ _healthcheck_wait ()
 		-v $(pwd)/../tests/docroot:/var/www/docroot \
 		"$IMAGE"
 	docker cp $(pwd)/../tests/scripts "$NAME:/var/www/"
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -173,7 +177,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e XDEBUG_ENABLED=1'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -201,7 +207,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -257,7 +265,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -285,7 +295,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -308,7 +320,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -331,7 +345,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -360,7 +376,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV="-e SECRET_SSH_PRIVATE_KEY"
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -381,7 +399,9 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	run docker exec -u docker "${NAME}" cat /tmp/test-startup.txt
 	[[ ${status} == 0 ]]
@@ -404,7 +424,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e SECRET_ACAPI_EMAIL -e SECRET_ACAPI_KEY'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -442,7 +464,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e SECRET_PLATFORMSH_CLI_TOKEN'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -475,7 +499,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e SECRET_TERMINUS_TOKEN'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -505,21 +531,15 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
 
-	### Tests ###
-	# Confirm output from cron is working
-
-	# Create tmp date file and confirm it's empty
-	docker exec -u docker "$NAME" bash -lc 'touch /tmp/date.txt'
-	run docker exec -u docker "$NAME" bash -lc 'cat /tmp/date.txt'
-	[[ "${output}" == "" ]]
+	run _healthcheck_wait
 	unset output
 
-	# Sleep for 60+1 seconds so cron can run again.
-	sleep 61
+	### Tests ###
 
-	# Confirm cron has ran and file contents has changed
+	# Give cron 60s to invoke the scheduled test job
+	sleep 60
+	# Confirm cron has run and file contents has changed
 	run docker exec -u docker "$NAME" bash -lc 'tail -1 /tmp/date.txt'
 	[[ "${output}" =~ "The current date is " ]]
 	unset output
@@ -533,7 +553,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e GIT_USER_EMAIL=git@example.com -e GIT_USER_NAME="Docksal CLI"'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -555,19 +577,19 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
 	# Check PHPCS libraries loaded
-	run docker exec -u docker "$NAME" bash -lc 'phpcs -i'
-	[[ "${output}" =~ (" DrupalPractice "|" DrupalPractice,"|" DrupalPractice"$) ]]
-	[[ "${output}" =~ (" Drupal "|" Drupal,"|" Drupal"$) ]]
-	[[ "${output}" =~ (" WordPress-VIP "|" WordPress-VIP,"|" WordPress-VIP"$) ]]
-	[[ "${output}" =~ (" WordPress-Core "|" WordPress-Core,"|" WordPress-Core"$) ]]
-	[[ "${output}" =~ (" WordPress-Extra "|" WordPress-Extra,"|" WordPress-Extra"$) ]]
-	[[ "${output}" =~ (" WordPress-Docs "|" WordPress-Docs,"|" WordPress-Docs"$) ]]
-	[[ "${output}" =~ (" WordPress "|" WordPress,"|" WordPress"$) ]]
+	# Normalize the output from phpcs -i so it's easier to do matches
+	run docker exec -u docker "$NAME" bash -lc "phpcs -i | sed 's/,//g'"
+	output="${output} "
+	[[ "${output}" =~ " Drupal " ]]
+	[[ "${output}" =~ " DrupalPractice " ]]
+	[[ "${output}" =~ " WordPress " ]] # Includes WordPress-Core, WordPress-Docs and WordPress-Extra
 	unset output
 
 	### Cleanup ###
@@ -579,7 +601,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
