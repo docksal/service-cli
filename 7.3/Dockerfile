@@ -202,10 +202,9 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		# sqlsrv is currently not supported in PHP 7.3
-		#pdo_sqlsrv \
+		#pdo_sqlsrv - currently not supported in PHP 7.3
 		redis \
-		#sqlsrv \
+		#sqlsrv - currently not supported in PHP 7.3
 		ssh2-1.1.2 \
 		# There is currently no stable pecl release of xdebug for PHP 7.3
 		xdebug-2.7.0beta1 \
@@ -215,10 +214,9 @@ RUN set -xe; \
 		gnupg \
 		imagick \
 		memcached \
-		# sqlsrv is currently not supported in PHP 7.3
-		#pdo_sqlsrv \
+		#pdo_sqlsrv - currently not supported in PHP 7.3
 		redis \
-		#sqlsrv \
+		#sqlsrv - currently not supported in PHP 7.3
 		ssh2 \
 	;\
 	# Cleanup
