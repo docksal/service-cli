@@ -163,11 +163,6 @@ RUN set -xe; \
 		libzip4 \
 		msodbcsql17 \
 	;\
-	# SSH2 must be installed from source
-	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
-	# XDEBUG must be installed from source
-	git clone https://github.com/xdebug/xdebug.git /usr/src/php/ext/xdebug && rm -rf /usr/src/php/ext/xdebug/.git; \
-	\
 	docker-php-ext-configure >/dev/null gd \
 		--with-freetype-dir=/usr/include/ \
 		--with-jpeg-dir=/usr/include/ \
@@ -213,6 +208,7 @@ RUN set -xe; \
 		pdo_sqlsrv \
 		redis \
 		sqlsrv \
+		ssh2-1.1.2 \
 	;\
 	docker-php-ext-enable \
 		apcu \
@@ -222,6 +218,7 @@ RUN set -xe; \
 		pdo_sqlsrv \
 		redis \
 		sqlsrv \
+		ssh2 \
 	;\
 	# Disable xdebug by default
 	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
