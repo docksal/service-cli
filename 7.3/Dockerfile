@@ -160,6 +160,9 @@ RUN set -xe; \
 		libzip4 \
 		msodbcsql17 \
 	;\
+	# SSH2 must be installed from source for PHP 7.x
+	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
+	\
 	docker-php-ext-configure >/dev/null gd \
 		--with-freetype-dir=/usr/include/ \
 		--with-jpeg-dir=/usr/include/ \
@@ -191,6 +194,7 @@ RUN set -xe; \
 		pgsql \
 		soap \
 		sockets \
+		ssh2 \
 		xsl \
 		zip \
 	;\
@@ -204,7 +208,6 @@ RUN set -xe; \
 		#pdo_sqlsrv - currently not supported in PHP 7.3
 		redis \
 		#sqlsrv - currently not supported in PHP 7.3
-		ssh2-1.1.2 \
 		# There is currently no stable pecl release of xdebug for PHP 7.3
 		xdebug-2.7.0beta1 \
 	;\
@@ -216,7 +219,6 @@ RUN set -xe; \
 		#pdo_sqlsrv - currently not supported in PHP 7.3
 		redis \
 		#sqlsrv - currently not supported in PHP 7.3
-		ssh2 \
 	;\
 	# Cleanup
 	docker-php-source delete; \

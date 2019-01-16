@@ -163,6 +163,9 @@ RUN set -xe; \
 		libzip4 \
 		msodbcsql17 \
 	;\
+	# SSH2 must be installed from source for PHP 7.x
+	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
+	\
 	docker-php-ext-configure >/dev/null gd \
 		--with-freetype-dir=/usr/include/ \
 		--with-jpeg-dir=/usr/include/ \
@@ -194,6 +197,7 @@ RUN set -xe; \
 		pgsql \
 		soap \
 		sockets \
+		ssh2 \
 		xsl \
 		zip \
 	;\
@@ -207,7 +211,6 @@ RUN set -xe; \
 		pdo_sqlsrv \
 		redis \
 		sqlsrv \
-		ssh2-1.1.2 \
 		xdebug \
 	;\
 	docker-php-ext-enable \
@@ -218,7 +221,6 @@ RUN set -xe; \
 		pdo_sqlsrv \
 		redis \
 		sqlsrv \
-		ssh2 \
 	;\
 	# Cleanup
 	docker-php-source delete; \
