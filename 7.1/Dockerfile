@@ -184,6 +184,7 @@ RUN set -xe; \
 		imap \
 		intl \
 		ldap \
+		# mcrypt is deprecated in 7.1 and removed in 7.2. See Deprecated features.
 		mcrypt \
 		mysqli \
 		opcache \

@@ -125,7 +125,6 @@ RUN set -xe; \
 		libldap2-dev \
 		libmagickcore-dev \
 		libmagickwand-dev \
-		libmcrypt-dev \
 		libmemcached-dev \
 		libmhash-dev \
 		libpng-dev \
@@ -151,7 +150,6 @@ RUN set -xe; \
 		libldap-2.4-2 \
 		libmagickcore-6.q16-3 \
 		libmagickwand-6.q16-3 \
-		libmcrypt4 \
 		libmemcached11 \
 		libmemcachedutil2 \
 		libmhash2 \
@@ -184,7 +182,8 @@ RUN set -xe; \
 		imap \
 		intl \
 		ldap \
-		# mcrypt is removed from 7.2. See Deprecated features
+		# mcrypt is deprecated in 7.1 and removed in 7.2. See Deprecated features.
+		# mcrypt \
 		mysqli \
 		opcache \
 		pcntl \
