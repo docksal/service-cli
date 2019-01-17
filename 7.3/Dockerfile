@@ -125,7 +125,6 @@ RUN set -xe; \
 		libldap2-dev \
 		libmagickcore-dev \
 		libmagickwand-dev \
-		libmcrypt-dev \
 		libmemcached-dev \
 		libmhash-dev \
 		libpng-dev \
@@ -150,7 +149,6 @@ RUN set -xe; \
 		libldap-2.4-2 \
 		libmagickcore-6.q16-3 \
 		libmagickwand-6.q16-3 \
-		libmcrypt4 \
 		libmemcached11 \
 		libmemcachedutil2 \
 		libmhash2 \
@@ -162,10 +160,8 @@ RUN set -xe; \
 		libzip4 \
 		msodbcsql17 \
 	;\
-	# SSH2 must be installed from source
+	# SSH2 must be installed from source for PHP 7.x
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
-	# XDEBUG must be installed from source
-	git clone https://github.com/xdebug/xdebug.git /usr/src/php/ext/xdebug && rm -rf /usr/src/php/ext/xdebug/.git; \
 	\
 	docker-php-ext-configure >/dev/null gd \
 		--with-freetype-dir=/usr/include/ \
@@ -188,7 +184,8 @@ RUN set -xe; \
 		imap \
 		intl \
 		ldap \
-		# mcrypt is removed from 7.2. See Deprecated features
+		# mcrypt is deprecated in 7.1 and removed in 7.2. See Deprecated features.
+		# mcrypt \
 		mysqli \
 		opcache \
 		pcntl \
@@ -198,7 +195,6 @@ RUN set -xe; \
 		soap \
 		sockets \
 		ssh2 \
-		xdebug \
 		xsl \
 		zip \
 	;\
@@ -209,23 +205,21 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		# sqlsrv is currently not supported in PHP 7.3
-		#pdo_sqlsrv \
+		#pdo_sqlsrv - currently not supported in PHP 7.3
 		redis \
-		#sqlsrv \
+		#sqlsrv - currently not supported in PHP 7.3
+		# There is currently no stable pecl release of xdebug for PHP 7.3
+		xdebug-2.7.0beta1 \
 	;\
 	docker-php-ext-enable \
 		apcu \
 		gnupg \
 		imagick \
 		memcached \
-		# sqlsrv is currently not supported in PHP 7.3
-		#pdo_sqlsrv \
+		#pdo_sqlsrv - currently not supported in PHP 7.3
 		redis \
-		#sqlsrv \
+		#sqlsrv - currently not supported in PHP 7.3
 	;\
-	# Disable xdebug by default
-	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \

@@ -125,7 +125,6 @@ RUN set -xe; \
 		libldap2-dev \
 		libmagickcore-dev \
 		libmagickwand-dev \
-		libmcrypt-dev \
 		libmemcached-dev \
 		libmhash-dev \
 		libpng-dev \
@@ -151,7 +150,6 @@ RUN set -xe; \
 		libldap-2.4-2 \
 		libmagickcore-6.q16-3 \
 		libmagickwand-6.q16-3 \
-		libmcrypt4 \
 		libmemcached11 \
 		libmemcachedutil2 \
 		libmhash2 \
@@ -163,10 +161,8 @@ RUN set -xe; \
 		libzip4 \
 		msodbcsql17 \
 	;\
-	# SSH2 must be installed from source
+	# SSH2 must be installed from source for PHP 7.x
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
-	# XDEBUG must be installed from source
-	git clone https://github.com/xdebug/xdebug.git /usr/src/php/ext/xdebug && rm -rf /usr/src/php/ext/xdebug/.git; \
 	\
 	docker-php-ext-configure >/dev/null gd \
 		--with-freetype-dir=/usr/include/ \
@@ -189,7 +185,8 @@ RUN set -xe; \
 		imap \
 		intl \
 		ldap \
-		# mcrypt is removed from 7.2. See Deprecated features
+		# mcrypt is deprecated in 7.1 and removed in 7.2. See Deprecated features.
+		# mcrypt \
 		mysqli \
 		opcache \
 		pcntl \
@@ -199,7 +196,6 @@ RUN set -xe; \
 		soap \
 		sockets \
 		ssh2 \
-		xdebug \
 		xsl \
 		zip \
 	;\
@@ -213,6 +209,7 @@ RUN set -xe; \
 		pdo_sqlsrv \
 		redis \
 		sqlsrv \
+		xdebug \
 	;\
 	docker-php-ext-enable \
 		apcu \
@@ -223,8 +220,6 @@ RUN set -xe; \
 		redis \
 		sqlsrv \
 	;\
-	# Disable xdebug by default
-	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \

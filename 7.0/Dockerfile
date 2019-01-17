@@ -163,7 +163,7 @@ RUN set -xe; \
 		libzip4 \
 		msodbcsql17 \
 	;\
-	# SSH2 must be installed from source
+	# SSH2 must be installed from source for PHP 7.x
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
 	\
 	docker-php-ext-configure >/dev/null gd \
@@ -221,8 +221,6 @@ RUN set -xe; \
 		redis \
 		sqlsrv \
 	;\
-	# Disable xdebug by default
-	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \
