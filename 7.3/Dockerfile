@@ -1,4 +1,4 @@
-FROM php:7.1-fpm
+FROM php:7.3-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
@@ -125,7 +125,6 @@ RUN set -xe; \
 		libldap2-dev \
 		libmagickcore-dev \
 		libmagickwand-dev \
-		libmcrypt-dev \
 		libmemcached-dev \
 		libmhash-dev \
 		libpng-dev \
@@ -135,7 +134,6 @@ RUN set -xe; \
 		libxpm-dev \
 		libxslt1-dev \
 		libzip-dev \
-		unixodbc-dev \
 	"; \
 	apt-get update >/dev/null; \
 	# Necessary for msodbcsql17 (MSSQL)
@@ -151,7 +149,6 @@ RUN set -xe; \
 		libldap-2.4-2 \
 		libmagickcore-6.q16-3 \
 		libmagickwand-6.q16-3 \
-		libmcrypt4 \
 		libmemcached11 \
 		libmemcachedutil2 \
 		libmhash2 \
@@ -188,7 +185,7 @@ RUN set -xe; \
 		intl \
 		ldap \
 		# mcrypt is deprecated in 7.1 and removed in 7.2. See Deprecated features.
-		mcrypt \
+		# mcrypt \
 		mysqli \
 		opcache \
 		pcntl \
@@ -208,19 +205,20 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		pdo_sqlsrv \
+		#pdo_sqlsrv - currently not supported in PHP 7.3
 		redis \
-		sqlsrv \
-		xdebug \
+		#sqlsrv - currently not supported in PHP 7.3
+		# There is currently no stable pecl release of xdebug for PHP 7.3
+		xdebug-2.7.0beta1 \
 	;\
 	docker-php-ext-enable \
 		apcu \
 		gnupg \
 		imagick \
 		memcached \
-		pdo_sqlsrv \
+		#pdo_sqlsrv - currently not supported in PHP 7.3
 		redis \
-		sqlsrv \
+		#sqlsrv - currently not supported in PHP 7.3
 	;\
 	# Cleanup
 	docker-php-source delete; \

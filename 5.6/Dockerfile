@@ -1,13 +1,3 @@
-# Build mhsendmail
-FROM golang:1.8.3 as mhbuild
-ENV MHSENDMAIL_VERSION=0.2.0
-RUN set -xe; \
-  go get -d github.com/mailhog/mhsendmail; \
-  cd /go/src/github.com/mailhog/mhsendmail; \
-  git checkout tags/v${MHSENDMAIL_VERSION}; \
-  go get github.com/mailhog/mhsendmail
-
-# Build the image
 FROM php:5.6-fpm
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -41,7 +31,7 @@ ENV LC_ALL en_US.utf8
 RUN set -xe; \
 	sed -i 's/main/main contrib non-free/' /etc/apt/sources.list; \
 	# blackfire.io repo
-	curl -fsSL https://packagecloud.io/gpg.key | apt-key add -; \
+	curl -fsSL https://packages.blackfire.io/gpg.key | apt-key add -; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
@@ -68,6 +58,7 @@ RUN set -xe; \
 		# cgi-fcgi binary - used for self-testing (php-fpm)
 		libfcgi-bin \
 		mc \
+		msmtp \
 		mysql-client \
 		nano \
 		openssh-client \
@@ -85,13 +76,15 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 RUN set -xe; \
-	# Create a regular user/group "docker" (uid = 1000, gid = 1000 ) with access to sudo
+	# Create a regular user/group "docker" (uid = 1000, gid = 1000 )
 	groupadd docker -g 1000; \
-	useradd -m -s /bin/bash -u 1000 -g 1000 -G sudo -p docker docker; \
+	useradd -m -s /bin/bash -u 1000 -g 1000 -p docker docker; \
+	# Give the docker user sudo access
+	usermod -a -G sudo docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 ENV GOSU_VERSION=1.10 \
-	GOMPLATE_VERSION=2.4.0
+	GOMPLATE_VERSION=3.0.0
 RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
 	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
@@ -135,6 +128,8 @@ RUN set -xe; \
 		libpng-dev \
 		libpq-dev \
 		libssh2-1-dev \
+		libxpm-dev \
+		libvpx-dev \
 		libxslt1-dev \
 		zlib1g-dev \
 	"; \
@@ -156,10 +151,17 @@ RUN set -xe; \
 		libpq5 \
 		libssh2-1 \
 		libsybdb5 \
+		libxpm4 \
+		libvpx4 \
 		libxslt1.1 \
 		zlib1g \
 	;\
-	docker-php-ext-configure >/dev/null gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/; \
+	docker-php-ext-configure >/dev/null gd \
+		--with-freetype-dir=/usr/include/ \
+		--with-jpeg-dir=/usr/include/ \
+		--with-vpx-dir=/usr/include/ \
+		--with-png-dir=/usr/include/ \
+		--with-xpm-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	# mssql can be install in PHP 5.6 only. pdo_dblib is available in PHP 7.0+ as well.
@@ -211,8 +213,6 @@ RUN set -xe; \
 		redis \
 		ssh2 \
 	;\
-	# Disable xdebug by default
-	rm -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \
@@ -220,13 +220,13 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.6.3 \
-	DRUSH_VERSION=8.1.16 \
+ENV COMPOSER_VERSION=1.8.0 \
+	DRUSH_VERSION=8.1.18 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.7.0 \
-	WPCLI_VERSION=1.5.0 \
-	BLACKFIRE_VERSION=1.15.0 \
-	PLATFORMSH_CLI_VERSION=3.33.5
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.8.0 \
+	WPCLI_VERSION=2.0.1 \
+	BLACKFIRE_VERSION=1.22.0 \
+	PLATFORMSH_CLI_VERSION=3.38.1
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -245,42 +245,31 @@ RUN set -xe; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
-# Ruby
-RUN set -xe; \
-	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		ruby-full \
-		rlwrap \
-	;\
-	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*; \
-	# bundler
-	gem install bundler >/dev/null; \
-	# Have bundler install gems locally (./.bundle) by default
-	echo "\n""export BUNDLE_PATH=.bundle" >> /home/docker/.profile
-
 # All further RUN commands will run as the "docker" user
 USER docker
+SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
-ENV MG_CODEGEN_VERSION=1.10 \
-	TERMINUS_VERSION=1.8.1
-RUN set -xe; \
+ENV MG_CODEGEN_VERSION=1.10.2 \
+	TERMINUS_VERSION=1.9.0 \
+	DRUSH_BACKDROP_VERSION=0.1.0
+# Don't use -x here, as the output may be excessive
+RUN set -e; \
 	\
 	# Set drush8 as a global fallback for Drush Launcher
-	echo "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
+	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin directory to PATH
-	echo "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
+	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
 	# Reload updated PATH from profile to make composer/drush/etc. visible below
 	. $HOME/.profile; \
 	# Install cgr to use it in-place of `composer global require`
 	composer global require consolidation/cgr >/dev/null; \
 	# Composer parallel install plugin
 	composer global require hirak/prestissimo >/dev/null; \
-	# Drupal Coder w/ a matching version of PHP_CodeSniffer
-	cgr drupal/coder >/dev/null; \
-	phpcs --config-set installed_paths $HOME/.composer/global/drupal/coder/vendor/drupal/coder/coder_sniffer; \
+	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
+	cgr drupal/coder wp-coding-standards/wpcs >/dev/null; \
+	phpcs --config-set installed_paths "$HOME/.composer/global/drupal/coder/vendor/drupal/coder/coder_sniffer/,$HOME/.composer/global/wp-coding-standards/wpcs/vendor/wp-coding-standards/wpcs/"; \
 	# Magento2 Code Generator
 	cgr staempfli/magento2-code-generator:${MG_CODEGEN_VERSION} >/dev/null; \
 	# Terminus
@@ -290,14 +279,15 @@ RUN set -xe; \
 	\
 	# Drush modules
 	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
+	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/drush/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
 	drush cc drush
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.33.11 \
-	NODE_VERSION=8.11.3 \
-	YARN_VERSION=1.8.0
-# Don't use -x here, as nvm prints too much stuff
+	NVM_VERSION=0.34.0 \
+	NODE_VERSION=10.15.0 \
+	YARN_VERSION=1.13.0
+# Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
 	export PROFILE="$HOME/.profile"; \
@@ -308,12 +298,72 @@ RUN set -e; \
 	export YARN_PROFILE="$HOME/.profile"; \
 	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
 
-USER root
+# Ruby (installed as user)
+ENV \
+	RVM_VERSION_INSTALL=1.29.7 \
+	RUBY_VERSION_INSTALL=2.6.0
+# Don't use -x here, as the output may be excessive
+RUN set -e; \
+	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
+	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+	# Import and trust rvm keys
+	# mpapis@gmail.com
+	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
+	echo 409B6B1796C275462A1703113804BB82D39DC0E3:6: | gpg --batch --import-ownertrust; \
+	# piotr.kuczynski@gmail.com
+	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
+	echo 7D2BAF1CF37B13E2069D6956105BD0E739499BDB:6: | gpg --batch --import-ownertrust; \
+	\
+	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
+	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
+	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION_INSTALL}/binscripts/rvm-installer | bash -s -- --ignore-dotfiles --version ${RVM_VERSION_INSTALL}; \
+	{ \
+		echo ''; \
+		echo 'export PATH="$PATH:$HOME/.rvm/bin"'; \
+		echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'; \
+	} >> $HOME/.profile; \
+	# Reload $HOME/.profile to apply settings for the current shell
+	. $HOME/.profile; \
+	\
+	# rvm.io does not currently have ruby binaries for Debian 9, so Ruby is compiled from source, which requires a bunch
+	# of extra dependencies installed (rvm installs these automatically), which bloat this image:
+	# rvm/ruby required packages: gawk, automake, bison, libffi-dev, libgdbm-dev, libncurses5-dev, libsqlite3-dev, libtool, libyaml-dev, sqlite3, zlib1g-dev, libgmp-dev, libreadline-dev, libssl-dev
+	rvm install ruby-${RUBY_VERSION_INSTALL}; \
+	rvm use ruby-${RUBY_VERSION_INSTALL} --default; \
+	\
+	gem install bundler; \
+	# Have bundler install gems locally (./.bundle) by default
+	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile; \
+	\
+	rvm cleanup all; \
+	rvm gemset globalcache enable
 
-# Copy mhsendmail binary from stage 1
-COPY --from=mhbuild /go/bin/mhsendmail /usr/local/bin/mhsendmail
+# Python (installed as user)
+ENV \
+	PYENV_VERSION_INSTALL=1.2.9
+#	PYTHON_VERSION_INSTALL=3.7.0
+RUN set -xe; \
+	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
+	rm -rf $HOME/.pyenv/.git; \
+	{ \
+		echo ''; \
+		echo 'export PYENV_ROOT="$HOME/.pyenv"'; \
+		echo 'export PATH="$PYENV_ROOT/bin:$PATH"'; \
+		echo 'eval "$(pyenv init -)"'; \
+	} >> $HOME/.profile
+# Disabled for now - uses too much space (~200MB).
+# The upsteam Debian 9 image ships with Python 2.7 out of the box, so we'll stick with that by default.
+#	# Reload $HOME/.profile to apply settings for the current shell
+#	. $HOME/.profile; \
+#	pyenv install ${PYTHON_VERSION_INSTALL}; \
+#	pyenv global ${PYTHON_VERSION_INSTALL}
+
+USER root
+SHELL ["/bin/sh", "-c"]
+
 # Copy configs and scripts
 COPY --chown=docker:docker config/.drush /home/docker/.drush
+COPY --chown=docker:docker config/.terminus /home/docker/.terminus
 COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh

@@ -52,28 +52,29 @@ tag_and_push ()
 # Possible docker image tags
 IMAGE_TAG_EDGE="edge-php${VERSION}"
 IMAGE_TAG_STABLE="php${VERSION}"
-IMAGE_TAG_RELEASE="${TRAVIS_TAG:1:3}-php${VERSION}"
+# Major version, e.g. 2-php7.2
+IMAGE_TAG_RELEASE_MAJOR="${TRAVIS_TAG:1:1}-php${VERSION}"
+# Major-minor version, e.g. 2.5-php7.2
+IMAGE_TAG_RELEASE_MAJOR_MINOR="${TRAVIS_TAG:1:3}-php${VERSION}"
 IMAGE_TAG_LATEST="latest"
 
 # Skip pull request builds
 is_pr && exit
 
-# Figure out which docker image tag to use
+docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
+
+# Push images
 if is_edge; then
-	IMAGE_TAG=${IMAGE_TAG_EDGE}
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_EDGE}
 elif is_stable; then
-	IMAGE_TAG=${IMAGE_TAG_STABLE}
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_STABLE}
 elif is_release; then
-	IMAGE_TAG=${IMAGE_TAG_RELEASE}
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_RELEASE_MAJOR}
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_RELEASE_MAJOR_MINOR}
 else
 	# Exit if not on develop, master or release tag
 	exit
 fi
-
-docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
-
-# Push images
-tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG}
 
 # Special case for the "latest" tag
 # Push (base image only) on stable and release builds

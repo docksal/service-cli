@@ -34,9 +34,6 @@ _healthcheck ()
 }
 
 # Waits for containers to become healthy
-# For reasoning why we are not using  `depends_on` `condition` see here:
-# https://github.com/docksal/docksal/issues/225#issuecomment-306604063
-# TODO: make this universal. Currently hardcoded for cli only.
 _healthcheck_wait ()
 {
 	# Wait for cli to become ready by watching its health status
@@ -52,9 +49,7 @@ _healthcheck_wait ()
 		# Give the container 30s to become ready
 		elapsed=$((elapsed + delay))
 		if ((elapsed > timeout)); then
-			echo-error "$container_name heathcheck failed" \
-				"Container did not enter a healthy state within the expected amount of time." \
-				"Try ${yellow}fin restart${NC}"
+			echo "$container_name heathcheck failed"
 			exit 1
 		fi
 	done
@@ -70,7 +65,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -122,7 +119,9 @@ _healthcheck_wait ()
 		-v $(pwd)/../tests/docroot:/var/www/docroot \
 		"$IMAGE"
 	docker cp $(pwd)/../tests/scripts "$NAME:/var/www/"
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -134,7 +133,7 @@ _healthcheck_wait ()
 	output=$(echo "$output" | sed -E 's/[[:space:]]{2,}/ => /g')
 	echo "$output" | grep "memory_limit => 256M => 256M"
 	# sendmail_path, being long, gets printed on two lines. We grep the first line only
-	echo "$output" | grep "sendmail_path => /usr/local/bin/mhsendmail --smtp-addr=mail: /usr/local/bin/mhsendmail --smtp-addr=mail:"
+	echo "$output" | grep "sendmail_path => /usr/bin/msmtp -t --host=mail -- /usr/bin/msmtp -t --host=mail --"
 	# Cleanup output after each "run"
 	unset output
 
@@ -149,12 +148,17 @@ _healthcheck_wait ()
 	echo "$output" | grep "${VERSION}"
 	unset output
 
+	# Confirm WebP support enabled for GD
+	output=$(echo "$phpInfo" | grep "WebP Support")
+	echo "$output" | grep "enabled"
+	unset output
+
 	output=$(echo "$phpInfo" | grep "memory_limit")
 	echo "$output" | grep "memory_limit => 1024M => 1024M"
 	unset output
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
-	echo "$output" | grep "sendmail_path => /usr/local/bin/mhsendmail --smtp-addr=mail:1025 => /usr/local/bin/mhsendmail --smtp-addr=mail:1025"
+	echo "$output" | grep "sendmail_path => /usr/bin/msmtp -t --host=mail --port=1025 => /usr/bin/msmtp -t --host=mail --port=1025"
 	unset output
 
 	# Check PHP modules
@@ -173,7 +177,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e XDEBUG_ENABLED=1'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -201,7 +207,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -257,7 +265,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -280,12 +290,64 @@ _healthcheck_wait ()
 	make clean
 }
 
+@test "Check Ruby tools and versions" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+
+	run _healthcheck_wait
+	unset output
+
+	### Tests ###
+
+	# rvm
+	run docker exec -u docker "$NAME" bash -lc 'rvm --version 2>&1 | grep "${RVM_VERSION_INSTALL}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# ruby
+	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VERSION_INSTALL}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "Check Python tools and versions" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+
+	run _healthcheck_wait
+	unset output
+
+	### Tests ###
+
+	# pyenv
+	run docker exec -u docker "$NAME" bash -lc 'pyenv --version 2>&1 | grep "${PYENV_VERSION_INSTALL}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# pyenv
+	run docker exec -u docker "$NAME" bash -lc 'python --version 2>&1 | grep "${PYTHON_VERSION_INSTALL}"'
+	[[ ${status} == 0 ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
 @test "Check misc tools and versions" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -294,9 +356,9 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
-	# Check mhsendmail (does not have a flag to report its versions...)
-	run docker exec -u docker "$NAME" which mhsendmail
-	echo "$output" | grep "/usr/local/bin/mhsendmail"
+	# Check msmtp
+	run docker exec -u docker "$NAME" which msmtp
+	echo "$output" | grep "/usr/bin/msmtp"
 	unset output
 
 	### Cleanup ###
@@ -314,7 +376,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV="-e SECRET_SSH_PRIVATE_KEY"
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -335,11 +399,17 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	make start
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	run docker exec -u docker "${NAME}" cat /tmp/test-startup.txt
 	[[ ${status} == 0 ]]
 	[[ "${output}" =~ "I ran properly" ]]
+
+	run docker exec -u docker "${NAME}" cat /tmp/test-startup-terminus.txt
+	[[ ${status} == 0 ]]
+	[[ "${output}" =~ "/home/docker/.composer/vendor/bin/terminus" ]]
 
 	### Cleanup ###
 	make clean
@@ -354,7 +424,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e SECRET_ACAPI_EMAIL -e SECRET_ACAPI_KEY'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -392,7 +464,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e SECRET_PLATFORMSH_CLI_TOKEN'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -425,7 +499,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e SECRET_TERMINUS_TOKEN'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -455,21 +531,15 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start
-	_healthcheck_wait
 
-	### Tests ###
-	# Confirm output from cron is working
-
-	# Create tmp date file and confirm it's empty
-	docker exec -u docker "$NAME" bash -lc 'touch /tmp/date.txt'
-	run docker exec -u docker "$NAME" bash -lc 'cat /tmp/date.txt'
-	[[ "${output}" == "" ]]
+	run _healthcheck_wait
 	unset output
 
-	# Sleep for 60+1 seconds so cron can run again.
-	sleep 61
+	### Tests ###
 
-	# Confirm cron has ran and file contents has changed
+	# Give cron 60s to invoke the scheduled test job
+	sleep 60
+	# Confirm cron has run and file contents has changed
 	run docker exec -u docker "$NAME" bash -lc 'tail -1 /tmp/date.txt'
 	[[ "${output}" =~ "The current date is " ]]
 	unset output
@@ -483,7 +553,9 @@ _healthcheck_wait ()
 
 	### Setup ###
 	make start -e ENV='-e GIT_USER_EMAIL=git@example.com -e GIT_USER_NAME="Docksal CLI"'
-	_healthcheck_wait
+
+	run _healthcheck_wait
+	unset output
 
 	### Tests ###
 
@@ -494,6 +566,50 @@ _healthcheck_wait ()
 
 	run docker exec -u docker "$NAME" bash -lc 'git config --get --global user.name'
 	[[ "${output}" == "Docksal CLI" ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "PHPCS Coding standards check" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+
+	run _healthcheck_wait
+	unset output
+
+	### Tests ###
+
+	# Check PHPCS libraries loaded
+	# Normalize the output from phpcs -i so it's easier to do matches
+	run docker exec -u docker "$NAME" bash -lc "phpcs -i | sed 's/,//g'"
+	output="${output} "
+	[[ "${output}" =~ " Drupal " ]]
+	[[ "${output}" =~ " DrupalPractice " ]]
+	[[ "${output}" =~ " WordPress " ]] # Includes WordPress-Core, WordPress-Docs and WordPress-Extra
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "Check Drush Backdrop Commands" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start
+
+	run _healthcheck_wait
+	unset output
+
+	### Tests ###
+
+	# Check Drush Backdrop command loaded
+	run docker exec -u docker "$NAME" bash -lc 'drush help backdrop-core-status'
+	[[ "${output}" =~ "Provides a birds-eye view of the current Backdrop installation, if any." ]]
 	unset output
 
 	### Cleanup ###
