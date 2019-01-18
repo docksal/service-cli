@@ -7,6 +7,11 @@ is_edge ()
 	[[ "${TRAVIS_BRANCH}" == "develop" ]]
 }
 
+is_edge_v3 ()
+{
+	[[ "${TRAVIS_BRANCH}" == "v3" ]]
+}
+
 is_stable ()
 {
 	[[ "${TRAVIS_BRANCH}" == "master" ]]
@@ -51,6 +56,7 @@ tag_and_push ()
 
 # Possible docker image tags
 IMAGE_TAG_EDGE="edge-php${VERSION}"
+IMAGE_TAG_EDGE_V3="edge-v3-php${VERSION}"
 IMAGE_TAG_STABLE="php${VERSION}"
 # Major version, e.g. 2-php7.2
 IMAGE_TAG_RELEASE_MAJOR="${TRAVIS_TAG:1:1}-php${VERSION}"
@@ -66,6 +72,8 @@ docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
 # Push images
 if is_edge; then
 	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_EDGE}
+elif is_edge_v3; then
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_EDGE_V3}
 elif is_stable; then
 	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_STABLE}
 elif is_release; then

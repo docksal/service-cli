@@ -1,31 +1,7 @@
-FROM php:7.1-fpm
+FROM docksal/php:7.1-edge
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
-
-# Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
-RUN set -xe; \
-	echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d && chmod +x /usr/sbin/policy-rc.d
-
-# Install basic packages
-RUN set -xe; \
-	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		apt-transport-https \
-		# ca-certificates and curl come from upstream
-		#ca-certificates \
-		#curl \
-		gnupg \
-		locales \
-		wget \
-	;\
-	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*
-
-# Set en_US.UTF-8 as the default locale
-RUN set -xe; \
-	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-ENV LC_ALL en_US.utf8
 
 # Enable additional repos
 RUN set -xe; \
@@ -36,32 +12,22 @@ RUN set -xe; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
 	echo 'deb https://packagecloud.io/github/git-lfs/debian stretch main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
-	echo 'deb-src https://packagecloud.io/github/git-lfs/debian stretch main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
-	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
-	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-	echo 'deb https://packages.microsoft.com/debian/9/prod stretch main' | tee /etc/apt/sources.list.d/mssql.list;
+	echo 'deb-src https://packagecloud.io/github/git-lfs/debian stretch main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list
 
-# Additional packages
+# Install additional packages
 RUN set -xe; \
-	# Create man direcotries, otherwise some packages may not install (e.g. postgresql-client)
+	# Create man directories, otherwise some packages may not install (e.g. postgresql-client)
 	# This should be a temporary workaround until fixed upstream: https://github.com/debuerreotype/debuerreotype/issues/10
-	mkdir -p /usr/share/man/man1 /usr/share/man/man7; \
+	for i in $(seq 1 8); do mkdir -p "/usr/share/man/man$i"; done; \
+	\
 	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		cron \
+	apt-get install -y --no-install-recommends >/dev/null \
 		dnsutils \
 		git \
 		git-lfs \
-		ghostscript \
-		# html2text binary - used for self-testing (php-fpm)
-		html2text \
-		imagemagick \
 		iputils-ping \
 		less \
-		# cgi-fcgi binary - used for self-testing (php-fpm)
-		libfcgi-bin \
 		mc \
-		msmtp \
 		mysql-client \
 		nano \
 		openssh-client \
@@ -73,16 +39,13 @@ RUN set -xe; \
 		sudo \
 		supervisor \
 		unzip \
-		webp \
+		wget \
 		zip \
-	;\
+	; \
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 RUN set -xe; \
-	# Create a regular user/group "docker" (uid = 1000, gid = 1000 )
-	groupadd docker -g 1000; \
-	useradd -m -s /bin/bash -u 1000 -g 1000 -p docker docker; \
 	# Give the docker user sudo access
 	usermod -a -G sudo docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -113,115 +76,20 @@ ENV NOTVISIBLE "in users profile"
 
 # PHP
 RUN set -xe; \
-	# Note: essential build tools (g++, gcc, make, etc) are included upstream as persistent packages.
-	# See https://github.com/docker-library/php/blob/4af0a8734a48ab84ee96de513aabc45418b63dc5/7.2/stretch/fpm/Dockerfile#L18-L37
 	buildDeps=" \
-		libc-client2007e-dev \
-		libfreetype6-dev \
-		libgpgme11-dev \
-		libicu-dev \
-		libjpeg62-turbo-dev \
-		libkrb5-dev \
-		libldap2-dev \
-		libmagickcore-dev \
-		libmagickwand-dev \
-		libmcrypt-dev \
-		libmemcached-dev \
-		libmhash-dev \
-		libpng-dev \
-		libpq-dev \
-		libwebp-dev \
-		libssh2-1-dev \
-		libxpm-dev \
-		libxslt1-dev \
-		libzip-dev \
-		unixodbc-dev \
 	"; \
 	apt-get update >/dev/null; \
-	# Necessary for msodbcsql17 (MSSQL)
-	ACCEPT_EULA=Y \
-	apt-get -y --no-install-recommends install >/dev/null \
+	apt-get install -y --no-install-recommends >/dev/null \
 		$buildDeps \
 		blackfire-php \
-		libc-client2007e \
-		libfreetype6 \
-		libgpgme11 \
-		libicu57 \
-		libjpeg62-turbo \
-		libldap-2.4-2 \
-		libmagickcore-6.q16-3 \
-		libmagickwand-6.q16-3 \
-		libmcrypt4 \
-		libmemcached11 \
-		libmemcachedutil2 \
-		libmhash2 \
-		libpng16-16 \
-		libpq5 \
-		libssh2-1 \
-		libxpm4 \
-		libxslt1.1 \
-		libzip4 \
-		msodbcsql17 \
-	;\
-	# SSH2 must be installed from source for PHP 7.x
-	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
-	\
-	docker-php-ext-configure >/dev/null gd \
-		--with-freetype-dir=/usr/include/ \
-		--with-jpeg-dir=/usr/include/ \
-		--with-webp-dir=/usr/include/ \
-		--with-png-dir=/usr/include/ \
-		--with-xpm-dir=/usr/include/; \
-	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
-	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
-	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
-	docker-php-ext-configure >/dev/null zip --with-libzip; \
-	\
-	docker-php-ext-install >/dev/null -j$(nproc) \
-		bcmath \
-		bz2 \
-		calendar\
-		exif \
-		gd \
-		gettext \
-		imap \
-		intl \
-		ldap \
-		# mcrypt is deprecated in 7.1 and removed in 7.2. See Deprecated features.
-		mcrypt \
-		mysqli \
-		opcache \
-		pcntl \
-		pdo_mysql \
-		pdo_pgsql \
-		pgsql \
-		soap \
-		sockets \
-		ssh2 \
-		xsl \
-		zip \
-	;\
+	; \
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \
-		apcu \
-		gnupg \
-		imagick \
-		# Use memcached (not memcache) for PHP 7.x
-		memcached \
-		pdo_sqlsrv \
-		redis \
-		sqlsrv \
 		xdebug \
-	;\
-	docker-php-ext-enable \
-		apcu \
-		gnupg \
-		imagick \
-		memcached \
-		pdo_sqlsrv \
-		redis \
-		sqlsrv \
-	;\
+	; \
+	# Use default PHP settings (development)
+	cp -f "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"; \
+	\
 	# Cleanup
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \
@@ -375,42 +243,23 @@ COPY --chown=docker:docker config/.drush /home/docker/.drush
 COPY --chown=docker:docker config/.terminus /home/docker/.terminus
 COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY startup.sh /opt/startup.sh
-COPY healthcheck.sh /opt/healthcheck.sh
-# PHP default settings, global overrides and fpm overrides
-ADD https://raw.githubusercontent.com/php/php-src/PHP-${PHP_VERSION}/php.ini-development /usr/local/etc/php/php.ini
-COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
+# PHP cli and fpm settings overrides
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
-COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
-# Create symlinks to project level overrides (if the source files are missing, nothing will break)
-RUN set -xe; \
-	ln -s /var/www/.docksal/etc/php/php.ini /usr/local/etc/php/conf.d/zzz-php.ini; \
-	ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/zzz-php-fpm.conf
+
+COPY config/docker-entrypoint.d /etc/docker-entrypoint.d
+COPY config/docker-healthcheck.d /etc/docker-healthcheck.d
 
 ENV \
 	# ssh-agent proxy socket (requires docksal/ssh-agent)
 	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
 	# Set TERM so text editors/etc. can be used
 	TERM=xterm \
-	# Allow PROJECT_ROOT to be universally used in fin custom commands (inside and outside cli)
-	PROJECT_ROOT=/var/www \
-	# Default values for HOST_UID and HOST_GUI to match the default Ubuntu user. These are used in startup.sh
-	HOST_UID=1000 \
-	HOST_GID=1000 \
 	# xdebug disabled by default
 	XDEBUG_ENABLED=0
 
-EXPOSE 9000
+# Expose additional ports
 EXPOSE 22
 EXPOSE 3000
 
-WORKDIR /var/www
-
-# Starter script
-ENTRYPOINT ["/opt/startup.sh"]
-
-# By default, launch supervisord to keep the container running.
-CMD ["supervisord"]
-
-# Health check script
-HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]
+# Use supervisord to run multiple processes in development
+CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]

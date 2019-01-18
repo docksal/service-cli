@@ -3,6 +3,7 @@ VOLUMES = \
 	-v $(CWD)/../tests:/var/www
 
 ENV = \
+	-e DEBUG \
 	-e XDEBUG_ENABLED \
 	-e SECRET_BLACKFIRE_CLIENT_ID \
 	-e SECRET_BLACKFIRE_CLIENT_TOKEN \
