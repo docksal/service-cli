@@ -346,8 +346,8 @@ RUN set -e; \
 	rvm gemset globalcache enable
 
 ENV WORDMOVE_VERSION=4.0.0
-
 RUN set -xe; \
+	. $HOME/.profile; \
 	gem install wordmove -v ${WORDMOVE_VERSION}
 
 # Python (installed as user)
