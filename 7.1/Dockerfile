@@ -347,6 +347,11 @@ RUN set -e; \
 	rvm cleanup all; \
 	rvm gemset globalcache enable
 
+ENV WORDMOVE_VERSION=4.0.0
+
+RUN set -xe; \
+	gem install wordmove -v ${WORDMOVE_VERSION}
+
 # Python (installed as user)
 ENV \
 	PYENV_VERSION_INSTALL=1.2.9
