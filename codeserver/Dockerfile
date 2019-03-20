@@ -11,7 +11,8 @@ USER docker
 ARG HOME=/home/docker
 
 ENV CODESERVER_VERSION=1.32.0-310 \
-		VSCODE_SHARE="/home/docker/.local/share/code-server" \
+                VSCODE_HOME="/home/docker/.local" \
+		VSCODE_SHARE="${VSCODE_HOME}/share/code-server" \
 		VSCODE_EXT_DIRECTORY="${VSCODE_SHARE}/extensions"
 
 ENV VSCODE_XDEBUG_VERSION=1.13.0 \
@@ -23,6 +24,8 @@ RUN \
 	# Always source user profile when provisioning as user (necessary for nvm/etc. to load)
 	. $HOME/.profile; \
 	set -xe; \
+                sudo mkdir ${VSCODE_HOME}; \
+                sudo chown -R docker:docker ${VSCODE_HOME}; \
 		# Download Code Server
 		wget -O /tmp/codeserver.tar.gz https://github.com/codercom/code-server/releases/download/${CODESERVER_VERSION}/code-server-${CODESERVER_VERSION}-linux-x64.tar.gz; \
 		#Install Code server
