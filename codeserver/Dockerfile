@@ -34,8 +34,6 @@ RUN \
 		# Install Extensions
 		install-vscode-extension https://github.com/felixfbecker/vscode-php-debug/releases/download/v${VSCODE_XDEBUG_VERSION}/php-debug.vsix felixfbecker.php-debug-${VSCODE_XDEBUG_VERSION}; \
 		install-vscode-extension https://github.com/eamodio/vscode-gitlens/releases/download/v${VSCODE_GITLENS_VERSION}/gitlens-${VSCODE_GITLENS_VERSION}.vsix eamodio.gitlens-${VSCODE_GITLENS_VERSION}; \
-	;\
-	\
 	sudo apt-get clean; \
 	sudo rm -rf /var/lib/apt/lists/*;
 
