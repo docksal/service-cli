@@ -10,15 +10,16 @@ USER docker
 
 ARG HOME=/home/docker
 
-ENV CODESERVER_VERSION=1.32.0-310 \
-                VSCODE_HOME="/home/docker/.local" \
-		VSCODE_SHARE="${VSCODE_HOME}/share/code-server" \
-		VSCODE_EXT_DIRECTORY="${VSCODE_SHARE}/extensions"
+ENV CODESERVER_VERSION=1.32.0-310
+
+ENV VSCODE_HOME="${HOME}/.local"
+ENV VSCODE_SHARE="${VSCODE_HOME}/share/code-server"
+ENV VSCODE_EXT_DIRECTORY="${VSCODE_SHARE}/extensions"
 
 ENV VSCODE_XDEBUG_VERSION=1.13.0 \
 		VSCODE_GITLENS_VERSION=9.5.1
 
-COPY install-vscode-extension /user/bin/
+COPY install-vscode-extension /usr/bin/
 
 RUN \
 	# Always source user profile when provisioning as user (necessary for nvm/etc. to load)
