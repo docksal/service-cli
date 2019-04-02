@@ -276,8 +276,8 @@ RUN set -e; \
 	# Composer parallel install plugin
 	composer global require hirak/prestissimo >/dev/null; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
-	cgr drupal/coder wp-coding-standards/wpcs >/dev/null; \
-	phpcs --config-set installed_paths "$HOME/.composer/global/drupal/coder/vendor/drupal/coder/coder_sniffer/,$HOME/.composer/global/wp-coding-standards/wpcs/vendor/wp-coding-standards/wpcs/"; \
+	cgr drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp >/dev/null; \
+	phpcs --config-set installed_paths "$HOME/.composer/global/drupal/coder/vendor/drupal/coder/coder_sniffer/,$HOME/.composer/global/wp-coding-standards/wpcs/vendor/wp-coding-standards/wpcs/,$HOME/.composer/global/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,$HOME/.composer/global/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,$HOME/.composer/global/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat"; \
 	# Magento2 Code Generator
 	cgr staempfli/magento2-code-generator:${MG_CODEGEN_VERSION} >/dev/null; \
 	# Terminus
