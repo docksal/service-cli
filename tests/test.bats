@@ -590,6 +590,9 @@ _healthcheck_wait ()
 	[[ "${output}" =~ " Drupal " ]]
 	[[ "${output}" =~ " DrupalPractice " ]]
 	[[ "${output}" =~ " WordPress " ]] # Includes WordPress-Core, WordPress-Docs and WordPress-Extra
+	[[ "${output}" =~ " PHPCompatibility " ]]
+	[[ "${output}" =~ " PHPCompatibilityWP " ]]
+	[[ "${output}" =~ " PHPCompatibilityParagonieRandomCompat " ]]
 	unset output
 
 	### Cleanup ###
