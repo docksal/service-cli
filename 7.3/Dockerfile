@@ -207,8 +207,7 @@ RUN set -xe; \
 		#pdo_sqlsrv - currently not supported in PHP 7.3
 		redis \
 		#sqlsrv - currently not supported in PHP 7.3
-		# There is currently no stable pecl release of xdebug for PHP 7.3
-		xdebug-2.7.0beta1 \
+		xdebug-2.7.2 \
 	;\
 	docker-php-ext-enable \
 		apcu \
