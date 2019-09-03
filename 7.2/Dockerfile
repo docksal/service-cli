@@ -226,13 +226,13 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.8.0 \
-	DRUSH_VERSION=8.1.18 \
+ENV COMPOSER_VERSION=1.9.0 \
+	DRUSH_VERSION=8.3.0 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.8.0 \
-	WPCLI_VERSION=2.0.1 \
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.0 \
+	WPCLI_VERSION=2.3.0 \
 	BLACKFIRE_VERSION=1.22.0 \
-	PLATFORMSH_CLI_VERSION=3.38.1
+	PLATFORMSH_CLI_VERSION=3.47.0
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
