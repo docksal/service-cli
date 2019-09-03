@@ -272,6 +272,8 @@ RUN set -e; \
 	composer global require consolidation/cgr >/dev/null; \
 	# Composer parallel install plugin
 	composer global require hirak/prestissimo >/dev/null; \
+	# Composer optimizations for Drupal projects
+	composer global require zaporylie/composer-drupal-optimizations:^1.1 >/dev/null; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
 	cgr drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp >/dev/null; \
 	phpcs --config-set installed_paths "$HOME/.composer/global/drupal/coder/vendor/drupal/coder/coder_sniffer/,$HOME/.composer/global/wp-coding-standards/wpcs/vendor/wp-coding-standards/wpcs/,$HOME/.composer/global/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,$HOME/.composer/global/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,$HOME/.composer/global/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat"; \
