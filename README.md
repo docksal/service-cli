@@ -68,7 +68,7 @@ cli
     ...
 ```
 
-[See docs](https://docs.docksal.io/en/master/tools/xdebug) on using Xdebug for web and cli PHP debugging.
+[See docs](https://docs.docksal.io/tools/xdebug/) on using Xdebug for web and cli PHP debugging.
 
 
 ## NodeJS
@@ -212,4 +212,25 @@ Starting with version 2.3, there is the `ide` flavor of the images, which comes 
 2.6-php7.3-ide
 ``` 
 
-[See docs](https://docs.docksal.io/en/master/tools/cloud9/) for using Cloud 9 in Docksal.
+[See docs](https://docs.docksal.io/tools/cloud9/) for using Cloud 9 in Docksal.
+
+<a name="standalone"></a>
+## Standalone usage
+
+When using the image outside of a Docksal stack (e.g. in CI), consider the following:
+
+- include `-v /home/docker` - this speeds up the container start substantially
+- invoke commands with `bash -lc <command>` - `-l` switch initializes a login session, which loads the `docker` user 
+environment, so tools installed at the user level (node/ruby/python stacks, php cli tools, etc.) can be used
+- include `-v $(pwd):/var/www` - this mounts this current host directory to the working directory in the container 
+(replace `$(pwd)` with any other relative or absolute path on the host if necessary)
+
+```bash
+$ time docker run --rm -it docksal/cli node --version
+error: exec: "node": executable file not found in $PATH
+       27.74 real         0.03 user         0.01 sys
+
+$ time docker run --rm -it -v /home/docker -v $PWD:/var/www docksal/cli bash -ilc 'node --version'
+v10.15.0
+        4.61 real         0.04 user         0.02 sys 
+```

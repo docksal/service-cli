@@ -1,12 +1,8 @@
 #!/usr/bin/env bats
 
 # Debugging
-teardown() {
+teardown () {
 	echo
-	# TODO: figure out how to deal with this (output from previous run commands showing up along with the error message)
-	echo "Note: ignore the lines between \"...failed\" above and here"
-	echo
-	echo "Status: ${status}"
 	echo "Output:"
 	echo "================================================================"
 	echo "${output}"
@@ -14,7 +10,6 @@ teardown() {
 }
 
 # Checks container health status (if available)
-# Relies on healchecks introduced in docksal/cli v1.3.0+, uses `sleep` as a fallback
 # @param $1 container id/name
 _healthcheck ()
 {
@@ -36,7 +31,7 @@ _healthcheck ()
 # Waits for containers to become healthy
 _healthcheck_wait ()
 {
-	# Wait for cli to become ready by watching its health status
+	# Wait for container to become ready by watching its health status
 	local container_name="${NAME}"
 	local delay=5
 	local timeout=30
@@ -109,99 +104,6 @@ _healthcheck_wait ()
 	make clean
 }
 
-@test "Bare service" {
-	[[ $SKIP == 1 ]] && skip
-
-	### Setup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	docker run --name "$NAME" -d \
-		-v /home/docker \
-		-v $(pwd)/../tests/docroot:/var/www/docroot \
-		"$IMAGE"
-	docker cp $(pwd)/../tests/scripts "$NAME:/var/www/"
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# Check PHP FPM and settings
-	run docker exec -u docker "$NAME" /var/www/scripts/test-php-fpm.sh index.php
-	# sed below is used to normalize the web output of phpinfo
-	# It will transforms "memory_limit                256M                                         256M" into
-	# "memory_limit => 256M => 256M", which is much easier to parse
-	output=$(echo "$output" | sed -E 's/[[:space:]]{2,}/ => /g')
-	echo "$output" | grep "memory_limit => 256M => 256M"
-	# sendmail_path, being long, gets printed on two lines. We grep the first line only
-	echo "$output" | grep "sendmail_path => /usr/bin/msmtp -t --host=mail -- /usr/bin/msmtp -t --host=mail --"
-	# Cleanup output after each "run"
-	unset output
-
-	run docker exec -u docker "$NAME" /var/www/scripts/test-php-fpm.sh nonsense.php
-	echo "$output" | grep "Status: 404 Not Found"
-	unset output
-
-	# Check PHP CLI and settings
-	phpInfo=$(docker exec -u docker "$NAME" php -i)
-
-	output=$(echo "$phpInfo" | grep "PHP Version")
-	echo "$output" | grep "${VERSION}"
-	unset output
-
-	# Confirm WebP support enabled for GD
-	output=$(echo "$phpInfo" | grep "WebP Support")
-	echo "$output" | grep "enabled"
-	unset output
-
-	output=$(echo "$phpInfo" | grep "memory_limit")
-	echo "$output" | grep "memory_limit => 1024M => 1024M"
-	unset output
-
-	output=$(echo "$phpInfo" | grep "sendmail_path")
-	echo "$output" | grep "sendmail_path => /usr/bin/msmtp -t --host=mail --port=1025 => /usr/bin/msmtp -t --host=mail --port=1025"
-	unset output
-
-	# Check PHP modules
-	run bash -lc "docker exec -u docker '${NAME}' php -m | diff php-modules.txt -"
-	[[ ${status} == 0 ]]
-	unset output
-
-	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-}
-
-# Examples of using Makefile commands
-# make start, make exec, make clean
-@test "Configuration overrides" {
-	[[ $SKIP == 1 ]] && skip
-
-	### Setup ###
-	make start -e ENV='-e XDEBUG_ENABLED=1'
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# Check PHP FPM settings overrides
-	run make exec -e CMD='/var/www/scripts/test-php-fpm.sh index.php'
-	echo "$output" | grep "memory_limit" | grep "512M"
-	unset output
-
-	# Check xdebug was enabled
-	run make exec -e CMD='php -m'
-	echo "$output" | grep -e "^xdebug$"
-	unset output
-
-	# Check PHP CLI overrides
-	run make exec -e CMD='php -i'
-	echo "$output" | grep "memory_limit => 128M => 128M"
-	unset output
-
-	### Cleanup ###
-	make clean
-}
-
 @test "Check PHP tools and versions" {
 	[[ $SKIP == 1 ]] && skip
 
@@ -213,47 +115,50 @@ _healthcheck_wait ()
 
 	### Tests ###
 
+	# Since tests doing the `[[ ${status} == 0 ]]` check look identical when they fail, we add an extra prefix to make
+	# them distinguishable, e.g. `[[ "composer" && ${status} == 0 ]]`
+
 	# Check Composer version
-	run docker exec -u docker "$NAME" bash -lc 'composer --version | grep "^Composer version ${COMPOSER_VERSION} "'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='composer --version | grep "^Composer version $${COMPOSER_VERSION} "'
+	[[ "composer" && ${status} == 0 ]]
 	unset output
 
 	# Check Drush Launcher version
-	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^Drush Launcher Version: ${DRUSH_LAUNCHER_VERSION}$"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='drush --version | grep "^Drush Launcher Version: $${DRUSH_LAUNCHER_VERSION}$$"'
+	[[ "drush launcher" && ${status} == 0 ]]
 	unset output
 
 	# Check Drush version
-	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='drush --version | grep "^ Drush Version   :  $${DRUSH_VERSION} $$"'
+	[[ "drush" && ${status} == 0 ]]
 	unset output
 
 	# Check Drupal Console version
-	run docker exec -u docker "$NAME" bash -lc 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_LAUNCHER_VERSION}$"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='drupal --version | grep "^Drupal Console Launcher $${DRUPAL_CONSOLE_LAUNCHER_VERSION}$$"'
+	[[ "drupal console launcher" && ${status} == 0 ]]
 	unset output
 
 	# Check Wordpress CLI version
-	run docker exec -u docker "$NAME" bash -lc 'wp --version | grep "^WP-CLI ${WPCLI_VERSION}$"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='wp --version | grep "^WP-CLI $${WPCLI_VERSION}$$"'
+	[[ "wp-cli" && ${status} == 0 ]]
 	unset output
 
 	# Check Magento 2 Code Generator version
 	# TODO: this needs to be replaced with the actual version check
 	# See https://github.com/staempfli/magento2-code-generator/issues/15
-	#run docker exec -u docker "$NAME" bash -lc 'mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
-	run docker exec -u docker "$NAME" bash -lc 'mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
-	[[ ${status} == 0 ]]
+	#run make exec -e CMD='mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
+	run make exec -e CMD='mg2-codegen --version | grep "^mg2-codegen @git-version@$$"'
+	[[ "mg2-codegen" && ${status} == 0 ]]
 	unset output
 
 	# Check Terminus version
-	run docker exec -u docker "$NAME" bash -lc 'terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='terminus --version | grep "^Terminus $${TERMINUS_VERSION}$$"'
+	[[ "terminus" && ${status} == 0 ]]
 	unset output
 
 	# Check Platform CLI version
-	run docker exec -u docker "$NAME" bash -lc 'platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='platform --version | grep "Platform.sh CLI $${PLATFORMSH_CLI_VERSION}$$"'
+	[[ "platform-cli" && ${status} == 0 ]]
 	unset output
 
 	### Cleanup ###
@@ -271,19 +176,22 @@ _healthcheck_wait ()
 
 	### Tests ###
 
+	# Since tests doing the `[[ ${status} == 0 ]]` check look identical when they fail, we add an extra prefix to make
+	# them distinguishable, e.g. `[[ "nvm" && ${status} == 0 ]]`
+
 	# nvm
-	run docker exec -u docker "$NAME" bash -lc 'nvm --version | grep "${NVM_VERSION}"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='nvm --version | grep "^$${NVM_VERSION}$$"'
+	[[ "nvm" && ${status} == 0 ]]
 	unset output
 
 	# nodejs
-	run docker exec -u docker "$NAME" bash -lc 'node --version | grep "${NODE_VERSION}"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='node --version | grep "^v$${NODE_VERSION}$$"'
+	[[ "node" && ${status} == 0 ]]
 	unset output
 
 	# yarn
-	run docker exec -u docker "$NAME" bash -lc 'yarn --version | grep "${YARN_VERSION}"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='yarn --version | grep "^$${YARN_VERSION}$$"'
+	[[ "yarn" && ${status} == 0 ]]
 	unset output
 
 	### Cleanup ###
@@ -301,14 +209,18 @@ _healthcheck_wait ()
 
 	### Tests ###
 
+	# Since tests doing the `[[ ${status} == 0 ]]` check look identical when they fail, we add an extra prefix to make
+	# them distinguishable, e.g. `[[ "rvm" && ${status} == 0 ]]`
+
 	# rvm
-	run docker exec -u docker "$NAME" bash -lc 'rvm --version 2>&1 | grep "${RVM_VERSION_INSTALL}"'
-	[[ ${status} == 0 ]]
+	# "rvm --version" prints into stderr...
+	run make exec -e CMD='rvm --version | grep "^rvm $${RVM_VERSION_INSTALL}"'
+	[[ "rvm" && ${status} == 0 ]]
 	unset output
 
 	# ruby
-	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VERSION_INSTALL}"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='ruby --version | grep "^ruby $${RUBY_VERSION_INSTALL}"'
+	[[ "ruby" && ${status} == 0 ]]
 	unset output
 
 	### Cleanup ###
@@ -326,14 +238,17 @@ _healthcheck_wait ()
 
 	### Tests ###
 
-	# pyenv
-	run docker exec -u docker "$NAME" bash -lc 'pyenv --version 2>&1 | grep "${PYENV_VERSION_INSTALL}"'
-	[[ ${status} == 0 ]]
-	unset output
+	# Since tests doing the `[[ ${status} == 0 ]]` check look identical when they fail, we add an extra prefix to make
+	# them distinguishable, e.g. `[[ "pyenv" && ${status} == 0 ]]`
 
 	# pyenv
-	run docker exec -u docker "$NAME" bash -lc 'python --version 2>&1 | grep "${PYTHON_VERSION_INSTALL}"'
-	[[ ${status} == 0 ]]
+	run make exec -e CMD='pyenv --version | grep "^pyenv $${PYENV_VERSION_INSTALL}$$"'
+	[[ "pyenv" && ${status} == 0 ]]
+	unset output
+
+	# python (prints its version into stderr)
+	run make exec -e CMD='python --version 2>&1 | grep "^Python $${PYTHON_VERSION_INSTALL}"'
+	[[ "Python" && ${status} == 0 ]]
 	unset output
 
 	### Cleanup ###
@@ -352,7 +267,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check Blackfire CLI version
-	run docker exec -u docker "$NAME" bash -lc 'blackfire version | grep "^blackfire ${BLACKFIRE_VERSION} "'
+	run make exec -e CMD='blackfire version | grep "^blackfire ${BLACKFIRE_VERSION} "'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -526,28 +441,6 @@ _healthcheck_wait ()
 	make clean
 }
 
-@test "Check cron" {
-	[[ $SKIP == 1 ]] && skip
-
-	### Setup ###
-	make start
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# Give cron 60s to invoke the scheduled test job
-	sleep 60
-	# Confirm cron has run and file contents has changed
-	run docker exec -u docker "$NAME" bash -lc 'tail -1 /tmp/date.txt'
-	[[ "${output}" =~ "The current date is " ]]
-	unset output
-
-	### Cleanup ###
-	make clean
-}
-
 @test "Git settings" {
 	[[ $SKIP == 1 ]] && skip
 
@@ -560,11 +453,11 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check git settings were applied
-	run docker exec -u docker "$NAME" bash -lc 'git config --get --global user.email'
+	run make exec -e CMD='git config --get --global user.email'
 	[[ "${output}" == "git@example.com" ]]
 	unset output
 
-	run docker exec -u docker "$NAME" bash -lc 'git config --get --global user.name'
+	run make exec -e CMD='git config --get --global user.name'
 	[[ "${output}" == "Docksal CLI" ]]
 	unset output
 
@@ -585,7 +478,7 @@ _healthcheck_wait ()
 
 	# Check PHPCS libraries loaded
 	# Normalize the output from phpcs -i so it's easier to do matches
-	run docker exec -u docker "$NAME" bash -lc "phpcs -i | sed 's/,//g'"
+	run make exec -e CMD="phpcs -i | sed 's/,//g'"
 	output="${output} "
 	[[ "${output}" =~ " Drupal " ]]
 	[[ "${output}" =~ " DrupalPractice " ]]
@@ -608,7 +501,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check Drush Backdrop command loaded
-	run docker exec -u docker "$NAME" bash -lc 'drush help backdrop-core-status'
+	run make exec -e CMD='drush help backdrop-core-status'
 	[[ "${output}" =~ "Provides a birds-eye view of the current Backdrop installation, if any." ]]
 	unset output
 

@@ -1,5 +1,5 @@
 -include ../tests/env_make
--include env_make
+-include $(INCLUDE)
 
 VERSION ?= 7.1
 REPO = docksal/cli
@@ -8,7 +8,9 @@ NAME = docksal-cli-$(VERSION)
 CWD = $(shell pwd)
 
 # Improve write performance for /home/docker by turning it into a volume
-VOLUMES += -v /home/docker
+#VOLUMES += -v /home/docker
+
+.EXPORT_ALL_VARIABLES:
 
 .PHONY: build test push shell run start stop logs clean release
 
@@ -22,18 +24,18 @@ push:
 	docker push $(REPO):$(TAG)
 
 run: clean
-	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG)
+	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG) $(CMD)
 
 start: clean
-	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG)
+	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG) $(CMD)
 
 # Non-interactive and non-tty docker exec (uses LF instead of CRLF line endings)
 exec:
-	@docker exec -u docker $(NAME) bash -lc "$(CMD)"
+	@docker exec -u docker $(NAME) bash -lc '$(CMD)'
 
 # Interactive docker exec
 exec-it:
-	@docker exec -u docker -it $(NAME) bash -ilc "$(CMD)"
+	@docker exec -u docker -it $(NAME) bash -ilc '$(CMD)'
 
 shell:
 	@docker exec -u docker -it $(NAME) bash -il

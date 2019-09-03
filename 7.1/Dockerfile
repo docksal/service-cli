@@ -1,4 +1,5 @@
-FROM docksal/php:7.1-edge
+#FROM docksal/php:7.1-edge
+FROM docksal/php:build-7.1
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
@@ -243,9 +244,7 @@ COPY --chown=docker:docker config/.drush /home/docker/.drush
 COPY --chown=docker:docker config/.terminus /home/docker/.terminus
 COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-# PHP cli and fpm settings overrides
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
-
 COPY config/docker-entrypoint.d /etc/docker-entrypoint.d
 COPY config/docker-healthcheck.d /etc/docker-healthcheck.d
 
