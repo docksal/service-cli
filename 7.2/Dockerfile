@@ -377,7 +377,9 @@ COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
 # PHP default settings, global overrides and fpm overrides
-ADD https://raw.githubusercontent.com/php/php-src/PHP-${PHP_VERSION}/php.ini-development /usr/local/etc/php/php.ini
+# PHP_VERSION is set upstream. The source code for the exact PHP version may not be available in Github
+# TODO: For now, will just hardcoded a specific version available on https://github.com/php/php-src/
+ADD https://raw.githubusercontent.com/php/php-src/php-7.2.22/php.ini-development /usr/local/etc/php/php.ini
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
