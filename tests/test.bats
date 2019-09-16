@@ -126,18 +126,21 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check PHP FPM and settings
-	run docker exec -u docker "$NAME" /var/www/scripts/test-php-fpm.sh index.php
-	# sed below is used to normalize the web output of phpinfo
-	# It will transforms "memory_limit                256M                                         256M" into
-	# "memory_limit => 256M => 256M", which is much easier to parse
-	output=$(echo "$output" | sed -E 's/[[:space:]]{2,}/ => /g')
-	echo "$output" | grep "memory_limit => 256M => 256M"
-	# sendmail_path, being long, gets printed on two lines. We grep the first line only
-	echo "$output" | grep "sendmail_path => /usr/bin/msmtp -t --host=mail -- /usr/bin/msmtp -t --host=mail --"
-	# Cleanup output after each "run"
+	# "sed -E 's/[[:space:]]{2,}/ => /g'" - makes the HTML phpinfo output easier to parse. It will transforms
+	# "memory_limit                256M                                         256M"
+	# into "memory_limit => 256M => 256M", which is much easier to parse
+	phpInfo=$(docker exec -u docker "$NAME" bash -c "/var/www/scripts/php-fpm.sh phpinfo.php | sed -E 's/[[:space:]]{2,}/ => /g'")
+
+	output=$(echo "$phpInfo" | grep "memory_limit")
+	echo "$output" | grep "256M => 256M"
 	unset output
 
-	run docker exec -u docker "$NAME" /var/www/scripts/test-php-fpm.sh nonsense.php
+	# sendmail_path, being long, gets cut off. We check it a little bit differently below
+	output=$(echo "$phpInfo" | grep "sendmail_path")
+	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 --read-envelope-from'
+	unset output
+
+	run docker exec -u docker "$NAME" /var/www/scripts/php-fpm.sh nonsense.php
 	echo "$output" | grep "Status: 404 Not Found"
 	unset output
 
@@ -154,11 +157,11 @@ _healthcheck_wait ()
 	unset output
 
 	output=$(echo "$phpInfo" | grep "memory_limit")
-	echo "$output" | grep "memory_limit => 1024M => 1024M"
+	echo "$output" | grep "1024M => 1024M"
 	unset output
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
-	echo "$output" | grep "sendmail_path => /usr/bin/msmtp -t --host=mail --port=1025 => /usr/bin/msmtp -t --host=mail --port=1025"
+	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 --read-envelope-from'
 	unset output
 
 	# Check PHP modules
@@ -184,7 +187,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check PHP FPM settings overrides
-	run make exec -e CMD='/var/www/scripts/test-php-fpm.sh index.php'
+	run make exec -e CMD='/var/www/scripts/php-fpm.sh phpinfo.php'
 	echo "$output" | grep "memory_limit" | grep "512M"
 	unset output
 
@@ -586,6 +589,7 @@ _healthcheck_wait ()
 	# Check PHPCS libraries loaded
 	# Normalize the output from phpcs -i so it's easier to do matches
 	run docker exec -u docker "$NAME" bash -lc "phpcs -i | sed 's/,//g'"
+	# The trailing space below allows comparing all values the same way: " <value> " (needed for the last value to match).
 	output="${output} "
 	[[ "${output}" =~ " Drupal " ]]
 	[[ "${output}" =~ " DrupalPractice " ]]
