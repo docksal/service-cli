@@ -106,8 +106,10 @@ git_settings ()
 {
 	# These must be run as the docker user
 	echo-debug "Configuring git..."
-	gosu docker git config --global user.email "${GIT_USER_EMAIL}"
-	gosu docker git config --global user.name "${GIT_USER_NAME}"
+	# Set default git settings if none have been passed
+	# See https://github.com/docksal/service-cli/issues/124
+	gosu docker git config --global user.email "${GIT_USER_EMAIL:-cli@docksal.io}"
+	gosu docker git config --global user.name "${GIT_USER_NAME:-Docksal CLI}"
 }
 
 # Inject a private SSH key if provided
