@@ -228,7 +228,7 @@ RUN set -xe; \
 ENV COMPOSER_VERSION=1.9.0 \
 	DRUSH_VERSION=8.3.0 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.0 \
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.3 \
 	WPCLI_VERSION=2.3.0 \
 	BLACKFIRE_VERSION=1.22.0 \
 	PLATFORMSH_CLI_VERSION=3.47.0
@@ -255,9 +255,9 @@ USER docker
 SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
-ENV MG_CODEGEN_VERSION=1.10.2 \
-	TERMINUS_VERSION=2.0.0 \
-	DRUSH_BACKDROP_VERSION=0.1.0
+ENV MG_CODEGEN_VERSION=1.11.0 \
+	TERMINUS_VERSION=2.1.0 \
+	DRUSH_BACKDROP_VERSION=1.0.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
@@ -297,8 +297,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.34.0 \
-	NODE_VERSION=10.15.0 \
-	YARN_VERSION=1.13.0
+	NODE_VERSION=10.16.3 \
+	YARN_VERSION=1.17.3
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
@@ -312,8 +312,8 @@ RUN set -e; \
 
 # Ruby (installed as user)
 ENV \
-	RVM_VERSION_INSTALL=1.29.7 \
-	RUBY_VERSION_INSTALL=2.6.0
+	RVM_VERSION_INSTALL=1.29.9 \
+	RUBY_VERSION_INSTALL=2.6.4
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
@@ -352,7 +352,7 @@ RUN set -e; \
 
 # Python (installed as user)
 ENV \
-	PYENV_VERSION_INSTALL=1.2.9
+	PYENV_VERSION_INSTALL=1.2.13
 #	PYTHON_VERSION_INSTALL=3.7.0
 RUN set -xe; \
 	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
