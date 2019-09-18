@@ -12,14 +12,14 @@ ENV \
 	VSCODE_HOME="${HOME}/.local" \
 	VSCODE_SHARE="${HOME}/.local/share/code-server" \
 	VSCODE_EXT_DIRECTORY="${HOME}/.local/share/code-server/extensions" \
-	CODESERVER_VERSION=1.1156-vsc1.33.1 \
+	CODE_SERVER_VERSION=1.1156-vsc1.33.1 \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
 	VSCODE_GITLENS_VERSION=9.9.3
 
-# Install codeserver
+# Install code-server
 RUN \
 	set -xe; \
-	curl -fsSL "https://github.com/cdr/code-server/releases/download/${CODESERVER_VERSION}/code-server${CODESERVER_VERSION}-linux-x64.tar.gz" -o /tmp/code-server.tar.gz; \
+	curl -fsSL "https://github.com/cdr/code-server/releases/download/${CODE_SERVER_VERSION}/code-server${CODE_SERVER_VERSION}-linux-x64.tar.gz" -o /tmp/code-server.tar.gz; \
 	tar -zxv --file=/tmp/code-server.tar.gz --directory=/tmp --strip-components=1; \
 	sudo mv /tmp/code-server /usr/local/bin/; rm -rf /tmp/*.*
 
@@ -32,7 +32,7 @@ RUN \
 	install-vscode-extension https://github.com/eamodio/vscode-gitlens/releases/download/v${VSCODE_GITLENS_VERSION}/gitlens-${VSCODE_GITLENS_VERSION}.vsix eamodio.gitlens-${VSCODE_GITLENS_VERSION}
 
 COPY config/settings.json ${VSCODE_SHARE}/User/settings.json
-COPY config/supervisord-codeserver.conf /etc/supervisor/conf.d/codeserver.conf
+COPY config/supervisord-code-server.conf /etc/supervisor/conf.d/code-server.conf
 
 # Switch back to root (IMPORTANT!)
 USER root

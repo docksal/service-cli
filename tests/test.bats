@@ -635,7 +635,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# This is a dirty hack to get tests to pass on Travis.
-	# TODO: This should be replaced with a proper Codeserver healthcheck in Dockerfile
+	# TODO: This should be replaced with a proper code-server healthcheck in Dockerfile
 	sleep 10
 
 	### Tests ###

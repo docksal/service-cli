@@ -31,7 +31,7 @@ xdebug_enable ()
 ide_enable ()
 {
 	echo-debug "Enabling web IDE..."
-	ln -s /opt/code-server/supervisord-code-server.conf /etc/supervisor/conf.d/codeserver.conf
+	ln -s /opt/code-server/supervisord-code-server.conf /etc/supervisor/conf.d/code-server.conf
 }
 
 # Creates symlinks to project level overrides if they exist

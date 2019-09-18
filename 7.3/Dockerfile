@@ -431,14 +431,14 @@ ENV \
 	VSCODE_HOME="${HOME}/.local" \
 	VSCODE_SHARE="${HOME}/.local/share/code-server" \
 	VSCODE_EXT_DIRECTORY="${HOME}/.local/share/code-server/extensions" \
-	CODESERVER_VERSION=1.1156-vsc1.33.1 \
+	CODE_SERVER_VERSION=1.1156-vsc1.33.1 \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
 	VSCODE_GITLENS_VERSION=9.9.3
 
-# Install codeserver
+# Install code-server
 RUN \
 	set -xe; \
-	curl -fsSL "https://github.com/cdr/code-server/releases/download/${CODESERVER_VERSION}/code-server${CODESERVER_VERSION}-linux-x64.tar.gz" -o /tmp/code-server.tar.gz; \
+	curl -fsSL "https://github.com/cdr/code-server/releases/download/${CODE_SERVER_VERSION}/code-server${CODE_SERVER_VERSION}-linux-x64.tar.gz" -o /tmp/code-server.tar.gz; \
 	tar -zxv --file=/tmp/code-server.tar.gz --directory=/tmp --strip-components=1; \
 	sudo mv /tmp/code-server /usr/local/bin/; rm -rf /tmp/*.*
 
