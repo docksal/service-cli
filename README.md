@@ -19,14 +19,10 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 ## Versions and image tag naming convention
 
 - Stable versions
-  - `2.6-php5.6`, `php5.6` - PHP 5.6 (deprecated, will be removed in v2.7)
-  - `2.6-php7.0`, `php7.0` - PHP 7.0 (deprecated, will be removed in v2.7)
   - `2.6-php7.1`, `php7.1` - PHP 7.1
   - `2.6-php7.2`, `php7.2`, `latest` - PHP 7.2
   - `2.6-php7.3`, `php7.3` - PHP 7.3
 - Development versions
-  - `edge-php5.6` - PHP 5.6 (deprecated, will be removed in v2.7)
-  - `edge-php7.0` - PHP 7.0 (deprecated, will be removed in v2.7)
   - `edge-php7.1` - PHP 7.1
   - `edge-php7.2` - PHP 7.2
   - `edge-php7.3` - PHP 7.3
@@ -54,7 +50,7 @@ manner (installing them with `apt-get` won't work).
 - SQLite - via `sqlite3`, `pdo_sqlite`
 - MySQL - via `mysqli`, `mysqlnd`, `pdo_mysql`
 - PostgreSQL - via `pgsql`, `pdo_pgsql`
-- MSSQL - via `mssql` and `pdo_dblib` for PHP 5.6; `sqlsrv` and `pdo_sqlsrv` for PHP 7.0, 7.1, 7.2
+- MSSQL - via `sqlsrv` and `pdo_sqlsrv`
 
 
 ### Using PHP Xdebug
@@ -211,8 +207,6 @@ GIT_USER_NAME="Docksal CLI"
 Starting with version 2.3, there is the `ide` flavor of the images, which comes with Cloud9 pre-installed, e.g.:
 
 ```
-2.6-php5.6-ide
-2.6-php7.0-ide
 2.6-php7.1-ide
 2.6-php7.2-ide
 2.6-php7.3-ide

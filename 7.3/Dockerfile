@@ -1,4 +1,4 @@
-FROM php:7.3-fpm
+FROM php:7.3-fpm-stretch
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
@@ -81,8 +81,7 @@ RUN set -xe; \
 
 RUN set -xe; \
 	# Create a regular user/group "docker" (uid = 1000, gid = 1000 )
-	groupadd docker -g 1000; \
-	useradd -m -s /bin/bash -u 1000 -g 1000 -p docker docker; \
+	useradd -m -s /bin/bash -u 1000 -U -p docker docker; \
 	# Give the docker user sudo access
 	usermod -a -G sudo docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -134,6 +133,7 @@ RUN set -xe; \
 		libxpm-dev \
 		libxslt1-dev \
 		libzip-dev \
+		unixodbc-dev \
 	"; \
 	apt-get update >/dev/null; \
 	# Necessary for msodbcsql17 (MSSQL)
@@ -205,20 +205,19 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		#pdo_sqlsrv - currently not supported in PHP 7.3
+		pdo_sqlsrv \
 		redis \
-		#sqlsrv - currently not supported in PHP 7.3
-		# There is currently no stable pecl release of xdebug for PHP 7.3
-		xdebug-2.7.0beta1 \
+		sqlsrv \
+		xdebug \
 	;\
 	docker-php-ext-enable \
 		apcu \
 		gnupg \
 		imagick \
 		memcached \
-		#pdo_sqlsrv - currently not supported in PHP 7.3
+		pdo_sqlsrv \
 		redis \
-		#sqlsrv - currently not supported in PHP 7.3
+		sqlsrv \
 	;\
 	# Cleanup
 	docker-php-source delete; \
@@ -227,13 +226,13 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.8.0 \
-	DRUSH_VERSION=8.1.18 \
+ENV COMPOSER_VERSION=1.9.0 \
+	DRUSH_VERSION=8.3.0 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.8.0 \
-	WPCLI_VERSION=2.0.1 \
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.3 \
+	WPCLI_VERSION=2.3.0 \
 	BLACKFIRE_VERSION=1.22.0 \
-	PLATFORMSH_CLI_VERSION=3.38.1
+	PLATFORMSH_CLI_VERSION=3.47.0
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -257,9 +256,9 @@ USER docker
 SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
-ENV MG_CODEGEN_VERSION=1.10.2 \
-	TERMINUS_VERSION=1.9.0 \
-	DRUSH_BACKDROP_VERSION=0.1.0
+ENV MG_CODEGEN_VERSION=1.11.0 \
+	TERMINUS_VERSION=2.1.0 \
+	DRUSH_BACKDROP_VERSION=1.0.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
@@ -274,9 +273,16 @@ RUN set -e; \
 	composer global require consolidation/cgr >/dev/null; \
 	# Composer parallel install plugin
 	composer global require hirak/prestissimo >/dev/null; \
+	# Composer optimizations for Drupal projects
+	composer global require zaporylie/composer-drupal-optimizations:^1.1 >/dev/null; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
-	cgr drupal/coder wp-coding-standards/wpcs >/dev/null; \
-	phpcs --config-set installed_paths "$HOME/.composer/global/drupal/coder/vendor/drupal/coder/coder_sniffer/,$HOME/.composer/global/wp-coding-standards/wpcs/vendor/wp-coding-standards/wpcs/"; \
+	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp >/dev/null; \
+	phpcs --config-set installed_paths \
+$HOME/.composer/vendor/drupal/coder/coder_sniffer/,\
+$HOME/.composer/vendor/wp-coding-standards/wpcs/,\
+$HOME/.composer/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,\
+$HOME/.composer/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,\
+$HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat; \
 	# Magento2 Code Generator
 	cgr staempfli/magento2-code-generator:${MG_CODEGEN_VERSION} >/dev/null; \
 	# Terminus
@@ -292,8 +298,8 @@ RUN set -e; \
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.34.0 \
-	NODE_VERSION=10.15.0 \
-	YARN_VERSION=1.13.0
+	NODE_VERSION=10.16.3 \
+	YARN_VERSION=1.17.3
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
@@ -307,8 +313,8 @@ RUN set -e; \
 
 # Ruby (installed as user)
 ENV \
-	RVM_VERSION_INSTALL=1.29.7 \
-	RUBY_VERSION_INSTALL=2.6.0
+	RVM_VERSION_INSTALL=1.29.9 \
+	RUBY_VERSION_INSTALL=2.6.4
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
@@ -347,7 +353,7 @@ RUN set -e; \
 
 # Python (installed as user)
 ENV \
-	PYENV_VERSION_INSTALL=1.2.9
+	PYENV_VERSION_INSTALL=1.2.13
 #	PYTHON_VERSION_INSTALL=3.7.0
 RUN set -xe; \
 	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
@@ -376,7 +382,9 @@ COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
 # PHP default settings, global overrides and fpm overrides
-ADD https://raw.githubusercontent.com/php/php-src/PHP-${PHP_VERSION}/php.ini-development /usr/local/etc/php/php.ini
+# PHP_VERSION is set upstream. The source code for the exact PHP version may not be available in Github
+# TODO: For now, will just hardcoded a specific version available on https://github.com/php/php-src/
+ADD https://raw.githubusercontent.com/php/php-src/php-7.3.9/php.ini-development /usr/local/etc/php/php.ini
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf

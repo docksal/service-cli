@@ -65,12 +65,14 @@ docker login -u "${DOCKER_USER}" -p "${DOCKER_PASS}"
 
 # Push images
 if is_edge; then
-	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_EDGE}
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_EDGE} # Example tag: edge-php7.3
 elif is_stable; then
-	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_STABLE}
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_STABLE} # Example tag: php7.3
 elif is_release; then
-	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_RELEASE_MAJOR}
-	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_RELEASE_MAJOR_MINOR}
+	# Have stable, major, minor tags match
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_STABLE} # Example tag: php7.3
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_RELEASE_MAJOR}  # Example tag: 2-php7.3
+	tag_and_push ${REPO}:build-${VERSION} ${REPO}:${IMAGE_TAG_RELEASE_MAJOR_MINOR}  # Example tag: 2.7-php7.3
 else
 	# Exit if not on develop, master or release tag
 	exit
