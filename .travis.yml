@@ -33,8 +33,8 @@ script:
   - cd ${TRAVIS_BUILD_DIR}/${VERSION}
   - travis_retry make  # Retry builds, as pecl.php.net tends to time out often
   - make test
-  # Build the Cloud9 flavor
-  - cd ${TRAVIS_BUILD_DIR}/codeserver
+  # Build the Coder flavor
+  - cd ${TRAVIS_BUILD_DIR}/code-server
   - travis_retry make
   - make test
 
@@ -44,4 +44,4 @@ after_success:
 
 after_failure:
   - cd ${TRAVIS_BUILD_DIR}/${VERSION} && make logs
-  - cd ${TRAVIS_BUILD_DIR}/codeserver && make logs
+  - cd ${TRAVIS_BUILD_DIR}/code-server && make logs
