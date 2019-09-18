@@ -133,6 +133,7 @@ RUN set -xe; \
 		libxpm-dev \
 		libxslt1-dev \
 		libzip-dev \
+		unixodbc-dev \
 	"; \
 	apt-get update >/dev/null; \
 	# Necessary for msodbcsql17 (MSSQL)
@@ -204,9 +205,9 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		#pdo_sqlsrv - currently not supported in PHP 7.3
+		pdo_sqlsrv \
 		redis \
-		#sqlsrv - currently not supported in PHP 7.3
+		sqlsrv \
 		xdebug \
 	;\
 	docker-php-ext-enable \
@@ -214,9 +215,9 @@ RUN set -xe; \
 		gnupg \
 		imagick \
 		memcached \
-		#pdo_sqlsrv - currently not supported in PHP 7.3
+		pdo_sqlsrv \
 		redis \
-		#sqlsrv - currently not supported in PHP 7.3
+		sqlsrv \
 	;\
 	# Cleanup
 	docker-php-source delete; \
