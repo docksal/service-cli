@@ -622,3 +622,28 @@ _healthcheck_wait ()
 	### Cleanup ###
 	make clean
 }
+
+@test "VS Code Server" {
+	#[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start -e ENV='-e IDE_ENABLED=1'
+
+	run _healthcheck_wait
+	unset output
+
+	### Tests ###
+
+	# This is a dirty hack to get tests to pass on Travis.
+	# TODO: This should be replaced with a proper Codeserver healthcheck in Dockerfile
+	sleep 10
+
+	### Tests ###
+
+	run make logs
+	echo "$output" | grep "Documentation on securing your setup"
+	unset output
+
+	### Cleanup ###
+	make clean
+}

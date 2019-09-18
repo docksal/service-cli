@@ -28,6 +28,12 @@ xdebug_enable ()
 	ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
+ide_enable ()
+{
+	echo-debug "Enabling web IDE..."
+	ln -s /opt/code-server/supervisord-code-server.conf /etc/supervisor/conf.d/codeserver.conf
+}
+
 # Creates symlinks to project level overrides if they exist
 php_settings ()
 {
@@ -141,6 +147,9 @@ convert_secrets
 
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
+
+# Enable web IDE
+[[ "$IDE_ENABLED" != "" ]] && [[ "$IDE_ENABLED" != "0" ]] && ide_enable
 
 # Include project level PHP settings if found
 php_settings
