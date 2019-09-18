@@ -75,7 +75,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	run make logs
-	echo "$output" | grep "Documentation on securing your setup: https://coder.com/docs"
+	echo "$output" | grep "Documentation on securing your setup"
 	unset output
 
 	### Cleanup ###

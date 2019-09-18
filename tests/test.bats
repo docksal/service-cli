@@ -30,7 +30,7 @@ _healthcheck ()
 	fi
 
 	# If it does, check the status
-	echo $health_status | grep '"healthy"' >/dev/null 2>&1
+	echo ${health_status} | grep '"healthy"' >/dev/null 2>&1
 }
 
 # Waits for containers to become healthy
@@ -44,7 +44,7 @@ _healthcheck_wait ()
 
 	until _healthcheck "$container_name"; do
 		echo "Waiting for $container_name to become ready..."
-		sleep "$delay";
+		sleep ${delay};
 
 		# Give the container 30s to become ready
 		elapsed=$((elapsed + delay))
