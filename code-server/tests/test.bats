@@ -60,7 +60,7 @@ _healthcheck_wait ()
 # To work on a specific test:
 # run `export SKIP=1` locally, then comment skip in the test you want to debug
 
-@test "Cloud 9 IDE" {
+@test "Codeserver IDE" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
@@ -69,13 +69,13 @@ _healthcheck_wait ()
 	run _healthcheck_wait
 	unset output
 	# This is a dirty hack to get tests to pass on Travis.
-	# TODO: This should be replaced with a proper Cloud9 healthcheck in Dockerfile
+	# TODO: This should be replaced with a proper Codeserver healthcheck in Dockerfile
 	sleep 10
 
 	### Tests ###
 
 	run make logs
-	echo "$output" | grep "Cloud9 is up and running"
+	echo "$output" | grep "Documentation on securing your setup"
 	unset output
 
 	### Cleanup ###
