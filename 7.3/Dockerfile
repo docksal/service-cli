@@ -1,4 +1,4 @@
-FROM php:7.3-fpm-stretch
+FROM php:7.3-fpm-buster
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
@@ -35,11 +35,10 @@ RUN set -xe; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian stretch main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
-	echo 'deb-src https://packagecloud.io/github/git-lfs/debian stretch main' | tee -a /etc/apt/sources.list.d/github_git-lfs.list; \
+	echo 'deb https://packagecloud.io/github/git-lfs/debian buster main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
 	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
 	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-	echo 'deb https://packages.microsoft.com/debian/9/prod stretch main' | tee /etc/apt/sources.list.d/mssql.list;
+	echo 'deb https://packages.microsoft.com/debian/10/prod buster main' | tee /etc/apt/sources.list.d/mssql.list;
 
 # Additional packages
 RUN set -xe; \
@@ -62,7 +61,8 @@ RUN set -xe; \
 		libfcgi-bin \
 		mc \
 		msmtp \
-		mysql-client \
+		# Debian 10 ships with MariaDB instead of MySQL
+		mariadb-client \
 		nano \
 		openssh-client \
 		openssh-server \
@@ -113,7 +113,7 @@ ENV NOTVISIBLE "in users profile"
 # PHP
 RUN set -xe; \
 	# Note: essential build tools (g++, gcc, make, etc) are included upstream as persistent packages.
-	# See https://github.com/docker-library/php/blob/4af0a8734a48ab84ee96de513aabc45418b63dc5/7.2/stretch/fpm/Dockerfile#L18-L37
+	# See https://github.com/docker-library/php/blob/406fcd31e62d633f62ac0d7bc5fc29aa1b3929fc/7.2/buster/fpm/Dockerfile#L18-L40
 	buildDeps=" \
 		libc-client2007e-dev \
 		libfreetype6-dev \
@@ -144,11 +144,11 @@ RUN set -xe; \
 		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
-		libicu57 \
+		libicu63 \
 		libjpeg62-turbo \
 		libldap-2.4-2 \
-		libmagickcore-6.q16-3 \
-		libmagickwand-6.q16-3 \
+		libmagickcore-6.q16-6 \
+		libmagickwand-6.q16-6 \
 		libmemcached11 \
 		libmemcachedutil2 \
 		libmhash2 \
@@ -388,10 +388,6 @@ ADD https://raw.githubusercontent.com/php/php-src/php-7.3.9/php.ini-development 
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
-# Create symlinks to project level overrides (if the source files are missing, nothing will break)
-RUN set -xe; \
-	ln -s /var/www/.docksal/etc/php/php.ini /usr/local/etc/php/conf.d/zzz-php.ini; \
-	ln -s /var/www/.docksal/etc/php/php-fpm.conf /usr/local/etc/php-fpm.d/zzz-php-fpm.conf
 
 ENV \
 	# ssh-agent proxy socket (requires docksal/ssh-agent)

@@ -28,6 +28,24 @@ xdebug_enable ()
 	ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
+# Creates symlinks to project level overrides if they exist
+php_settings ()
+{
+	php_ini=/var/www/.docksal/etc/php/php.ini
+	if [[ -f ${php_ini} ]]; then
+		echo-debug "Found project level overrides for PHP. Including:"
+		echo-debug "${php_ini}"
+		ln -s /var/www/.docksal/etc/php/php.ini /usr/local/etc/php/conf.d/zzz-php.ini
+	fi
+
+	php_fpm_conf=/var/www/.docksal/etc/php/php-fpm.conf
+	if [[ -f ${php_fpm_conf} ]]; then
+		echo-debug "Found project level overrides for PHP-FPM. Including:"
+		echo-debug "${php_fpm_conf}"
+		ln -s ${php_fpm_conf} /usr/local/etc/php-fpm.d/zzz-php-fpm.conf
+	fi
+}
+
 add_ssh_key ()
 {
 	echo-debug "Adding a private SSH key from SECRET_SSH_PRIVATE_KEY..."
@@ -123,6 +141,9 @@ convert_secrets
 
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
+
+# Include project level PHP settings if found
+php_settings
 
 # Make sure permissions are correct (after uid/gid change and COPY operations in Dockerfile)
 # To not bloat the image size, permissions on the home folder are reset at runtime.
