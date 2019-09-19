@@ -5,14 +5,16 @@ FROM docksal/cli:${FROM_TAG}
 # Run as docker, so we don't have to fix permissions
 USER docker
 
+# Run as docker, so we don't have to fix permissions
+USER docker
+
 ARG HOME=/home/docker
 
 ENV \
-	# This is the directory code-server assumes by default
-	VSCODE_HOME="${HOME}/.local" \
-	VSCODE_SHARE="${HOME}/.local/share/code-server" \
-	VSCODE_EXT_DIRECTORY="${HOME}/.local/share/code-server/extensions" \
+	# TODO: 2.x versions do not yet work with xdebug
 	CODE_SERVER_VERSION=1.1156-vsc1.33.1 \
+	VSCODE_HOME="${HOME}/code-server" \
+	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
 	VSCODE_GITLENS_VERSION=9.9.3
 
@@ -23,16 +25,15 @@ RUN \
 	tar -zxv --file=/tmp/code-server.tar.gz --directory=/tmp --strip-components=1; \
 	sudo mv /tmp/code-server /usr/local/bin/; rm -rf /tmp/*.*
 
+# Settings and scripts
+COPY opt/code-server /opt/code-server
+
 # Install extensions
-COPY install-vscode-extension /usr/bin/
 RUN \
 	set -xe; \
 	mkdir -p ${VSCODE_EXT_DIRECTORY}; \
-	install-vscode-extension https://github.com/felixfbecker/vscode-php-debug/releases/download/v${VSCODE_XDEBUG_VERSION}/php-debug.vsix felixfbecker.php-debug-${VSCODE_XDEBUG_VERSION}; \
-	install-vscode-extension https://github.com/eamodio/vscode-gitlens/releases/download/v${VSCODE_GITLENS_VERSION}/gitlens-${VSCODE_GITLENS_VERSION}.vsix eamodio.gitlens-${VSCODE_GITLENS_VERSION}
-
-COPY config/settings.json ${VSCODE_SHARE}/User/settings.json
-COPY config/supervisord-code-server.conf /etc/supervisor/conf.d/code-server.conf
+	/opt/code-server/install-vscode-extension https://github.com/felixfbecker/vscode-php-debug/releases/download/v${VSCODE_XDEBUG_VERSION}/php-debug.vsix felixfbecker.php-debug-${VSCODE_XDEBUG_VERSION}; \
+	/opt/code-server/install-vscode-extension https://github.com/eamodio/vscode-gitlens/releases/download/v${VSCODE_GITLENS_VERSION}/gitlens-${VSCODE_GITLENS_VERSION}.vsix eamodio.gitlens-${VSCODE_GITLENS_VERSION}
 
 # Switch back to root (IMPORTANT!)
 USER root

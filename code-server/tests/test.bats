@@ -60,7 +60,7 @@ _healthcheck_wait ()
 # To work on a specific test:
 # run `export SKIP=1` locally, then comment skip in the test you want to debug
 
-@test "Codeserver IDE" {
+@test "VS Code Server" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
@@ -69,7 +69,7 @@ _healthcheck_wait ()
 	run _healthcheck_wait
 	unset output
 	# This is a dirty hack to get tests to pass on Travis.
-	# TODO: This should be replaced with a proper Codeserver healthcheck in Dockerfile
+	# TODO: This should be replaced with a proper code-server healthcheck in Dockerfile
 	sleep 10
 
 	### Tests ###

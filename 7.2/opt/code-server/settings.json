@@ -3,19 +3,23 @@
   "launch": {
     "version": "0.2.0",
     "configurations": [
+      // Listener mode (recommended for most cases)
+      // Can be used to debug both: web and cli PHP sessions.
       {
-        "name": "XDebug: web",
+        "name": "XDebug (listener)",
         "type": "php",
         "request": "launch",
-        "port": 9001
+        "port": 9000
       },
+      // Current script mode
+      // Note: IDE launches the script inside of the ide container and not the cli container.
       {
-        "name": "XDebug: cli (currently open script)",
+        "name": "XDebug (currently open script)",
         "type": "php",
         "request": "launch",
         "program": "${file}",
         "cwd": "${fileDirname}",
-        "port": 9001
+        "port": 9000
       }
     ]
   }
