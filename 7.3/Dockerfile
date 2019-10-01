@@ -229,6 +229,7 @@ RUN set -xe; \
 ENV COMPOSER_VERSION=1.9.0 \
 	DRUSH_VERSION=8.3.0 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
+	DRUPAL_CHECK_VERSION=1.0.13 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.3 \
 	WPCLI_VERSION=2.3.0 \
 	BLACKFIRE_VERSION=1.22.0 \
@@ -249,7 +250,7 @@ RUN set -xe; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Drupal Check CLI
-	curl -fsSL "https://github.com/mglaman/drupal-check/releases/latest/download/drupal-check.phar" -o /usr/local/bin/drupal-check; \
+	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
