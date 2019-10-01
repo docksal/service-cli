@@ -248,6 +248,8 @@ RUN set -xe; \
 	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	# Drupal Check CLI
+	curl -fsSL "https://github.com/mglaman/drupal-check/releases/latest/download/drupal-check.phar" -o /usr/local/bin/drupal-check; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
