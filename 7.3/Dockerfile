@@ -381,7 +381,7 @@ SHELL ["/bin/sh", "-c"]
 COPY --chown=docker:docker config/.drush /home/docker/.drush
 COPY --chown=docker:docker config/.terminus /home/docker/.terminus
 COPY --chown=docker:docker config/.ssh /home/docker/.ssh
-COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY config/supervisor /etc/supervisor/conf.d
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
 # PHP default settings, global overrides and fpm overrides
@@ -405,6 +405,7 @@ ENV \
 	# xdebug disabled by default
 	XDEBUG_ENABLED=0
 
+# TODO: [v3] remove and set these via docker-compose
 EXPOSE 9000
 EXPOSE 22
 EXPOSE 3000
@@ -430,11 +431,10 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	# This is the directory code-server assumes by default
-	VSCODE_HOME="${HOME}/.local" \
-	VSCODE_SHARE="${HOME}/.local/share/code-server" \
-	VSCODE_EXT_DIRECTORY="${HOME}/.local/share/code-server/extensions" \
+	# TODO: 2.x versions do not yet work with xdebug
 	CODE_SERVER_VERSION=1.1156-vsc1.33.1 \
+	VSCODE_HOME="${HOME}/code-server" \
+	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
 	VSCODE_GITLENS_VERSION=9.9.3
 
@@ -445,15 +445,15 @@ RUN \
 	tar -zxv --file=/tmp/code-server.tar.gz --directory=/tmp --strip-components=1; \
 	sudo mv /tmp/code-server /usr/local/bin/; rm -rf /tmp/*.*
 
+# Settings and scripts
+COPY opt/code-server /opt/code-server
+
 # Install extensions
-COPY ./opt/code-server /opt/code-server
 RUN \
 	set -xe; \
 	mkdir -p ${VSCODE_EXT_DIRECTORY}; \
 	/opt/code-server/install-vscode-extension https://github.com/felixfbecker/vscode-php-debug/releases/download/v${VSCODE_XDEBUG_VERSION}/php-debug.vsix felixfbecker.php-debug-${VSCODE_XDEBUG_VERSION}; \
 	/opt/code-server/install-vscode-extension https://github.com/eamodio/vscode-gitlens/releases/download/v${VSCODE_GITLENS_VERSION}/gitlens-${VSCODE_GITLENS_VERSION}.vsix eamodio.gitlens-${VSCODE_GITLENS_VERSION}
-
-COPY opt/code-server/settings.json ${VSCODE_SHARE}/User/settings.json
 
 # Switch back to root (IMPORTANT!)
 USER root
