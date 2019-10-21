@@ -30,7 +30,7 @@ _healthcheck ()
 	fi
 
 	# If it does, check the status
-	echo $health_status | grep '"healthy"' >/dev/null 2>&1
+	echo ${health_status} | grep '"healthy"' >/dev/null 2>&1
 }
 
 # Waits for containers to become healthy
@@ -44,7 +44,7 @@ _healthcheck_wait ()
 
 	until _healthcheck "$container_name"; do
 		echo "Waiting for $container_name to become ready..."
-		sleep "$delay";
+		sleep ${delay};
 
 		# Give the container 30s to become ready
 		elapsed=$((elapsed + delay))
@@ -617,6 +617,25 @@ _healthcheck_wait ()
 	# Check Drush Backdrop command loaded
 	run docker exec -u docker "$NAME" bash -lc 'drush help backdrop-core-status'
 	[[ "${output}" =~ "Provides a birds-eye view of the current Backdrop installation, if any." ]]
+	unset output
+
+	### Cleanup ###
+	make clean
+}
+
+@test "VS Code Server" {
+	[[ $SKIP == 1 ]] && skip
+
+	### Setup ###
+	make start -e ENV='-e IDE_ENABLED=1'
+
+	run _healthcheck_wait
+	unset output
+
+	### Tests ###
+
+	run make logs
+	echo "$output" | grep "Documentation on securing your setup"
 	unset output
 
 	### Cleanup ###

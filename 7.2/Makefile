@@ -13,7 +13,7 @@ VOLUMES += -v /home/docker
 .PHONY: build test push shell run start stop logs clean release
 
 build:
-	docker build -t $(REPO):$(TAG) .
+	docker build --cache-from=$(REPO):edge-php$(VERSION) -t $(REPO):$(TAG) .
 
 test:
 	IMAGE=$(REPO):$(TAG) NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats

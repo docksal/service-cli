@@ -1,4 +1,4 @@
-FROM php:7.1-fpm-buster
+FROM php:7.1-fpm-buster as cli
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
@@ -231,6 +231,7 @@ RUN set -xe; \
 ENV COMPOSER_VERSION=1.9.0 \
 	DRUSH_VERSION=8.3.0 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
+	DRUPAL_CHECK_VERSION=1.0.13 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.3 \
 	WPCLI_VERSION=2.3.0 \
 	BLACKFIRE_VERSION=1.22.0 \
@@ -250,6 +251,8 @@ RUN set -xe; \
 	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	# Drupal Check CLI
+	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
 
@@ -380,7 +383,7 @@ SHELL ["/bin/sh", "-c"]
 COPY --chown=docker:docker config/.drush /home/docker/.drush
 COPY --chown=docker:docker config/.terminus /home/docker/.terminus
 COPY --chown=docker:docker config/.ssh /home/docker/.ssh
-COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY config/supervisor /etc/supervisor/conf.d
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
 # PHP default settings, global overrides and fpm overrides
@@ -404,6 +407,7 @@ ENV \
 	# xdebug disabled by default
 	XDEBUG_ENABLED=0
 
+# TODO: [v3] remove and set these via docker-compose
 EXPOSE 9000
 EXPOSE 22
 EXPOSE 3000
@@ -418,3 +422,40 @@ CMD ["supervisord"]
 
 # Health check script
 HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]
+
+
+# Visual Studio Code Server flavor
+FROM cli as code-server
+
+# Run as docker, so we don't have to fix permissions
+USER docker
+
+ARG HOME=/home/docker
+
+ENV \
+	# TODO: 2.x versions do not yet work with xdebug
+	CODE_SERVER_VERSION=1.1156-vsc1.33.1 \
+	VSCODE_HOME="${HOME}/code-server" \
+	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
+	VSCODE_XDEBUG_VERSION=1.13.0 \
+	VSCODE_GITLENS_VERSION=9.9.3
+
+# Install code-server
+RUN \
+	set -xe; \
+	curl -fsSL "https://github.com/cdr/code-server/releases/download/${CODE_SERVER_VERSION}/code-server${CODE_SERVER_VERSION}-linux-x64.tar.gz" -o /tmp/code-server.tar.gz; \
+	tar -zxv --file=/tmp/code-server.tar.gz --directory=/tmp --strip-components=1; \
+	sudo mv /tmp/code-server /usr/local/bin/; rm -rf /tmp/*.*
+
+# Settings and scripts
+COPY opt/code-server /opt/code-server
+
+# Install extensions
+RUN \
+	set -xe; \
+	mkdir -p ${VSCODE_EXT_DIRECTORY}; \
+	/opt/code-server/install-vscode-extension https://github.com/felixfbecker/vscode-php-debug/releases/download/v${VSCODE_XDEBUG_VERSION}/php-debug.vsix felixfbecker.php-debug-${VSCODE_XDEBUG_VERSION}; \
+	/opt/code-server/install-vscode-extension https://github.com/eamodio/vscode-gitlens/releases/download/v${VSCODE_GITLENS_VERSION}/gitlens-${VSCODE_GITLENS_VERSION}.vsix eamodio.gitlens-${VSCODE_GITLENS_VERSION}
+
+# Switch back to root (IMPORTANT!)
+USER root

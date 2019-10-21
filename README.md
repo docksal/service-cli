@@ -13,7 +13,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 - Hosting provider cli tools (Acquia, Pantheon, Platform.sh)
 - Cron job scheduling
 - Custom startup script support
-- Web based IDE (Cloud9)
+- Coder (Visual Studio Code web IDE)
 
 
 ## Versions and image tag naming convention
@@ -200,16 +200,16 @@ GIT_USER_NAME="Docksal CLI"
 
 
 <a name="ide"></a>
-## Web based IDE (Cloud9)
+## Coder (Visual Studio Code web IDE)
 
-[Cloud9](https://c9.github.io/core/) is a free, open-source online IDE.
+[Coder](https://coder.com/) is a free, open-source web IDE.
 
-Starting with version 2.3, there is the `ide` flavor of the images, which comes with Cloud9 pre-installed, e.g.:
+Starting with version 2.8, there is the `ide` flavor of the images, which comes with Coder pre-installed, e.g.:
 
 ```
-2.6-php7.1-ide
-2.6-php7.2-ide
-2.6-php7.3-ide
-``` 
+2.8-php7.1-ide
+2.8-php7.2-ide
+2.8-php7.3-ide
+```
 
-[See docs](https://docs.docksal.io/en/master/tools/cloud9/) for using Cloud 9 in Docksal.
+[See docs](https://docs.docksal.io/en/master/tools/ide/) for instructions on using Coder in Docksal.

@@ -1,7 +1,7 @@
 -include ../tests/env_make
 -include env_make
 
-VERSION ?= 7.1
+VERSION ?= 7.3
 REPO = docksal/cli
 FROM_TAG = build-$(VERSION)
 TAG = $(FROM_TAG)-ide

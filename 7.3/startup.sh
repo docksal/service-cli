@@ -28,6 +28,17 @@ xdebug_enable ()
 	ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
+ide_mode_enable ()
+{
+	echo-debug "Enabling web IDE..."
+	# Enabled only code-server service (disabled all other services)
+	# TODO: [v3] split IDE/cli and php-fpm entirely
+	rm -f /etc/supervisor/conf.d/supervisord-*
+	ln -s /opt/code-server/supervisord-code-server.conf /etc/supervisor/conf.d/
+	mkdir -p ${VSCODE_HOME}/User
+	ln -s /opt/code-server/settings.json ${VSCODE_HOME}/User/
+}
+
 # Creates symlinks to project level overrides if they exist
 php_settings ()
 {
@@ -141,6 +152,9 @@ convert_secrets
 
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
+
+# Enable web IDE
+[[ "$IDE_ENABLED" != "" ]] && [[ "$IDE_ENABLED" != "0" ]] && ide_mode_enable
 
 # Include project level PHP settings if found
 php_settings
