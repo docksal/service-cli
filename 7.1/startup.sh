@@ -34,7 +34,15 @@ ide_mode_enable ()
 	# Enabled only code-server service (disabled all other services)
 	# TODO: [v3] split IDE/cli and php-fpm entirely
 	rm -f /etc/supervisor/conf.d/supervisord-*
-	ln -s /opt/code-server/supervisord-code-server.conf /etc/supervisor/conf.d/
+	if [[ "$IDE_PASSWORD" != "" ]]; then
+		export PASSWORD="${IDE_PASSWORD}"
+		extra_options=""
+	else
+		extra_options="--no-auth"
+	fi
+	cp /opt/code-server/supervisord-code-server.conf /etc/supervisor/conf.d/
+	sed -i 's/{{ extra_options }}/'${extra_options}'/g' /etc/supervisor/conf.d/supervisord-code-server.conf
+	cat /etc/supervisor/conf.d/supervisord-code-server.conf
 	mkdir -p ${VSCODE_HOME}/User
 	ln -s /opt/code-server/settings.json ${VSCODE_HOME}/User/
 }
