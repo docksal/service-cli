@@ -212,4 +212,8 @@ Starting with version 2.8, there is the `ide` flavor of the images, which comes 
 2.8-php7.3-ide
 ```
 
+`IDE_PASSWORD`
+
+Store you preffered password into this variable, if you need password protected IDE environment
+
 [See docs](https://docs.docksal.io/en/master/tools/ide/) for instructions on using Coder in Docksal.
