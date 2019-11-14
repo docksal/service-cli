@@ -137,7 +137,7 @@ _healthcheck_wait ()
 
 	# sendmail_path, being long, gets cut off. We check it a little bit differently below
 	output=$(echo "$phpInfo" | grep "sendmail_path")
-	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 --read-envelope-from'
+	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025'
 	unset output
 
 	run docker exec -u docker "$NAME" /var/www/scripts/php-fpm.sh nonsense.php
@@ -161,7 +161,7 @@ _healthcheck_wait ()
 	unset output
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
-	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 --read-envelope-from'
+	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025'
 	unset output
 
 	# Check PHP modules
