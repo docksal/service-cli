@@ -12,6 +12,7 @@ RUN set -xe; \
 	apt-get update >/dev/null; \
 	apt-get -y --no-install-recommends install >/dev/null \
 		apt-transport-https \
+		apt-utils \
 		# ca-certificates and curl come from upstream
 		#ca-certificates \
 		#curl \
@@ -54,7 +55,6 @@ RUN set -xe; \
 		ghostscript \
 		# html2text binary - used for self-testing (php-fpm)
 		html2text \
-		imagemagick \
 		iputils-ping \
 		less \
 		# cgi-fcgi binary - used for self-testing (php-fpm)
@@ -128,6 +128,7 @@ RUN set -xe; \
 		libmemcached-dev \
 		libmhash-dev \
 		libpng-dev \
+		librsvg2-dev \
 		libpq-dev \
 		libwebp-dev \
 		libssh2-1-dev \
@@ -255,6 +256,23 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
+
+# Install imagemagick to match the same version on Pantheon.
+ENV IMAGEMAGICK_VERSION=6.8.8-10
+
+USER root
+
+# Make imagemagick to include support for SVGs
+RUN set -xe; \
+   	cd /usr/local/share; \
+   	wget https://imagemagick.org/download/releases/ImageMagick-${IMAGEMAGICK_VERSION}.tar.xz; \
+   	tar -xvf ImageMagick-${IMAGEMAGICK_VERSION}.tar.xz; \
+   	rm ImageMagick-${IMAGEMAGICK_VERSION}.tar.xz; \
+   	cd ImageMagick-${IMAGEMAGICK_VERSION}; \
+   	./configure --with-rsvg=yes; \
+   	make ; \
+   	make install; \
+   	ldconfig /usr/local/lib;
 
 # All further RUN commands will run as the "docker" user
 USER docker
