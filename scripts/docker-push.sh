@@ -53,9 +53,8 @@ tag_and_push ()
 IMAGE_TAG_EDGE="edge-php${VERSION}"
 IMAGE_TAG_STABLE="php${VERSION}"
 
-IFS='.'
 # Read the split parts
-read -a ver_arr <<< "$TRAVIS_TAG"
+IFS='.' read -a ver_arr <<< "$TRAVIS_TAG"
 
 # Major version, e.g. 2-php7.2
 IMAGE_TAG_RELEASE_MAJOR="${ver_arr[0]#v*}-php${VERSION}"
