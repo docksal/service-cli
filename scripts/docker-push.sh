@@ -52,10 +52,15 @@ tag_and_push ()
 # Possible docker image tags
 IMAGE_TAG_EDGE="edge-php${VERSION}"
 IMAGE_TAG_STABLE="php${VERSION}"
+
+# Read the split parts
+IFS='.' read -a ver_arr <<< "$TRAVIS_TAG"
+
 # Major version, e.g. 2-php7.2
-IMAGE_TAG_RELEASE_MAJOR="${TRAVIS_TAG:1:1}-php${VERSION}"
+IMAGE_TAG_RELEASE_MAJOR="${ver_arr[0]#v*}-php${VERSION}"
+
 # Major-minor version, e.g. 2.5-php7.2
-IMAGE_TAG_RELEASE_MAJOR_MINOR="${TRAVIS_TAG:1:3}-php${VERSION}"
+IMAGE_TAG_RELEASE_MAJOR_MINOR="${ver_arr[0]#v*}.${ver_arr[1]}-php${VERSION}"
 IMAGE_TAG_LATEST="latest"
 
 # Skip pull request builds
