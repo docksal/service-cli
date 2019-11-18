@@ -156,7 +156,9 @@ _healthcheck_wait ()
 	unset output
 
 	output=$(echo "$phpInfo" | grep "memory_limit")
-	echo "$output" | grep "-1 => -1"
+	# grep expression cannot start with "-", so prepending the expression with "memory_limit" here.
+	# Another option is to do "grep -- '-...'".
+	echo "$output" | grep "memory_limit => -1 => -1"
 	unset output
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
