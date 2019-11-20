@@ -2,6 +2,7 @@
 -include env_make
 
 VERSION ?= 7.2
+APPENDIX ?= php$(VERSION)
 REPO = docksal/cli
 TAG = build-$(VERSION)
 NAME = docksal-cli-$(VERSION)
@@ -9,6 +10,8 @@ CWD = $(shell pwd)
 
 # Improve write performance for /home/docker by turning it into a volume
 VOLUMES += -v /home/docker
+
+.EXPORT_ALL_VARIABLES:
 
 .PHONY: build test push shell run start stop logs clean release
 
@@ -50,7 +53,7 @@ logs-follow:
 clean:
 	docker rm -vf $(NAME) >/dev/null 2>&1 || true
 
-release: build
-	make push -e TAG=$(TAG)
+release:
+	@../scripts/docker-push.sh
 
 default: build
