@@ -38,7 +38,7 @@ script:
 
 after_success:
   - docker image ls
-  - ${TRAVIS_BUILD_DIR}/scripts/docker-push.sh
+  - make release
 
 after_failure:
   - cd ${TRAVIS_BUILD_DIR}/${VERSION} && make logs
