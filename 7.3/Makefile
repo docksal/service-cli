@@ -2,30 +2,33 @@
 -include env_make
 
 VERSION ?= 7.3
+TAG_APPENDIX ?= -php$(VERSION)
+BUILD_TAG = build-$(TAG_APPENDIX)
 REPO = docksal/cli
-TAG = build-$(VERSION)
 NAME = docksal-cli-$(VERSION)
 CWD = $(shell pwd)
 
 # Improve write performance for /home/docker by turning it into a volume
 VOLUMES += -v /home/docker
 
+.EXPORT_ALL_VARIABLES:
+
 .PHONY: build test push shell run start stop logs clean release
 
 build:
-	docker build --cache-from=$(REPO):edge-php$(VERSION) -t $(REPO):$(TAG) .
+	docker build --cache-from=$(REPO):edge$(TAG_APPENDIX) -t $(REPO):$(BUILD_TAG) .
 
 test:
-	IMAGE=$(REPO):$(TAG) NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats
+	IMAGE=$(REPO):$(BUILD_TAG) NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats
 
 push:
-	docker push $(REPO):$(TAG)
+	docker push $(REPO):$(BUILD_TAG)
 
 run: clean
-	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG)
+	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(BUILD_TAG)
 
 start: clean
-	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG)
+	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(BUILD_TAG)
 
 # Non-interactive and non-tty docker exec (uses LF instead of CRLF line endings)
 exec:
@@ -50,7 +53,7 @@ logs-follow:
 clean:
 	docker rm -vf $(NAME) >/dev/null 2>&1 || true
 
-release: build
-	make push -e TAG=$(TAG)
+release:
+	@../scripts/docker-push.sh
 
 default: build
