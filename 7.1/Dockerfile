@@ -148,8 +148,6 @@ RUN set -xe; \
 		libicu63 \
 		libjpeg62-turbo \
 		libldap-2.4-2 \
-		librsvg2-2 \
-		librsvg2-bin \
 		libmagickcore-6.q16-*-extra \
 		libmagickwand-6.q16-6 \
 		libmcrypt4 \
