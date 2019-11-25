@@ -147,7 +147,7 @@ RUN set -xe; \
 		libicu63 \
 		libjpeg62-turbo \
 		libldap-2.4-2 \
-		libmagickcore-6.q16-6 \
+		libmagickcore-6.q16-*-extra \
 		libmagickwand-6.q16-6 \
 		libmemcached11 \
 		libmemcachedutil2 \
