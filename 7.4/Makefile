@@ -6,7 +6,7 @@ VERSION ?= 7.4
 # tag naming schema: <image-repo>:[<software-version>-]<image-stability-tag>[-tag-appendix][-<flavor>]
 # uncomment lines bellow if you want include this in tag name
 # SOFTWARE_VERSION ?= $(VERSION)
-# FLAVOR ?= custom
+# FLAVOR =? custom
 
 TAG_APPENDIX ?= php$(VERSION)
 BUILD_TAG = build-$(TAG_APPENDIX)
