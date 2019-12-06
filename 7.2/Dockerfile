@@ -252,7 +252,7 @@ RUN set -xe; \
 	# Drupal Check CLI
 	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
+	(cd /usr/local/bin && chmod +x composer drupal-check drush8 drush drupal wp blackfire platform);
 
 # All further RUN commands will run as the "docker" user
 USER docker
