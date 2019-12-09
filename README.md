@@ -68,7 +68,7 @@ cli
     ...
 ```
 
-[See docs](https://docs.docksal.io/en/master/tools/xdebug) on using Xdebug for web and cli PHP debugging.
+[See docs](https://docs.docksal.io/tools/xdebug/) on using Xdebug for web and cli PHP debugging.
 
 
 ## NodeJS
@@ -216,4 +216,4 @@ Starting with version 2.8, there is the `ide` flavor of the images, which comes 
 
 Store your preferred password in this variable if you need to password protect the IDE environment.
 
-[See docs](https://docs.docksal.io/en/master/tools/ide/) for instructions on using Coder in Docksal.
+[See docs](https://docs.docksal.io/tools/ide/) for instructions on using Coder in Docksal.
