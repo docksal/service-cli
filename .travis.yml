@@ -30,7 +30,7 @@ install:
 
 script:
   # Pull the latest edge image to speed up builds (hoping for image layer cache hits)
-  - docker pull ${REPO}:edge-php${VERSION}
+  - docker pull ${REPO}:edge-php${VERSION} || true
   # Build the base image
   - cd ${TRAVIS_BUILD_DIR}/${VERSION}
   - travis_retry make  # Retry builds, as pecl.php.net tends to time out often
