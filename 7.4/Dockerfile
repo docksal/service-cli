@@ -386,6 +386,7 @@ COPY healthcheck.sh /opt/healthcheck.sh
 ADD https://raw.githubusercontent.com/php/php-src/php-7.4.0/php.ini-development /usr/local/etc/php/php.ini
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
+COPY config/php/opcache.ini /opt/docker-php-ext-opcache.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
 ENV \
