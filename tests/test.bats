@@ -202,6 +202,11 @@ _healthcheck_wait ()
 	echo "$output" | grep "memory_limit => 128M => 128M"
 	unset output
 
+	# Check Opcache Preload Enabled for 7.4
+	run make exec -e CMD='php -i'
+	[[ "${VERSION}" == "7.4" ]] && [[ echo "$output" | grep -e "^opcache.preload$" ]]
+	unset output
+
 	### Cleanup ###
 	make clean
 }
