@@ -427,6 +427,7 @@ _healthcheck_wait ()
 
 @test "Check Acquia integration" {
 	[[ $SKIP == 1 ]] && skip
+        [[ "${VERSION}" != "7.4" ]] && skip
 
 	# Confirm secret is not empty
 	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
