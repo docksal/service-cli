@@ -204,7 +204,7 @@ _healthcheck_wait ()
 
 	# Check Opcache Preload Enabled for 7.4
 	run make exec -e CMD='php -i'
-	[[ "${VERSION}" == "7.4" ]] && [[ echo "$output" | grep -e "^opcache.preload$" ]]
+	[[ "${VERSION}" == "7.4" ]] && echo "$output" | grep "opcache.preload"
 	unset output
 
 	### Cleanup ###
