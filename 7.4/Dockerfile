@@ -233,8 +233,8 @@ ENV COMPOSER_VERSION=1.9.0 \
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
-	# Drush 8 (global fallback)
-	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
+	# Drush 8 (global fallback) / Currently Not Included until 7.4 compatible
+	# curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
 	# Drush Launcher
 	curl -fsSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console Launcher
@@ -247,8 +247,8 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Drupal Check CLI
 	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
-	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer drupal-check drush8 drush drupal wp blackfire platform);
+	# Make all downloaded binaries executable in one shot / Add drush8 back to list once compatible.
+	(cd /usr/local/bin && chmod +x composer drupal-check drush drupal wp blackfire platform);
 
 # All further RUN commands will run as the "docker" user
 USER docker
@@ -261,8 +261,8 @@ ENV MG_CODEGEN_VERSION=1.11.0 \
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
-	# Set drush8 as a global fallback for Drush Launcher
-	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
+	# Set drush8 as a global fallback for Drush Launcher / Currently disabled for 7.4 until compatible
+	# echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin directory to PATH
 	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
@@ -287,12 +287,12 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 	# Terminus
 	cgr pantheon-systems/terminus:${TERMINUS_VERSION} >/dev/null; \
 	# Cleanup
-	composer clear-cache; \
-	\
+	composer clear-cache;
+        # Disabled until 7.4 Compatible.
 	# Drush modules
-	#drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/drush/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
-	drush cc drush
+	# drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
+	# mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/drush/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
+	# drush cc drush
 
 # Node.js (installed as user)
 ENV \
