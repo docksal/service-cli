@@ -234,7 +234,8 @@ _healthcheck_wait ()
 
 	# Check Drush version
 	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
-	[[ ${status} == 0 ]]
+        # Currently check on all other version than 7.4
+	[[ "${VERSION}" != "7.4" ]] && [[ ${status} == 0 ]]
 	unset output
 
 	# Check Drupal Console version
