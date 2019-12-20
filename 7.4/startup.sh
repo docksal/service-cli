@@ -28,6 +28,12 @@ xdebug_enable ()
 	ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
+opcache_preload_enable()
+{
+        echo-debug "Enabling opcache preload..."
+        ln -s /opt/docker-php-ext-opcache.ini /usr/local/etc/php/conf.d/
+}
+
 ide_mode_enable ()
 {
 	echo-debug "Enabling web IDE..."
@@ -155,6 +161,9 @@ convert_secrets
 
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
+
+# Enable opcache preload
+[[ -f "/var/www/.docksal/etc/php/preload.php" ]] && opcache_preload_enable
 
 # Enable web IDE
 [[ "$IDE_ENABLED" != "" ]] && [[ "$IDE_ENABLED" != "0" ]] && ide_mode_enable

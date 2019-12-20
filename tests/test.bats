@@ -202,6 +202,11 @@ _healthcheck_wait ()
 	echo "$output" | grep "memory_limit => 128M => 128M"
 	unset output
 
+	# Check Opcache Preload Enabled for 7.4
+	run make exec -e CMD='php -i'
+	[[ "${VERSION}" == "7.4" ]] && echo "$output" | grep "opcache.preload"
+	unset output
+
 	### Cleanup ###
 	make clean
 }
@@ -229,7 +234,8 @@ _healthcheck_wait ()
 
 	# Check Drush version
 	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
-	[[ ${status} == 0 ]]
+        # Currently check on all other version than 7.4
+	[[ "${VERSION}" != "7.4" ]] && [[ ${status} == 0 ]]
 	unset output
 
 	# Check Drupal Console version
@@ -421,6 +427,7 @@ _healthcheck_wait ()
 
 @test "Check Acquia integration" {
 	[[ $SKIP == 1 ]] && skip
+        [[ "${VERSION}" == "7.4" ]] && skip
 
 	# Confirm secret is not empty
 	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
@@ -606,6 +613,8 @@ _healthcheck_wait ()
 
 @test "Check Drush Backdrop Commands" {
 	[[ $SKIP == 1 ]] && skip
+        # Skip for 7.4 Right now
+        [[ "$VERSION" == "7.4" ]] && skip 
 
 	### Setup ###
 	make start
