@@ -180,7 +180,7 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	make start -e ENV='-e XDEBUG_ENABLED=1'
+	make start -e ENV='-e XDEBUG_ENABLED=1 -e XHPROF_ENABLED=1'
 
 	run _healthcheck_wait
 	unset output
@@ -195,6 +195,11 @@ _healthcheck_wait ()
 	# Check xdebug was enabled
 	run make exec -e CMD='php -m'
 	echo "$output" | grep -e "^xdebug$"
+	unset output
+
+	# Check xhprof (tideways) was enabled
+	run make exec -e CMD='php -m'
+	echo "$output" | grep -e "^tideways"
 	unset output
 
 	# Check PHP CLI overrides
@@ -614,7 +619,7 @@ _healthcheck_wait ()
 @test "Check Drush Backdrop Commands" {
 	[[ $SKIP == 1 ]] && skip
         # Skip for 7.4 Right now
-        [[ "$VERSION" == "7.4" ]] && skip 
+        [[ "$VERSION" == "7.4" ]] && skip
 
 	### Setup ###
 	make start
