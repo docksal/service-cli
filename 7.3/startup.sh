@@ -28,6 +28,12 @@ xdebug_enable ()
 	ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
+xhprof_enable ()
+{
+	echo-debug "Enabling xhprof..."
+	ln -s /opt/docker-php-ext-xhprof.ini /usr/local/etc/php/conf.d/
+}
+
 ide_mode_enable ()
 {
 	echo-debug "Enabling web IDE..."
@@ -155,6 +161,9 @@ convert_secrets
 
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
+
+# Enable xdebug
+[[ "$XHPROF_ENABLED" != "" ]] && [[ "$XHPROF_ENABLED" != "0" ]] && xhprof_enable
 
 # Enable web IDE
 [[ "$IDE_ENABLED" != "" ]] && [[ "$IDE_ENABLED" != "0" ]] && ide_mode_enable
