@@ -28,6 +28,12 @@ xdebug_enable ()
 	ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
+xhprof_enable ()
+{
+	echo-debug "Enabling xhprof..."
+	ln -s /opt/docker-php-ext-xhprof.ini /usr/local/etc/php/conf.d/
+}
+
 opcache_preload_enable()
 {
         echo-debug "Enabling opcache preload..."
@@ -161,6 +167,9 @@ convert_secrets
 
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
+
+# Enable xhprof
+[[ "$XHPROF_ENABLED" != "" ]] && [[ "$XHPROF_ENABLED" != "0" ]] && xhprof_enable
 
 # Enable opcache preload
 [[ -f "/var/www/.docksal/etc/php/preload.php" ]] && opcache_preload_enable

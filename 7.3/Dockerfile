@@ -111,6 +111,8 @@ RUN set -xe; \
 ENV NOTVISIBLE "in users profile"
 
 # PHP
+ENV TIDEWAYS_VERSION=5.0.2 \
+		TIDEWAYS_PHP_VERSION=7.3
 RUN set -xe; \
 	# Note: essential build tools (g++, gcc, make, etc) are included upstream as persistent packages.
 	# See https://github.com/docker-library/php/blob/406fcd31e62d633f62ac0d7bc5fc29aa1b3929fc/7.2/buster/fpm/Dockerfile#L18-L40
@@ -223,7 +225,11 @@ RUN set -xe; \
 	docker-php-source delete; \
 	rm -rf /tmp/pear ~/.pearrc; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
-	apt-get clean; rm -rf /var/lib/apt/lists/*
+	apt-get clean; rm -rf /var/lib/apt/lists/*; \
+	cd /tmp;
+	curl -fsSL "https://github.com/tideways/php-xhprof-extension/releases/download/v${TIDEWAYS_VERSION}/tideways-xhprof-${TIDEWAYS_VERSION}-x86_64.tar.gz" -o tideways.tar.gz; \
+	tar -xf tideways.tar.gz; \
+	cp /tmp/tideways_xhprof-*/tideways_xhprof-${TIDEWAYS_PHP_VERSION}.so /usr/local/lib/php/extensions/no-debug-non-zts-*/;
 
 # PHP tools (installed globally)
 ENV COMPOSER_VERSION=1.9.0 \
@@ -390,6 +396,7 @@ COPY healthcheck.sh /opt/healthcheck.sh
 ADD https://raw.githubusercontent.com/php/php-src/php-7.3.9/php.ini-development /usr/local/etc/php/php.ini
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
+COPY config/php/xhprof.ini /opt/docker-php-ext-xhprof.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
 ENV \
