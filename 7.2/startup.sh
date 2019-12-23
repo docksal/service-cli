@@ -31,7 +31,13 @@ xdebug_enable ()
 xhprof_enable ()
 {
 	echo-debug "Enabling xhprof..."
-	ln -s /opt/docker-php-ext-xhprof.ini /usr/local/etc/php/conf.d/
+	cp /opt/docker-php-ext-xhprof.ini /usr/local/etc/php/conf.d/
+	# Output directory to the ini file
+	echo "xhprof.output_dir = ${XHPROF_OUTPUT_DIR}" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini
+	# Try to create directory if it doesn't exist
+	mkdir ${XHPROF_OUTPUT_DIR} || true
+	# Change owner of directory
+	chown docker:docker ${XHPROF_OUTPUT_DIR}
 }
 
 ide_mode_enable ()

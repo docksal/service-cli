@@ -403,7 +403,8 @@ ENV \
 	HOST_GID=1000 \
 	# xdebug disabled by default
 	XDEBUG_ENABLED=0 \
-	XHPROF_ENABLED=0
+	XHPROF_ENABLED=0 \
+	XHPROF_OUTPUT_DIR=/tmp/xhprof
 
 # TODO: [v3] remove and set these via docker-compose
 EXPOSE 9000
