@@ -28,6 +28,18 @@ xdebug_enable ()
 	ln -s /opt/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
 }
 
+xhprof_enable ()
+{
+	echo-debug "Enabling xhprof..."
+	cp /opt/docker-php-ext-xhprof.ini /usr/local/etc/php/conf.d/
+	# Output directory to the ini file
+	echo "xhprof.output_dir = ${XHPROF_OUTPUT_DIR}" >> /usr/local/etc/php/conf.d/docker-php-ext-xhprof.ini
+	# Try to create directory if it doesn't exist
+	mkdir ${XHPROF_OUTPUT_DIR} || true
+	# Change owner of directory
+	chown docker:docker ${XHPROF_OUTPUT_DIR}
+}
+
 ide_mode_enable ()
 {
 	echo-debug "Enabling web IDE..."
@@ -155,6 +167,9 @@ convert_secrets
 
 # Enable xdebug
 [[ "$XDEBUG_ENABLED" != "" ]] && [[ "$XDEBUG_ENABLED" != "0" ]] && xdebug_enable
+
+# Enable xdebug
+[[ "$XHPROF_ENABLED" != "" ]] && [[ "$XHPROF_ENABLED" != "0" ]] && xhprof_enable
 
 # Enable web IDE
 [[ "$IDE_ENABLED" != "" ]] && [[ "$IDE_ENABLED" != "0" ]] && ide_mode_enable

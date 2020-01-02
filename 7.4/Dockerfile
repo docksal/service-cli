@@ -205,6 +205,7 @@ RUN set -xe; \
 		redis \
 		sqlsrv-5.7.1preview \
 		xdebug \
+		xhprof \
 	;\
 	docker-php-ext-enable \
 		apcu \
@@ -386,6 +387,7 @@ COPY healthcheck.sh /opt/healthcheck.sh
 ADD https://raw.githubusercontent.com/php/php-src/php-7.4.0/php.ini-development /usr/local/etc/php/php.ini
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
+COPY config/php/xhprof.ini /opt/docker-php-ext-xhprof.ini
 COPY config/php/opcache.ini /opt/docker-php-ext-opcache.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
@@ -400,7 +402,9 @@ ENV \
 	HOST_UID=1000 \
 	HOST_GID=1000 \
 	# xdebug disabled by default
-	XDEBUG_ENABLED=0
+	XDEBUG_ENABLED=0 \
+	XHPROF_ENABLED=0 \
+	XHPROF_OUTPUT_DIR=/tmp/xhprof
 
 # TODO: [v3] remove and set these via docker-compose
 EXPOSE 9000
