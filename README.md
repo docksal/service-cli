@@ -7,7 +7,7 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 
 ## Features
 
-- php/php-fpm (w/ xdebug), nodejs (via nvm), phyton (via pyenv), ruby (via rvm)
+- php/php-fpm (w/ xdebug), nodejs (via nvm), python (via pyenv), ruby (via rvm)
 - Framework specific tools for Drupal, Wordpress, Magento
 - Miscellaneous cli tools for day to day web development
 - Hosting provider cli tools (Acquia, Pantheon, Platform.sh)

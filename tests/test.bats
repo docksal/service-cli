@@ -209,7 +209,7 @@ _healthcheck_wait ()
 
 	# Check Opcache Preload Enabled for 7.4
 	run make exec -e CMD='php -i'
-	[[ "${VERSION}" == "7.4" ]] && echo "$output" | grep "opcache.preload"
+	if [[ "${VERSION}" == "7.4" ]]; then echo "$output" | grep "opcache.preload"; fi
 	unset output
 
 	### Cleanup ###
@@ -239,8 +239,8 @@ _healthcheck_wait ()
 
 	# Check Drush version
 	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
-        # Currently check on all other version than 7.4
-	[[ "${VERSION}" != "7.4" ]] && [[ ${status} == 0 ]]
+	# Check on all other version than 7.4 until Drush is compatible with PHP 7.4
+	if [[ "${VERSION}" != "7.4" ]]; then [[ ${status} == 0 ]]; fi
 	unset output
 
 	# Check Drupal Console version
@@ -432,7 +432,7 @@ _healthcheck_wait ()
 
 @test "Check Acquia integration" {
 	[[ $SKIP == 1 ]] && skip
-        [[ "${VERSION}" == "7.4" ]] && skip
+	[[ "${VERSION}" == "7.4" ]] && skip
 
 	# Confirm secret is not empty
 	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
@@ -618,8 +618,8 @@ _healthcheck_wait ()
 
 @test "Check Drush Backdrop Commands" {
 	[[ $SKIP == 1 ]] && skip
-        # Skip for 7.4 Right now
-        [[ "$VERSION" == "7.4" ]] && skip
+	# Skip until Drush Backdrop is compatible with PHP 7.4
+	[[ "$VERSION" == "7.4" ]] && skip
 
 	### Setup ###
 	make start
