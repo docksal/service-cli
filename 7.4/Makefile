@@ -1,7 +1,7 @@
 -include ../tests/env_make
 -include env_make
 
-VERSION ?= 7.1
+VERSION ?= 7.4
 TAG_APPENDIX ?= -php$(VERSION)
 BUILD_TAG = build-$(TAG_APPENDIX)
 REPO = docksal/cli

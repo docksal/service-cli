@@ -25,7 +25,6 @@ json
 ldap
 libxml
 mbstring
-mcrypt
 memcached
 mysqli
 mysqlnd
@@ -47,6 +46,7 @@ session
 SimpleXML
 soap
 sockets
+sodium
 SPL
 sqlite3
 sqlsrv

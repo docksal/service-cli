@@ -1,4 +1,4 @@
-FROM php:7.1-fpm-buster as cli
+FROM php:7.4-fpm-buster as cli
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
@@ -124,7 +124,6 @@ RUN set -xe; \
 		libldap2-dev \
 		libmagickcore-dev \
 		libmagickwand-dev \
-		libmcrypt-dev \
 		libmemcached-dev \
 		libmhash-dev \
 		libpng-dev \
@@ -150,7 +149,6 @@ RUN set -xe; \
 		libldap-2.4-2 \
 		libmagickcore-6.q16-*-extra \
 		libmagickwand-6.q16-6 \
-		libmcrypt4 \
 		libmemcached11 \
 		libmemcachedutil2 \
 		libmhash2 \
@@ -166,15 +164,13 @@ RUN set -xe; \
 	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
 	\
 	docker-php-ext-configure >/dev/null gd \
-		--with-freetype-dir=/usr/include/ \
-		--with-jpeg-dir=/usr/include/ \
-		--with-webp-dir=/usr/include/ \
-		--with-png-dir=/usr/include/ \
-		--with-xpm-dir=/usr/include/; \
-	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
+		--with-freetype \
+		--with-webp \
+		--with-xpm; \
+	PHP_OPENSSL=yes docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
-	docker-php-ext-configure >/dev/null zip --with-libzip; \
+	docker-php-ext-configure >/dev/null zip; \
 	\
 	docker-php-ext-install >/dev/null -j$(nproc) \
 		bcmath \
@@ -186,8 +182,6 @@ RUN set -xe; \
 		imap \
 		intl \
 		ldap \
-		# mcrypt is deprecated in 7.1 and removed in 7.2. See Deprecated features.
-		mcrypt \
 		mysqli \
 		opcache \
 		pcntl \
@@ -207,9 +201,9 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		pdo_sqlsrv \
+		pdo_sqlsrv-5.7.1preview \
 		redis \
-		sqlsrv \
+		sqlsrv-5.7.1preview \
 		xdebug \
 	;\
 	docker-php-ext-enable \
@@ -239,8 +233,8 @@ ENV COMPOSER_VERSION=1.9.0 \
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
-	# Drush 8 (global fallback)
-	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
+	# Drush 8 (global fallback) / Currently Not Included until 7.4 compatible
+	# curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
 	# Drush Launcher
 	curl -fsSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console Launcher
@@ -253,8 +247,8 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Drupal Check CLI
 	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
-	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer drupal-check drush8 drush drupal wp blackfire platform);
+	# Make all downloaded binaries executable in one shot / Add drush8 back to list once compatible.
+	(cd /usr/local/bin && chmod +x composer drupal-check drush drupal wp blackfire platform);
 
 # All further RUN commands will run as the "docker" user
 USER docker
@@ -267,8 +261,8 @@ ENV MG_CODEGEN_VERSION=1.11.0 \
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
-	# Set drush8 as a global fallback for Drush Launcher
-	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
+	# Set drush8 as a global fallback for Drush Launcher / Currently disabled for 7.4 until compatible
+	# echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin directory to PATH
 	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
@@ -293,12 +287,12 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 	# Terminus
 	cgr pantheon-systems/terminus:${TERMINUS_VERSION} >/dev/null; \
 	# Cleanup
-	composer clear-cache; \
-	\
+	composer clear-cache;
+        # Disabled until 7.4 Compatible.
 	# Drush modules
-	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/drush/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
-	drush cc drush
+	# drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
+	# mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/drush/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
+	# drush cc drush
 
 # Node.js (installed as user)
 ENV \
@@ -389,9 +383,10 @@ COPY healthcheck.sh /opt/healthcheck.sh
 # PHP default settings, global overrides and fpm overrides
 # PHP_VERSION is set upstream. The source code for the exact PHP version may not be available in Github
 # TODO: For now, will just hardcoded a specific version available on https://github.com/php/php-src/
-ADD https://raw.githubusercontent.com/php/php-src/php-7.1.32/php.ini-development /usr/local/etc/php/php.ini
+ADD https://raw.githubusercontent.com/php/php-src/php-7.4.0/php.ini-development /usr/local/etc/php/php.ini
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
+COPY config/php/opcache.ini /opt/docker-php-ext-opcache.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
 ENV \
