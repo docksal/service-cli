@@ -262,7 +262,7 @@ SHELL ["/bin/bash", "-c"]
 # PHP tools (installed as user)
 ENV MG_CODEGEN_VERSION=1.11.0 \
 	TERMINUS_VERSION=2.2.0 \
-	DRUSH_BACKDROP_VERSION=1.0.0
+	DRUSH_BACKDROP_VERSION=1.2.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
