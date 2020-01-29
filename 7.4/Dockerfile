@@ -193,6 +193,7 @@ RUN set -xe; \
 		ssh2 \
 		xsl \
 		zip \
+		sysvsem \
 	;\
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \

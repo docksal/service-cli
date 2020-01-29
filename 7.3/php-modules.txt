@@ -52,6 +52,7 @@ sqlite3
 sqlsrv
 ssh2
 standard
+sysvsem
 tokenizer
 xml
 xmlreader
