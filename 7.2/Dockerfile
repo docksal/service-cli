@@ -377,7 +377,7 @@ RUN set -xe; \
 #	pyenv global ${PYTHON_VERSION_INSTALL}
 
 # Notify web container about started fin exec
-RUN echo 'bash -c "[[ \"${VIRTUAL_HOST}\" != \"\" ]] && (while true; do curl -s -m 2 ${VIRTUAL_HOST}/exec_in_progress_inside_cli >/dev/null 2>&1; sleep 10; done &)">/dev/null' >> $HOME/.profile
+RUN echo 'bash -c "[[ \"${VIRTUAL_HOST}\" != \"\" ]] && (while true; do curl -s -m 1 ${VIRTUAL_HOST}/exec_in_progress_inside_cli >/dev/null 2>&1; sleep 60; done &)">/dev/null' >> $HOME/.profile
 
 USER root
 SHELL ["/bin/sh", "-c"]
