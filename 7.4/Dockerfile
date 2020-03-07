@@ -231,7 +231,7 @@ ENV COMPOSER_VERSION=1.9.0 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.3 \
 	WPCLI_VERSION=2.3.0 \
 	BLACKFIRE_VERSION=1.27.4 \
-	PLATFORMSH_CLI_VERSION=3.52.0
+	PLATFORMSH_CLI_VERSION=3.52.3
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
