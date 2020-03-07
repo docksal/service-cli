@@ -197,6 +197,7 @@ RUN set -xe; \
 		ssh2 \
 		xsl \
 		zip \
+		sysvsem \
 	;\
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \
@@ -234,7 +235,7 @@ ENV COMPOSER_VERSION=1.9.0 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.3 \
 	WPCLI_VERSION=2.3.0 \
 	BLACKFIRE_VERSION=1.27.4 \
-	PLATFORMSH_CLI_VERSION=3.49.1
+	PLATFORMSH_CLI_VERSION=3.52.0
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -262,7 +263,7 @@ SHELL ["/bin/bash", "-c"]
 # PHP tools (installed as user)
 ENV MG_CODEGEN_VERSION=1.11.0 \
 	TERMINUS_VERSION=2.2.0 \
-	DRUSH_BACKDROP_VERSION=1.0.0
+	DRUSH_BACKDROP_VERSION=1.2.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
