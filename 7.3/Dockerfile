@@ -377,7 +377,7 @@ RUN set -xe; \
 #	pyenv global ${PYTHON_VERSION_INSTALL}
 
 # Notify web container about started fin exec
-RUN echo 'bash -c "[[ \"${VIRTUAL_HOST}\" != \"\" ]] && (while true; do curl -s -m 1 ${VIRTUAL_HOST}/exec_in_progress_inside_cli >/dev/null 2>&1; sleep 60; done &)">/dev/null' >> $HOME/.profile
+RUN echo '(/opt/ping-web.sh &)' >> $HOME/.profile
 
 USER root
 SHELL ["/bin/sh", "-c"]
@@ -389,6 +389,7 @@ COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisor /etc/supervisor/conf.d
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
+COPY ping-web.sh /opt/ping-web.sh
 # PHP default settings, global overrides and fpm overrides
 # PHP_VERSION is set upstream. The source code for the exact PHP version may not be available in Github
 # TODO: For now, will just hardcoded a specific version available on https://github.com/php/php-src/
@@ -408,6 +409,8 @@ ENV \
 	# Default values for HOST_UID and HOST_GUI to match the default Ubuntu user. These are used in startup.sh
 	HOST_UID=1000 \
 	HOST_GID=1000 \
+	# Delay in seconds between pings web from cli, while running fin exec. 0 - disabled
+	WEB_KEEPALIVE=0 \
 	# xdebug disabled by default
 	XDEBUG_ENABLED=0 \
 	XHPROF_ENABLED=0 \
