@@ -187,6 +187,9 @@ Stored in `/home/docker/.platform` inside `cli`.
 
 Platform CLI is installed and available globally in `cli`.
 
+`WEB_KEEPALIVE`
+
+Sets the delay in seconds between pings of the web container during execution `fin exec`. Setting this variable to non zero value prevents the project from stopping in cases of long `fin exec` and web container inactivity. Disabled by default (set to 0).
 
 ## Git configuration
 
