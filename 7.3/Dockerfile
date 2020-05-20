@@ -261,6 +261,7 @@ USER docker
 SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
+# Note: DRUSH_BACKDROP_VERSION should be pinned at 1.2.0 as 1.3.0 introduces changes that break regular drush 8.
 ENV MG_CODEGEN_VERSION=1.11.0 \
 	TERMINUS_VERSION=2.3.0 \
 	DRUSH_BACKDROP_VERSION=1.2.0
