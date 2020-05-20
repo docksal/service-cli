@@ -228,14 +228,14 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.9.0 \
+ENV COMPOSER_VERSION=1.10.6 \
 	DRUSH_VERSION=8.3.0 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CHECK_VERSION=1.0.13 \
-	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.3 \
-	WPCLI_VERSION=2.3.0 \
-	BLACKFIRE_VERSION=1.27.4 \
-	PLATFORMSH_CLI_VERSION=3.52.3
+	DRUPAL_CHECK_VERSION=1.1.1 \
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.4 \
+	WPCLI_VERSION=2.4.1 \
+	BLACKFIRE_VERSION=1.35.1 \
+	PLATFORMSH_CLI_VERSION=3.56.1
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -262,8 +262,8 @@ SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
 ENV MG_CODEGEN_VERSION=1.11.0 \
-	TERMINUS_VERSION=2.2.0 \
-	DRUSH_BACKDROP_VERSION=1.2.0
+	TERMINUS_VERSION=2.3.0 \
+	DRUSH_BACKDROP_VERSION=1.3.1
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
@@ -302,9 +302,9 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.35.0 \
-	NODE_VERSION=12.13.0 \
-	YARN_VERSION=1.19.1
+	NVM_VERSION=0.35.3 \
+	NODE_VERSION=12.16.3 \
+	YARN_VERSION=1.22.4
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
@@ -318,8 +318,8 @@ RUN set -e; \
 
 # Ruby (installed as user)
 ENV \
-	RVM_VERSION_INSTALL=1.29.9 \
-	RUBY_VERSION_INSTALL=2.6.5
+	RVM_VERSION_INSTALL=1.29.10 \
+	RUBY_VERSION_INSTALL=2.7.1
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
@@ -358,8 +358,8 @@ RUN set -e; \
 
 # Python (installed as user)
 ENV \
-	PYENV_VERSION_INSTALL=1.2.14
-#	PYTHON_VERSION_INSTALL=3.7.0
+	PYENV_VERSION_INSTALL=1.2.18
+#	PYTHON_VERSION_INSTALL=3.8.3
 RUN set -xe; \
 	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
 	rm -rf $HOME/.pyenv/.git; \
