@@ -297,7 +297,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 	\
 	# Drush modules
 	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/drush/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
+	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/backdrop-drush-extension/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
 	drush cc drush
 
 # Node.js (installed as user)
