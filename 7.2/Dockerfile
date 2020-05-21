@@ -458,7 +458,7 @@ RUN \
 	sudo mv /tmp/code-server /usr/local/bin/; rm -rf /tmp/*.*
 
 # Settings and scripts
-COPY opt/code-server /opt/code-server
+COPY --chown=docker:docker opt/code-server /opt/code-server
 
 # Install extensions
 RUN \
