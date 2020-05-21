@@ -22,5 +22,15 @@
         "port": 9000
       }
     ]
+  },
+  // File associations
+  "files.associations": {
+    "*.inc": "php",
+    "*.module": "php",
+    "*.install": "php",
+    "*.theme": "php",
+    "*.tpl.php": "php",
+    "*.test": "php",
+    "*.php": "php"
   }
 }
