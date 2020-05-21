@@ -441,7 +441,7 @@ ARG HOME=/home/docker
 
 ENV \
 	# TODO: 2.x versions do not yet work with xdebug
-	CODE_SERVER_VERSION=1.1156-vsc1.33.1 \
+	CODE_SERVER_VERSION=3.3.1 \
 	VSCODE_HOME="${HOME}/code-server" \
 	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
@@ -450,12 +450,12 @@ ENV \
 # Install code-server
 RUN \
 	set -xe; \
-	curl -fsSL "https://github.com/cdr/code-server/releases/download/${CODE_SERVER_VERSION}/code-server${CODE_SERVER_VERSION}-linux-x64.tar.gz" -o /tmp/code-server.tar.gz; \
-	tar -zxv --file=/tmp/code-server.tar.gz --directory=/tmp --strip-components=1; \
-	sudo mv /tmp/code-server /usr/local/bin/; rm -rf /tmp/*.*
+	curl -fsSL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_amd64.deb" -o /tmp/code-server_amd64.deb; \
+	sudo dpkg -i /tmp/code-server_amd64.deb; \
+	rm -rf /tmp/*.*
 
 # Settings and scripts
-COPY opt/code-server /opt/code-server
+COPY --chown=docker:docker opt/code-server /opt/code-server
 
 # Install extensions
 RUN \

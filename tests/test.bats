@@ -650,7 +650,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	run make logs
-	echo "$output" | grep "Documentation on securing your setup"
+	echo "$output" | grep 'HTTP server listening on http://0\.0\.0\.0:8080'
 	unset output
 
 	### Cleanup ###
