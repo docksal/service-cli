@@ -451,7 +451,7 @@ ENV \
 RUN \
 	set -xe; \
 	curl -fsSL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_amd64.deb" -o /tmp/code-server_amd64.deb; \
-    sudo dpkg -i /tmp/code-server_amd64.deb; \
+	sudo dpkg -i /tmp/code-server_amd64.deb; \
 	rm -rf /tmp/*.*
 
 # Settings and scripts
