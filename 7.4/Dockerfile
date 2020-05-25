@@ -231,7 +231,8 @@ ENV COMPOSER_VERSION=1.10.6 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.4 \
 	WPCLI_VERSION=2.4.0 \
 	BLACKFIRE_VERSION=1.35.1 \
-	PLATFORMSH_CLI_VERSION=3.56.1
+	PLATFORMSH_CLI_VERSION=3.56.1 \
+	ACQUIA_CLI_VERSION=2.0.6
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -249,8 +250,10 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Drupal Check CLI
 	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
+	# Acquia CLI
+	curl -fsSL "https://github.com/typhonius/acquia_cli/releases/download/${ACQUIA_CLI_VERSION}/acquiacli.phar" -o /usr/local/bin/acquiacli; \
 	# Make all downloaded binaries executable in one shot / Add drush8 back to list once compatible.
-	(cd /usr/local/bin && chmod +x composer drupal-check drush drupal wp blackfire platform);
+	(cd /usr/local/bin && chmod +x composer drupal-check drush drupal wp blackfire platform acquiacli);
 
 # All further RUN commands will run as the "docker" user
 USER docker

@@ -173,6 +173,13 @@ Stored in `/home/docker/.acquia/cloudapi.conf` inside `cli`.
 
 Acquia Cloud API can be used via `ac-<command>` group of commands in Drush.
 
+`SECRET_ACQUIACLI_KEY` and `SECRET_ACQUIACLI_SECRET`
+
+Credentials used to authenticate with [Acquia CLI](https://github.com/typhonius/acquia_cli) tool.
+Stored as `ACQUIACLI_KEY` and `ACQUIACLI_SECRET` environment variables inside `cli`.
+
+Acquia CLI is installed and available globally in `cli`.
+
 `SECRET_TERMINUS_TOKEN`
 
 Credentials used to authenticate [Terminus](https://pantheon.io/docs/terminus) with Pantheon.
