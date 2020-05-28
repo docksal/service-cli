@@ -175,7 +175,7 @@ Acquia Cloud API can be used via `ac-<command>` group of commands in Drush.
 
 `SECRET_ACQUIACLI_KEY` and `SECRET_ACQUIACLI_SECRET`
 
-Credentials used to authenticate with [Acquia CLI](https://github.com/typhonius/acquia_cli) tool.
+Credentials used to authenticate [Acquia CLI](https://github.com/typhonius/acquia_cli) with Acquia.
 Stored as `ACQUIACLI_KEY` and `ACQUIACLI_SECRET` environment variables inside `cli`.
 
 Acquia CLI is installed and available globally in `cli`.
