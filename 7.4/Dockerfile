@@ -204,9 +204,9 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		pdo_sqlsrv-5.7.1preview \
+		pdo_sqlsrv \
 		redis \
-		sqlsrv-5.7.1preview \
+		sqlsrv \
 		xdebug \
 		xhprof \
 	;\
