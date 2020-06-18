@@ -239,8 +239,7 @@ _healthcheck_wait ()
 
 	# Check Drush version
 	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
-	# Check on all other version than 7.4 until Drush is compatible with PHP 7.4
-	if [[ "${VERSION}" != "7.4" ]]; then [[ ${status} == 0 ]]; fi
+	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drupal Console version

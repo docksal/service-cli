@@ -226,20 +226,20 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.10.6 \
-	DRUSH_VERSION=8.3.0 \
+ENV COMPOSER_VERSION=1.10.7 \
+	DRUSH_VERSION=8.3.5 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CHECK_VERSION=1.1.1 \
+	DRUPAL_CHECK_VERSION=1.1.2 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.4 \
 	WPCLI_VERSION=2.4.0 \
-	BLACKFIRE_VERSION=1.35.1 \
-	PLATFORMSH_CLI_VERSION=3.56.1 \
+	BLACKFIRE_VERSION=1.36.0 \
+	PLATFORMSH_CLI_VERSION=3.57.4 \
 	ACQUIACLI_VERSION=2.0.6
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
-	# Drush 8 (global fallback) / Currently Not Included until 7.4 compatible
-	# curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
+	# Drush 8 (global fallback)
+	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
 	# Drush Launcher
 	curl -fsSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console Launcher
@@ -254,8 +254,8 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/typhonius/acquia_cli/releases/download/${ACQUIACLI_VERSION}/acquiacli.phar" -o /usr/local/bin/acquiacli; \
-	# Make all downloaded binaries executable in one shot / Add drush8 back to list once compatible.
-	(cd /usr/local/bin && chmod +x composer drupal-check drush drupal wp blackfire platform acquiacli);
+	# Make all downloaded binaries executable in one shot
+	(cd /usr/local/bin && chmod +x composer drupal-check drush8 drush drupal wp blackfire platform acquiacli);
 
 # All further RUN commands will run as the "docker" user
 USER docker
@@ -269,8 +269,8 @@ ENV MG_CODEGEN_VERSION=1.11.0 \
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
-	# Set drush8 as a global fallback for Drush Launcher / Currently disabled for 7.4 until compatible
-	# echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
+	# Set drush8 as a global fallback for Drush Launcher
+	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin directory to PATH
 	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
@@ -295,17 +295,17 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 	# Terminus
 	cgr pantheon-systems/terminus:${TERMINUS_VERSION} >/dev/null; \
 	# Cleanup
-	composer clear-cache;
-        # Disabled until 7.4 Compatible.
+	composer clear-cache; \
+	\
 	# Drush modules
-	# drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	# mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/backdrop-drush-extension/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
-	# drush cc drush
+	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
+	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/backdrop-drush-extension/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
+	drush cc drush
 
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.35.3 \
-	NODE_VERSION=12.16.3 \
+	NODE_VERSION=12.18.1 \
 	YARN_VERSION=1.22.4
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
