@@ -445,12 +445,11 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	# TODO: 2.x versions do not yet work with xdebug
-	CODE_SERVER_VERSION=3.3.1 \
+	CODE_SERVER_VERSION=3.4.1 \
 	VSCODE_HOME="${HOME}/code-server" \
 	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
-	VSCODE_GITLENS_VERSION=9.9.3
+	VSCODE_GITLENS_VERSION=10.2.2
 
 # Install code-server
 RUN \
