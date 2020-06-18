@@ -228,14 +228,14 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.10.6 \
-	DRUSH_VERSION=8.3.0 \
+ENV COMPOSER_VERSION=1.10.7 \
+	DRUSH_VERSION=8.3.5 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CHECK_VERSION=1.1.1 \
+	DRUPAL_CHECK_VERSION=1.1.2 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.4 \
 	WPCLI_VERSION=2.4.0 \
-	BLACKFIRE_VERSION=1.35.1 \
-	PLATFORMSH_CLI_VERSION=3.56.1 \
+	BLACKFIRE_VERSION=1.36.0 \
+	PLATFORMSH_CLI_VERSION=3.57.4 \
 	ACQUIACLI_VERSION=2.0.6
 RUN set -xe; \
 	# Composer
@@ -307,7 +307,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.35.3 \
-	NODE_VERSION=12.16.3 \
+	NODE_VERSION=12.18.1 \
 	YARN_VERSION=1.22.4
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
