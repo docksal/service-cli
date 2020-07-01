@@ -385,7 +385,6 @@ USER root
 SHELL ["/bin/sh", "-c"]
 
 # Copy configs and scripts
-COPY --chown=docker:docker config/.drush /home/docker/.drush
 COPY --chown=docker:docker config/.terminus /home/docker/.terminus
 COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisor /etc/supervisor/conf.d

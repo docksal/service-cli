@@ -429,48 +429,6 @@ _healthcheck_wait ()
 	make clean
 }
 
-@test "Check Acquia integration" {
-	[[ $SKIP == 1 ]] && skip
-	[[ "${VERSION}" == "7.4" ]] && skip
-
-	# Confirm secret is not empty
-	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
-	[[ "${SECRET_ACAPI_KEY}" != "" ]]
-
-	### Setup ###
-	make start -e ENV='-e SECRET_ACAPI_EMAIL -e SECRET_ACAPI_KEY'
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# Confirm secrets were passed to the container
-	run docker exec -u docker "${NAME}" bash -lc 'echo SECRET_ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}'
-	[[ "${output}" == "SECRET_ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}" ]]
-	unset output
-	run docker exec -u docker "${NAME}" bash -lc 'echo SECRET_ACAPI_KEY: ${SECRET_ACAPI_KEY}'
-	[[ "${output}" == "SECRET_ACAPI_KEY: ${SECRET_ACAPI_KEY}" ]]
-	unset output
-
-	# Confirm the SECRET_ prefix was stripped
-	run docker exec -u docker "${NAME}" bash -lc 'echo ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}'
-	[[ "${output}" == "ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}" ]]
-	unset output
-	run docker exec -u docker "${NAME}" bash -lc 'echo ACAPI_KEY: ${SECRET_ACAPI_KEY}'
-	[[ "${output}" == "ACAPI_KEY: ${SECRET_ACAPI_KEY}" ]]
-	unset output
-
-	# Confirm authentication works
-	run docker exec -u docker "${NAME}" bash -lc 'drush ac-site-list'
-	[[ ${status} == 0 ]]
-	[[ ! "${output}" =~ "Not authorized" ]]
-	unset output
-
-	### Cleanup ###
-	make clean
-}
-
 @test "Check Platform.sh integration" {
 	[[ $SKIP == 1 ]] && skip
 
