@@ -2,7 +2,7 @@
 
 This image is focused on console tools necessary to develop LAMP stack (and other web) applications.
 
-This image(s) is part of the [Docksal](http://docksal.io) image library.
+This image(s) is part of the [Docksal](https://docksal.io) image library.
 
 
 ## Features
@@ -13,19 +13,19 @@ This image(s) is part of the [Docksal](http://docksal.io) image library.
 - Hosting provider cli tools (Acquia, Pantheon, Platform.sh)
 - Cron job scheduling
 - Custom startup script support
-- Coder (Visual Studio Code web IDE)
+- [VS Code Server](https://github.com/cdr/code-server) (VS Code in the browser)
 
 
 ## Versions and image tag naming convention
 
 - Stable versions
-  - `2.6-php7.1`, `php7.1` - PHP 7.1
-  - `2.6-php7.2`, `php7.2`, `latest` - PHP 7.2
-  - `2.6-php7.3`, `php7.3` - PHP 7.3
+  - `2.11-php7.2`, `php7.2` - PHP 7.2
+  - `2.11-php7.3`, `php7.3`, `latest` - PHP 7.3
+  - `2.11-php7.4`, `php7.4` - PHP 7.4
 - Development versions
-  - `edge-php7.1` - PHP 7.1
   - `edge-php7.2` - PHP 7.2
   - `edge-php7.3` - PHP 7.3
+  - `edge-php7.4` - PHP 7.4
 
 
 ## PHP
@@ -74,12 +74,10 @@ cli
 ## NodeJS
 
 - nvm
-- node v10.15.0 w/ npm v6.4.1 (following NodeJS LTS release cycle)
+- node v12.18.1 (following NodeJS LTS release cycle)
 - yarn
 
 NodeJS is installed via `nvm` in the `docker` user's profile inside the image (`/home/docker/.nvm`).
-
-This image comes with NodeJS v10.15.0 by default .
 
 If you need a different version of node, use `nvm` to install it, e.g, `nvm install 11.6.0`. 
 Then, use `nvm use 11.6.0` to use it in the current session or `nvm alias default 11.6.0` to use it by default. 
@@ -87,7 +85,7 @@ Then, use `nvm use 11.6.0` to use it in the current session or `nvm alias defaul
 ## Python
 
 - pyenv 
-- python 2.7.13
+- python 3.8.3
 
 This image comes with a system level installed Python version from upstream (Debian 9).
 
@@ -99,7 +97,7 @@ Note: additional versions will be installed in the `docker` user's profile insid
 ## Ruby
 
 - rvm
-- ruby v2.6.0
+- ruby v2.7.1
 - gem
 - bundler
 
@@ -121,9 +119,9 @@ Then, `rvm use 2.5.1` to use it in the current session or `rvm --default use 2.5
 
 ## Hosting provider tools
 
-- Acquia Cloud API drush commands ([Acquia](https://www.acquia.com/)) 
-- terminus ([Pantheon](https://pantheon.io/))
-- platform ([Platform.sh](https://platform.sh/))
+- `acquia_cli` for Acquia Cloud APIv2 ([Acquia](https://www.acquia.com/)) 
+- `terminus` ([Pantheon](https://pantheon.io/))
+- `platform` ([Platform.sh](https://platform.sh/))
 
 Also, see the [Secrets](#secrets) section below for more information on managing and using your hosting provider keys.
 
@@ -166,16 +164,9 @@ The value must be base64 encoded, i.e:
 cat /path/to/some_key_rsa | base64
 ```
 
-`SECRET_ACAPI_EMAIL` and `SECRET_ACAPI_KEY`
-
-Credentials used to authenticate with [Acquia Cloud API](https://docs.acquia.com/acquia-cloud/api).  
-Stored in `/home/docker/.acquia/cloudapi.conf` inside `cli`. 
-
-Acquia Cloud API can be used via `ac-<command>` group of commands in Drush.
-
 `SECRET_ACQUIACLI_KEY` and `SECRET_ACQUIACLI_SECRET`
 
-Credentials used to authenticate [Acquia CLI](https://github.com/typhonius/acquia_cli) with Acquia.
+Credentials used to authenticate [Acquia CLI](https://github.com/typhonius/acquia_cli) with Acquia Cloud APIv2.
 Stored as `ACQUIACLI_KEY` and `ACQUIACLI_SECRET` environment variables inside `cli`.
 
 Acquia CLI is installed and available globally in `cli`.
