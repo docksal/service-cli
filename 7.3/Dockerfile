@@ -147,7 +147,7 @@ RUN set -xe; \
 		libicu63 \
 		libjpeg62-turbo \
 		libldap-2.4-2 \
-		libmagickcore-6.q16-6 \
+		libmagickcore-6.q16-*-extra \
 		libmagickwand-6.q16-6 \
 		libmemcached11 \
 		libmemcachedutil2 \
@@ -197,6 +197,7 @@ RUN set -xe; \
 		ssh2 \
 		xsl \
 		zip \
+		sysvsem \
 	;\
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \
@@ -209,6 +210,7 @@ RUN set -xe; \
 		redis \
 		sqlsrv \
 		xdebug \
+		xhprof \
 	;\
 	docker-php-ext-enable \
 		apcu \
@@ -226,14 +228,15 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.9.0 \
-	DRUSH_VERSION=8.3.0 \
+ENV COMPOSER_VERSION=1.10.7 \
+	DRUSH_VERSION=8.3.5 \
 	DRUSH_LAUNCHER_VERSION=0.6.0 \
-	DRUPAL_CHECK_VERSION=1.0.13 \
-	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.3 \
-	WPCLI_VERSION=2.3.0 \
-	BLACKFIRE_VERSION=1.27.4 \
-	PLATFORMSH_CLI_VERSION=3.49.1
+	DRUPAL_CHECK_VERSION=1.1.2 \
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.4 \
+	WPCLI_VERSION=2.4.0 \
+	BLACKFIRE_VERSION=1.36.0 \
+	PLATFORMSH_CLI_VERSION=3.57.4 \
+	ACQUIACLI_VERSION=2.0.6
 RUN set -xe; \
 	# Composer
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
@@ -251,17 +254,20 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Drupal Check CLI
 	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
+	# Acquia CLI
+	curl -fsSL "https://github.com/typhonius/acquia_cli/releases/download/${ACQUIACLI_VERSION}/acquiacli.phar" -o /usr/local/bin/acquiacli; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer drush8 drush drupal wp blackfire platform);
+	(cd /usr/local/bin && chmod +x composer drupal-check drush8 drush drupal wp blackfire platform acquiacli);
 
 # All further RUN commands will run as the "docker" user
 USER docker
 SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
+# Note: DRUSH_BACKDROP_VERSION should be pinned at 1.2.0 as 1.3.0 introduces changes that break regular drush 8.
 ENV MG_CODEGEN_VERSION=1.11.0 \
-	TERMINUS_VERSION=2.2.0 \
-	DRUSH_BACKDROP_VERSION=1.0.0
+	TERMINUS_VERSION=2.3.0 \
+	DRUSH_BACKDROP_VERSION=1.2.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
@@ -295,14 +301,14 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 	\
 	# Drush modules
 	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/drush/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
+	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/backdrop-drush-extension/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
 	drush cc drush
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.35.0 \
-	NODE_VERSION=12.13.0 \
-	YARN_VERSION=1.19.1
+	NVM_VERSION=0.35.3 \
+	NODE_VERSION=12.18.1 \
+	YARN_VERSION=1.22.4
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
@@ -316,8 +322,8 @@ RUN set -e; \
 
 # Ruby (installed as user)
 ENV \
-	RVM_VERSION_INSTALL=1.29.9 \
-	RUBY_VERSION_INSTALL=2.6.5
+	RVM_VERSION_INSTALL=1.29.10 \
+	RUBY_VERSION_INSTALL=2.7.1
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
@@ -356,8 +362,8 @@ RUN set -e; \
 
 # Python (installed as user)
 ENV \
-	PYENV_VERSION_INSTALL=1.2.14
-#	PYTHON_VERSION_INSTALL=3.7.0
+	PYENV_VERSION_INSTALL=1.2.18
+#	PYTHON_VERSION_INSTALL=3.8.3
 RUN set -xe; \
 	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
 	rm -rf $HOME/.pyenv/.git; \
@@ -374,22 +380,26 @@ RUN set -xe; \
 #	pyenv install ${PYTHON_VERSION_INSTALL}; \
 #	pyenv global ${PYTHON_VERSION_INSTALL}
 
+# Notify web container about started fin exec
+RUN echo '(/opt/ping-web.sh &)' >> $HOME/.profile
+
 USER root
 SHELL ["/bin/sh", "-c"]
 
 # Copy configs and scripts
-COPY --chown=docker:docker config/.drush /home/docker/.drush
 COPY --chown=docker:docker config/.terminus /home/docker/.terminus
 COPY --chown=docker:docker config/.ssh /home/docker/.ssh
 COPY config/supervisor /etc/supervisor/conf.d
 COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
+COPY ping-web.sh /opt/ping-web.sh
 # PHP default settings, global overrides and fpm overrides
 # PHP_VERSION is set upstream. The source code for the exact PHP version may not be available in Github
 # TODO: For now, will just hardcoded a specific version available on https://github.com/php/php-src/
-ADD https://raw.githubusercontent.com/php/php-src/php-7.3.9/php.ini-development /usr/local/etc/php/php.ini
+ADD https://raw.githubusercontent.com/php/php-src/php-7.3.19/php.ini-development /usr/local/etc/php/php.ini
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
+COPY config/php/xhprof.ini /opt/docker-php-ext-xhprof.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
 ENV \
@@ -402,8 +412,12 @@ ENV \
 	# Default values for HOST_UID and HOST_GUI to match the default Ubuntu user. These are used in startup.sh
 	HOST_UID=1000 \
 	HOST_GID=1000 \
+	# Delay in seconds between pings web from cli, while running fin exec. 0 - disabled
+	WEB_KEEPALIVE=0 \
 	# xdebug disabled by default
-	XDEBUG_ENABLED=0
+	XDEBUG_ENABLED=0 \
+	XHPROF_ENABLED=0 \
+	XHPROF_OUTPUT_DIR=/tmp/xhprof
 
 # TODO: [v3] remove and set these via docker-compose
 EXPOSE 9000
@@ -431,22 +445,21 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	# TODO: 2.x versions do not yet work with xdebug
-	CODE_SERVER_VERSION=1.1156-vsc1.33.1 \
+	CODE_SERVER_VERSION=3.4.1 \
 	VSCODE_HOME="${HOME}/code-server" \
 	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
-	VSCODE_GITLENS_VERSION=9.9.3
+	VSCODE_GITLENS_VERSION=10.2.2
 
 # Install code-server
 RUN \
 	set -xe; \
-	curl -fsSL "https://github.com/cdr/code-server/releases/download/${CODE_SERVER_VERSION}/code-server${CODE_SERVER_VERSION}-linux-x64.tar.gz" -o /tmp/code-server.tar.gz; \
-	tar -zxv --file=/tmp/code-server.tar.gz --directory=/tmp --strip-components=1; \
-	sudo mv /tmp/code-server /usr/local/bin/; rm -rf /tmp/*.*
+	curl -fsSL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_amd64.deb" -o /tmp/code-server_amd64.deb; \
+	sudo dpkg -i /tmp/code-server_amd64.deb; \
+	rm -rf /tmp/*.*
 
 # Settings and scripts
-COPY opt/code-server /opt/code-server
+COPY --chown=docker:docker opt/code-server /opt/code-server
 
 # Install extensions
 RUN \

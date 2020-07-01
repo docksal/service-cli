@@ -180,7 +180,7 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	make start -e ENV='-e XDEBUG_ENABLED=1'
+	make start -e ENV='-e XDEBUG_ENABLED=1 -e XHPROF_ENABLED=1'
 
 	run _healthcheck_wait
 	unset output
@@ -197,9 +197,19 @@ _healthcheck_wait ()
 	echo "$output" | grep -e "^xdebug$"
 	unset output
 
+	# Check xdebug was enabled
+	run make exec -e CMD='php -m'
+	echo "$output" | grep -e "^xhprof$"
+	unset output
+
 	# Check PHP CLI overrides
 	run make exec -e CMD='php -i'
 	echo "$output" | grep "memory_limit => 128M => 128M"
+	unset output
+
+	# Check Opcache Preload Enabled for 7.4
+	run make exec -e CMD='php -i'
+	if [[ "${VERSION}" == "7.4" ]]; then echo "$output" | grep "opcache.preload"; fi
 	unset output
 
 	### Cleanup ###
@@ -419,47 +429,6 @@ _healthcheck_wait ()
 	make clean
 }
 
-@test "Check Acquia integration" {
-	[[ $SKIP == 1 ]] && skip
-
-	# Confirm secret is not empty
-	[[ "${SECRET_ACAPI_EMAIL}" != "" ]]
-	[[ "${SECRET_ACAPI_KEY}" != "" ]]
-
-	### Setup ###
-	make start -e ENV='-e SECRET_ACAPI_EMAIL -e SECRET_ACAPI_KEY'
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# Confirm secrets were passed to the container
-	run docker exec -u docker "${NAME}" bash -lc 'echo SECRET_ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}'
-	[[ "${output}" == "SECRET_ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}" ]]
-	unset output
-	run docker exec -u docker "${NAME}" bash -lc 'echo SECRET_ACAPI_KEY: ${SECRET_ACAPI_KEY}'
-	[[ "${output}" == "SECRET_ACAPI_KEY: ${SECRET_ACAPI_KEY}" ]]
-	unset output
-
-	# Confirm the SECRET_ prefix was stripped
-	run docker exec -u docker "${NAME}" bash -lc 'echo ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}'
-	[[ "${output}" == "ACAPI_EMAIL: ${SECRET_ACAPI_EMAIL}" ]]
-	unset output
-	run docker exec -u docker "${NAME}" bash -lc 'echo ACAPI_KEY: ${SECRET_ACAPI_KEY}'
-	[[ "${output}" == "ACAPI_KEY: ${SECRET_ACAPI_KEY}" ]]
-	unset output
-
-	# Confirm authentication works
-	run docker exec -u docker "${NAME}" bash -lc 'drush ac-site-list'
-	[[ ${status} == 0 ]]
-	[[ ! "${output}" =~ "Not authorized" ]]
-	unset output
-
-	### Cleanup ###
-	make clean
-}
-
 @test "Check Platform.sh integration" {
 	[[ $SKIP == 1 ]] && skip
 
@@ -606,6 +575,8 @@ _healthcheck_wait ()
 
 @test "Check Drush Backdrop Commands" {
 	[[ $SKIP == 1 ]] && skip
+	# Skip until Drush Backdrop is compatible with PHP 7.4
+	[[ "$VERSION" == "7.4" ]] && skip
 
 	### Setup ###
 	make start
@@ -636,7 +607,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	run make logs
-	echo "$output" | grep "Documentation on securing your setup"
+	echo "$output" | grep 'HTTP server listening on http://0\.0\.0\.0:8080'
 	unset output
 
 	### Cleanup ###
