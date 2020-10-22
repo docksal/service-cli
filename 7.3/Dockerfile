@@ -228,7 +228,8 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.10.7 \
+ENV COMPOSER_VERSION=1.10.15 \
+	COMPOSER2_VERSION=2.0.0-RC2 \
 	DRUSH_VERSION=8.3.5 \
 	DRUSH_LAUNCHER_VERSION=0.7.4 \
 	DRUPAL_CHECK_VERSION=1.1.2 \
@@ -238,8 +239,10 @@ ENV COMPOSER_VERSION=1.10.7 \
 	PLATFORMSH_CLI_VERSION=3.57.4 \
 	ACQUIACLI_VERSION=2.0.6
 RUN set -xe; \
-	# Composer
+	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
+	# Composer 2.x
+	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER2_VERSION}/composer.phar" -o /usr/local/bin/composer2; \
 	# Drush 8 (global fallback)
 	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
 	# Drush Launcher
@@ -257,7 +260,7 @@ RUN set -xe; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/typhonius/acquia_cli/releases/download/${ACQUIACLI_VERSION}/acquiacli.phar" -o /usr/local/bin/acquiacli; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer drupal-check drush8 drush drupal wp blackfire platform acquiacli);
+	(cd /usr/local/bin && chmod +x composer composer2 drupal-check drush8 drush drupal wp blackfire platform acquiacli);
 
 # All further RUN commands will run as the "docker" user
 USER docker
