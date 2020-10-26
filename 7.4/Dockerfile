@@ -226,8 +226,8 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=2 \
-	COMPOSER1_VERSION=1.10.16 \
+ENV COMPOSER_DEFAULT_VERSION=2 \
+	COMPOSER_VERSION=1.10.16 \
 	COMPOSER2_VERSION=2.0.2 \
 	DRUSH_VERSION=8.3.5 \
 	DRUSH_LAUNCHER_VERSION=0.7.4 \
@@ -239,7 +239,7 @@ ENV COMPOSER_VERSION=2 \
 	ACQUIACLI_VERSION=2.0.6
 RUN set -xe; \
 	# Composer 1.x
-	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER1_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
+	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
 	# Composer 2.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER2_VERSION}/composer.phar" -o /usr/local/bin/composer2; \
 	# Drush 8 (global fallback)
@@ -259,7 +259,7 @@ RUN set -xe; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/typhonius/acquia_cli/releases/download/${ACQUIACLI_VERSION}/acquiacli.phar" -o /usr/local/bin/acquiacli; \
 	# Set Default Composer Version
-	ln -s /usr/local/bin/composer${COMPOSER_VERSION} /usr/local/bin/composer \
+	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer1 composer2 drupal-check drush8 drush drupal wp blackfire platform acquiacli);
 
