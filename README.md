@@ -32,7 +32,7 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 
 - php-fpm && php-cli
 - xdebug
-- composer
+- composer v1 & v2
 - drush (Drupal)
   - drush launcher with a fallback to a global drush 8 
   - registry_rebuild module
@@ -218,3 +218,17 @@ Starting with version 2.8, there is the `ide` flavor of the images, which comes 
 Store your preferred password in this variable if you need to password protect the IDE environment.
 
 [See docs](https://docs.docksal.io/tools/ide/) for instructions on using Coder in Docksal.
+
+## Composer
+
+Versions 1.x and 2.x are apart of the container. While not all projects will work with Version 2.x quite yet 
+there is the ability to role back and use the 1.x version by setting the `COMPOSER_VERSION` variable to `1`.
+
+Example :
+
+```
+services:
+  cli:
+    environment:
+      COMPOSER_VERSION=1
+```
