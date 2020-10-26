@@ -143,6 +143,9 @@ git_settings ()
 # Inject a private SSH key if provided
 [[ "$SECRET_SSH_PRIVATE_KEY" != "" ]] && add_ssh_key
 
+# Set Composer Version
+[[ "${COMPOSER_VERSION}" != "" ]] && [[ -f /usr/local/bin/composer${COMPOSER_VERSION} ]] && rm -f /usr/local/bin/composer && ln -s /usr/local/bin/composer${COMPOSER_VERSION} /usr/local/bin/composer
+
 # Convert all Environment Variables Prefixed with SECRET_
 convert_secrets
 
