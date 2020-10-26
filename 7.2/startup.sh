@@ -146,7 +146,6 @@ git_settings ()
 # Set Composer Version
 [[ "${COMPOSER_DEFAULT_VERSION}" != "" ]] && [[ -f /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} ]] && ln -sf /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer
 
-
 # Convert all Environment Variables Prefixed with SECRET_
 convert_secrets
 
