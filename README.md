@@ -221,10 +221,10 @@ Store your preferred password in this variable if you need to password protect t
 
 ## Composer
 
-Versions 1 and 2 are a part of the container. While not all projects will work with version 2 quite yet 
-there is the ability to role back and use version 1 by setting the `COMPOSER_DEFAULT_VERSION` variable to `1`.
+Versions 1 and 2 are both installed in the container. Version 2 is set as the default version, but while not all 
+projects may be able to work with version 2 quite yet, version 1 is available by setting the `COMPOSER_DEFAULT_VERSION` variable to `1`.
 
-Example :
+Example:
 
 ```
 services:
