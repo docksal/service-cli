@@ -259,7 +259,7 @@ RUN set -xe; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/typhonius/acquia_cli/releases/download/${ACQUIACLI_VERSION}/acquiacli.phar" -o /usr/local/bin/acquiacli; \
 	# Set Default Composer Version
-	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer \
+	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer1 composer2 drupal-check drush8 drush drupal wp blackfire platform acquiacli);
 
