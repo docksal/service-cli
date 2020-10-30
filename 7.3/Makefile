@@ -12,12 +12,16 @@ CWD = $(shell pwd)
 # Improve write performance for /home/docker by turning it into a volume
 VOLUMES += -v /home/docker
 
+# Use BuildKit backend for docker image builds
+# See https://docs.docker.com/engine/reference/builder/#buildkit
+DOCKER_BUILDKIT=1
+
 .EXPORT_ALL_VARIABLES:
 
 .PHONY: build test push shell run start stop logs clean release
 
 build:
-	docker build --cache-from=$(REPO):edge-$(SOFTWARE_VERSION) -t $(REPO):$(BUILD_TAG) .
+	docker build -t $(REPO):$(BUILD_TAG) .
 
 test:
 	IMAGE=$(REPO):$(BUILD_TAG) NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats
