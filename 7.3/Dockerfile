@@ -312,8 +312,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NODE_VERSION=12.18.1 \
 	NVM_VERSION=0.36.0 \
+	NODE_VERSION=14.15.0 \
 	YARN_VERSION=1.22.10
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
