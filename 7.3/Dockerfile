@@ -329,7 +329,7 @@ RUN set -e; \
 # Ruby (installed as user)
 ENV \
 	RVM_VERSION_INSTALL=1.29.10 \
-	RUBY_VERSION_INSTALL=2.7.1
+	RUBY_VERSION_INSTALL=2.7.2
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
