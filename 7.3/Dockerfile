@@ -451,7 +451,7 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=3.4.1 \
+	CODE_SERVER_VERSION=3.6.1 \
 	VSCODE_HOME="${HOME}/code-server" \
 	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
