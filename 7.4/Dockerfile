@@ -282,20 +282,18 @@ RUN set -e; \
 	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
 	# Reload updated PATH from profile to make composer/drush/etc. visible below
 	. $HOME/.profile; \
-	# Install cgr to use it in-place of `composer global require`
-	composer global require consolidation/cgr >/dev/null; \
-	# Composer parallel install plugin
-	composer global require hirak/prestissimo >/dev/null; \
-	# Composer optimizations for Drupal projects
-	composer global require zaporylie/composer-drupal-optimizations:^1.1 >/dev/null; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
-	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp >/dev/null; \
+	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp; \
+	# Don't fix the indentation or installed_paths will not be set correctly
 	phpcs --config-set installed_paths \
 $HOME/.composer/vendor/drupal/coder/coder_sniffer/,\
 $HOME/.composer/vendor/wp-coding-standards/wpcs/,\
 $HOME/.composer/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,\
 $HOME/.composer/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,\
 $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat; \
+	# Install cgr to use it in-place of `composer global require` for misc globally installed cli tools (terminus, etc.)
+	# See https://pantheon.io/blog/fixing-composer-global-command
+	composer global require consolidation/cgr >/dev/null; \
 	# Magento2 Code Generator
 	cgr staempfli/magento2-code-generator:${MG_CODEGEN_VERSION} >/dev/null; \
 	# Terminus
