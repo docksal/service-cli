@@ -228,7 +228,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check Composer version
-	run docker exec -u docker "$NAME" bash -lc 'composer --version | grep "^Composer version ${COMPOSER_VERSION} "'
+	run docker exec -u docker "$NAME" bash -lc 'composer --version | grep "^Composer version ${COMPOSER2_VERSION} "'
 	[[ ${status} == 0 ]]
 	unset output
 
