@@ -426,10 +426,6 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	[[ "${output}" =~ "I ran properly" ]]
 
-	run docker exec -u docker "${NAME}" cat /tmp/test-startup-terminus.txt
-	[[ ${status} == 0 ]]
-	[[ "${output}" =~ "/home/docker/.composer/vendor/bin/terminus" ]]
-
 	### Cleanup ###
 	make clean
 }
