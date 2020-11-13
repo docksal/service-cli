@@ -236,4 +236,4 @@ The following Composer optimization packages are no longer relevant/compatible w
 - [zaporylie/composer-drupal-optimizations](https://github.com/zaporylie/composer-drupal-optimizations) 
 
 To benefit from these optimizations with Composer v1, you would need to pin the image to an older version.  
-See Docksal [documentation](https://docs.docksal.io/service/cli/settings#php-versions) for more details.
+See Docksal [documentation](https://docs.docksal.io/service/cli/settings#composer) for more details.
