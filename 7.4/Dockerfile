@@ -86,8 +86,8 @@ RUN set -xe; \
 	usermod -a -G sudo docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-ENV GOSU_VERSION=1.10 \
-	GOMPLATE_VERSION=3.0.0
+ENV GOSU_VERSION=1.12 \
+	GOMPLATE_VERSION=3.8.0
 RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
 	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
@@ -226,18 +226,24 @@ RUN set -xe; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
-ENV COMPOSER_VERSION=1.10.7 \
-	DRUSH_VERSION=8.3.5 \
-	DRUSH_LAUNCHER_VERSION=0.6.0 \
+ENV COMPOSER_DEFAULT_VERSION=2 \
+	COMPOSER_VERSION=1.10.17 \
+	COMPOSER2_VERSION=2.0.6 \
+	DRUSH_VERSION=8.4.5 \
+	DRUSH_LAUNCHER_VERSION=0.8.0 \
+	# Pinned at 1.1.2 due to binaries not available for more recent releases on Github
 	DRUPAL_CHECK_VERSION=1.1.2 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.4 \
 	WPCLI_VERSION=2.4.0 \
-	BLACKFIRE_VERSION=1.36.0 \
-	PLATFORMSH_CLI_VERSION=3.57.4 \
-	ACQUIACLI_VERSION=2.0.6
+	BLACKFIRE_VERSION=1.44.1 \
+	PLATFORMSH_CLI_VERSION=3.63.0 \
+	ACQUIACLI_VERSION=2.0.9 \
+	TERMINUS_VERSION=2.4.1
 RUN set -xe; \
-	# Composer
-	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer; \
+	# Composer 1.x
+	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
+	# Composer 2.x
+	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER2_VERSION}/composer.phar" -o /usr/local/bin/composer2; \
 	# Drush 8 (global fallback)
 	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
 	# Drush Launcher
@@ -254,8 +260,12 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/typhonius/acquia_cli/releases/download/${ACQUIACLI_VERSION}/acquiacli.phar" -o /usr/local/bin/acquiacli; \
+	# Pantheon Terminus
+	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
+	# Set Default Composer Version
+	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer drupal-check drush8 drush drupal wp blackfire platform acquiacli);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drupal-check drush8 drush drupal wp blackfire platform acquiacli terminus);
 
 # All further RUN commands will run as the "docker" user
 USER docker
@@ -263,8 +273,8 @@ SHELL ["/bin/bash", "-c"]
 
 # PHP tools (installed as user)
 # Note: DRUSH_BACKDROP_VERSION should be pinned at 1.2.0 as 1.3.0 introduces changes that break regular drush 8.
-ENV MG_CODEGEN_VERSION=1.11.0 \
-	TERMINUS_VERSION=2.3.0 \
+ENV \
+	MG_CODEGEN_VERSION=1.11.2 \
 	DRUSH_BACKDROP_VERSION=1.2.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
@@ -276,24 +286,22 @@ RUN set -e; \
 	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
 	# Reload updated PATH from profile to make composer/drush/etc. visible below
 	. $HOME/.profile; \
-	# Install cgr to use it in-place of `composer global require`
-	composer global require consolidation/cgr >/dev/null; \
-	# Composer parallel install plugin
-	composer global require hirak/prestissimo >/dev/null; \
-	# Composer optimizations for Drupal projects
-	composer global require zaporylie/composer-drupal-optimizations:^1.1 >/dev/null; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
 	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp >/dev/null; \
+	# Don't fix the indentation or installed_paths will not be set correctly
 	phpcs --config-set installed_paths \
 $HOME/.composer/vendor/drupal/coder/coder_sniffer/,\
 $HOME/.composer/vendor/wp-coding-standards/wpcs/,\
 $HOME/.composer/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,\
 $HOME/.composer/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,\
 $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat; \
+	# Install cgr to use it in-place of `composer global require` for misc globally installed cli tools.
+	# See https://pantheon.io/blog/fixing-composer-global-command
+	composer global require consolidation/cgr >/dev/null; \
 	# Magento2 Code Generator
+	# Cannot be properly installed and used as a phar binary
+	# See https://github.com/staempfli/magento2-code-generator/issues/11
 	cgr staempfli/magento2-code-generator:${MG_CODEGEN_VERSION} >/dev/null; \
-	# Terminus
-	cgr pantheon-systems/terminus:${TERMINUS_VERSION} >/dev/null; \
 	# Cleanup
 	composer clear-cache; \
 	\
@@ -304,14 +312,14 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.35.3 \
-	NODE_VERSION=12.18.1 \
-	YARN_VERSION=1.22.4
+	NVM_VERSION=0.36.0 \
+	NODE_VERSION=14.15.0 \
+	YARN_VERSION=1.22.10
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
 	export PROFILE="$HOME/.profile"; \
-	curl -fsSL https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash >/dev/null; \
+	curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash >/dev/null; \
 	# Reload profile to load nvm (needed by Yarn installation below)
 	. $HOME/.profile; \
 	# Yarn
@@ -321,7 +329,7 @@ RUN set -e; \
 # Ruby (installed as user)
 ENV \
 	RVM_VERSION_INSTALL=1.29.10 \
-	RUBY_VERSION_INSTALL=2.7.1
+	RUBY_VERSION_INSTALL=2.7.2
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
@@ -360,7 +368,7 @@ RUN set -e; \
 
 # Python (installed as user)
 ENV \
-	PYENV_VERSION_INSTALL=1.2.18
+	PYENV_VERSION_INSTALL=1.2.21
 #	PYTHON_VERSION_INSTALL=3.8.3
 RUN set -xe; \
 	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
@@ -393,8 +401,8 @@ COPY healthcheck.sh /opt/healthcheck.sh
 COPY ping-web.sh /opt/ping-web.sh
 # PHP default settings, global overrides and fpm overrides
 # PHP_VERSION is set upstream. The source code for the exact PHP version may not be available in Github
-# TODO: For now, will just hardcoded a specific version available on https://github.com/php/php-src/
-ADD https://raw.githubusercontent.com/php/php-src/php-7.4.7/php.ini-development /usr/local/etc/php/php.ini
+# TODO: For now, will just hardcode a specific version available on https://github.com/php/php-src/
+ADD https://raw.githubusercontent.com/php/php-src/php-7.4.12/php.ini-development /usr/local/etc/php/php.ini
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
 COPY config/php/xhprof.ini /opt/docker-php-ext-xhprof.ini
@@ -444,7 +452,7 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=3.4.1 \
+	CODE_SERVER_VERSION=3.6.1 \
 	VSCODE_HOME="${HOME}/code-server" \
 	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.13.0 \

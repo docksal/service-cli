@@ -227,8 +227,13 @@ _healthcheck_wait ()
 
 	### Tests ###
 
-	# Check Composer version
-	run docker exec -u docker "$NAME" bash -lc 'composer --version | grep "^Composer version ${COMPOSER_VERSION} "'
+	# Check Composer v1 version (legacy)
+	run docker exec -u docker "$NAME" bash -lc 'composer1 --version | grep "^Composer version ${COMPOSER_VERSION} "'
+	[[ ${status} == 0 ]]
+	unset output
+
+	# Check Composer v2 version (default)
+	run docker exec -u docker "$NAME" bash -lc 'composer --version | grep "^Composer version ${COMPOSER2_VERSION} "'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -420,10 +425,6 @@ _healthcheck_wait ()
 	run docker exec -u docker "${NAME}" cat /tmp/test-startup.txt
 	[[ ${status} == 0 ]]
 	[[ "${output}" =~ "I ran properly" ]]
-
-	run docker exec -u docker "${NAME}" cat /tmp/test-startup-terminus.txt
-	[[ ${status} == 0 ]]
-	[[ "${output}" =~ "/home/docker/.composer/vendor/bin/terminus" ]]
 
 	### Cleanup ###
 	make clean
