@@ -218,8 +218,8 @@ Store your preferred password in this variable if you need to password protect t
 
 ## Composer
 
-Versions 1 and 2 are both installed in the container. Version 2 is set as the default version, but while not all 
-projects may be able to work with version 2 quite yet, version 1 is available by setting the `COMPOSER_DEFAULT_VERSION` variable to `1`.
+Composer v1 and v2 are both installed in the container. v2 is set as the default version, but while not all 
+projects may be able to work with v2 quite yet, v1 is available by setting the `COMPOSER_DEFAULT_VERSION` variable to `1`.
 
 Example:
 
@@ -229,3 +229,11 @@ services:
     environment:
       COMPOSER_DEFAULT_VERSION=1
 ```
+
+The following Composer optimization packages are no longer relevant/compatible with Composer v2 and have been dropped:
+
+- [hirak/prestissimo](https://github.com/hirak/prestissimo)
+- [zaporylie/composer-drupal-optimizations](https://github.com/zaporylie/composer-drupal-optimizations) 
+
+To benefit from these optimizations with Composer v1, you would need to pin the image to an older version.  
+See Docksal [documentation](https://docs.docksal.io/service/cli/settings#php-versions) for more details.
