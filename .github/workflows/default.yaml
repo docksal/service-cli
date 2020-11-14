@@ -1,0 +1,149 @@
+name: Default (push)
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - feature/*
+    tags:
+      - v*
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  REPO: docksal/cli
+  LATEST_VERSION: 7.3
+  DOCKSAL_VERSION: develop
+
+jobs:
+  build-test-push:
+    name: Build, Test, Push
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false # Don't cancel other jobs if one fails
+      matrix:
+        version:
+          - 7.3
+          - 7.4
+
+    steps:
+      -
+        name: Install prerequisites for tests
+        run: |
+          set -xeuo pipefail
+          sudo apt-get -qq update
+          # Install cgi-fcgi binary used in tests
+          sudo apt-get -y --no-install-recommends install libfcgi-bin
+          # Install bats for tests
+          git clone https://github.com/bats-core/bats-core.git
+          cd bats-core
+          sudo ./install.sh /usr/local
+          bats -v
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Check Docker
+        run: |
+          docker version
+          docker info
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_TOKEN }}
+#      -
+#        name: Build
+#        working-directory: ${{ matrix.version }}
+#        run: make buildx-with-cache
+      -
+        # Build for local use
+        name: Build and cache image (local)
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ${{ matrix.version }}
+          file: ${{ matrix.version }}/Dockerfile
+          #platforms: linux/amd64,linux/arm64
+          tags: ${{ env.REPO }}:build-php${{ matrix.version }} # Tag used locally in tests
+          load: true # cache image locally for use by other steps
+          #push: true # cannot use "push" together with "load"
+          cache-from: type=registry,ref=ghcr.io/${{ env.REPO }}:build-php${{ matrix.version }}
+          cache-to: type=inline # Write the cache metadata into the image configuration
+      -
+        # Print image info
+        name: Image info
+        run: |
+          set -xeuo pipefail
+          docker image ls | grep "${{ env.REPO }}"
+          docker image inspect "${{ env.REPO }}:build-php${{ matrix.version }}"
+      -
+        # Cache image layers in the registry
+        name: Build and cache (ghcr.io)
+        uses: docker/build-push-action@v2
+        with:
+          context: ${{ matrix.version }}
+          file: ${{ matrix.version }}/Dockerfile
+          #platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/${{ env.REPO }}:build-php${{ matrix.version }} # Build cache tag in ghcr.io
+          push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
+          cache-to: type=inline # Write the cache metadata into the image configuration
+      -
+        # Run tests
+        name: Test
+        working-directory: ${{ matrix.version }}
+        env:
+          SECRET_PLATFORMSH_CLI_TOKEN: ${{ secrets.SECRET_PLATFORMSH_CLI_TOKEN }}
+          SECRET_TERMINUS_TOKEN: ${{ secrets.SECRET_TERMINUS_TOKEN }}
+        run: make test
+      -
+        # Generate image meta information
+        name: Image tags
+        id: docker_tags
+        working-directory: ${{ matrix.version }}
+        env:
+          VERSION: ${{ matrix.version }}
+        run: make tags
+#      -
+#        # Push image to registries
+#        name: Push image (Docker Hub and GitHub Container Registry)
+#        working-directory: ${{ matrix.version }}
+#        run: make release
+      -
+        # Push image to registries
+        name: Push image to registries
+        id: docker_push
+        # Don't run if the list of tags is empty
+        # Tags are only generated for develop, master and release tag builds
+        if: ${{ steps.docker_tags.outputs.tags != '' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: ${{ matrix.version }}
+          file: ${{ matrix.version }}/Dockerfile
+          #platforms: linux/amd64,linux/arm64
+          # Tag and push to Docker Hub and GitHub Container Registry
+          tags: ${{ steps.docker_tags.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
+          cache-to: type=inline # Write the cache metadata into the image configuration
