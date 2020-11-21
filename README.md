@@ -227,7 +227,7 @@ Example:
 services:
   cli:
     environment:
-      COMPOSER_DEFAULT_VERSION=1
+      - COMPOSER_DEFAULT_VERSION=1
 ```
 
 The following Composer optimization packages are no longer relevant/compatible with Composer v2 and have been dropped:
