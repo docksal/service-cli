@@ -136,7 +136,7 @@ acli_login ()
 	echo-debug "Authenticating with Acquia CLI..."
 	# This has to be done using the docker user via su to load the user environment
 	# Note: Using 'su -l' to initiate a login session and have .profile sourced for the docker user
-	local command="acquiacli auth:login --key='${ACQUIACLI_KEY}' --secret='${ACQUIACLI_SECRET}' --no-interactive"
+	local command="acli auth:login --key='${ACQUIA_CLI_KEY}' --secret='${ACQUIA_CLI_SECRET}' --no-interactive"
 	local output=$(su -l docker -c "${command}" 2>&1)
 	if [[ $? != 0 ]]; then
 		echo-debug "ERROR: Acquia authentication failed."
@@ -195,7 +195,7 @@ chown "${HOST_UID:-1000}:${HOST_GID:-1000}" /var/www
 [[ "$TERMINUS_TOKEN" != "" ]] && terminus_login
 
 # Authenticate to Acquia CLI
-[[ "$ACQUIACLI_KEY" != "" ]] && [[ "$ACQUIACLI_SECRET" != "" ]] && acli_login
+[[ "$ACQUIA_CLI_KEY" != "" ]] && [[ "$ACQUIA_CLI_SECRET" != "" ]] && acli_login
 
 # If crontab file is found within project add contents to user crontab file.
 if [[ -f ${PROJECT_ROOT}/.docksal/services/cli/crontab ]]; then
