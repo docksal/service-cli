@@ -87,7 +87,8 @@ render_tmpl ()
 
 	if [[ -f "${tmpl}" ]]; then
 		echo-debug "Rendering template: ${tmpl}..."
-		gomplate --file "${tmpl}" --out "${file}"
+		# gomplate started throwing an empty line into stderr in v3.7.0, so we have to mute it below
+		gomplate --file "${tmpl}" --out "${file}" &>/dev/null
 	else
 		echo-debug "Error: Template file not found: ${tmpl}"
 		return 1
