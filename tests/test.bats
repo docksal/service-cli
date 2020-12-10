@@ -228,32 +228,32 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check Composer v1 version (legacy)
-	run docker exec -u docker "$NAME" bash -lc 'composer1 --version | grep "^Composer version ${COMPOSER_VERSION} "'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; composer1 --version | grep "^Composer version ${COMPOSER_VERSION} "'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Composer v2 version (default)
-	run docker exec -u docker "$NAME" bash -lc 'composer --version | grep "^Composer version ${COMPOSER2_VERSION} "'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; composer --version | grep "^Composer version ${COMPOSER2_VERSION} "'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drush Launcher version
-	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^Drush Launcher Version: ${DRUSH_LAUNCHER_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; drush --version | grep "^Drush Launcher Version: ${DRUSH_LAUNCHER_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drush version
-	run docker exec -u docker "$NAME" bash -lc 'drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drupal Console version
-	run docker exec -u docker "$NAME" bash -lc 'drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_LAUNCHER_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_LAUNCHER_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Wordpress CLI version
-	run docker exec -u docker "$NAME" bash -lc 'wp --version | grep "^WP-CLI ${WPCLI_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; wp --version | grep "^WP-CLI ${WPCLI_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -261,17 +261,17 @@ _healthcheck_wait ()
 	# TODO: this needs to be replaced with the actual version check
 	# See https://github.com/staempfli/magento2-code-generator/issues/15
 	#run docker exec -u docker "$NAME" bash -lc 'mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
-	run docker exec -u docker "$NAME" bash -lc 'mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Terminus version
-	run docker exec -u docker "$NAME" bash -lc 'terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Platform CLI version
-	run docker exec -u docker "$NAME" bash -lc 'platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
