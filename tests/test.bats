@@ -83,6 +83,7 @@ _healthcheck_wait ()
 		git-lfs \
 		gcc \
 		html2text \
+		jq \
 		less \
 		make \
 		mc \
@@ -97,6 +98,7 @@ _healthcheck_wait ()
 		sudo \
 		unzip \
 		wget \
+		yq \
 		zip \
 	'
 
