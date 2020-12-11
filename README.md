@@ -162,26 +162,26 @@ The value must be base64 encoded, i.e:
 cat /path/to/some_key_rsa | base64
 ```
 
-`SECRET_ACQUIACLI_KEY` and `SECRET_ACQUIACLI_SECRET`
+`SECRET_ACQUIA_CLI_KEY` and `SECRET_ACQUIA_CLI_SECRET`
 
-Credentials used to authenticate [Acquia CLI](https://github.com/typhonius/acquia_cli) with Acquia Cloud APIv2.
-Stored as `ACQUIACLI_KEY` and `ACQUIACLI_SECRET` environment variables inside `cli`.
+Credentials used to authenticate [Acquia CLI](https://github.com/acquia/cli) with Acquia Cloud APIv2.
+Stored as `ACQUIA_CLI_KEY` and `ACQUIA_CLI_SECRET` environment variables inside `cli`.
 
-Acquia CLI is installed and available globally in `cli`.
+Acquia CLI is installed and available globally in `cli` as `acli`.
 
 `SECRET_TERMINUS_TOKEN`
 
 Credentials used to authenticate [Terminus](https://pantheon.io/docs/terminus) with Pantheon.
 Stored in `/home/docker/.terminus/` inside `cli`.
 
-Terminus is installed and available globally in `cli`.
+Terminus is installed and available globally in `cli` as `terminus`.
 
 `SECRET_PLATFORMSH_CLI_TOKEN`
 
 Credentials used to authenticate with the [Platform.sh CLI](https://github.com/platformsh/platformsh-cli) tool.
 Stored in `/home/docker/.platform` inside `cli`.
 
-Platform CLI is installed and available globally in `cli`.
+Platform CLI is installed and available globally in `cli` as `platform`.
 
 `WEB_KEEPALIVE`
 
