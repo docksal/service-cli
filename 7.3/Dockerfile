@@ -239,7 +239,8 @@ ENV COMPOSER_DEFAULT_VERSION=2 \
 	PLATFORMSH_CLI_VERSION=3.63.0 \
 	ACQUIA_CLI_VERSION=1.3.0 \
 	TERMINUS_VERSION=2.4.1 \
-	JQ_VERSION=1.6
+	JQ_VERSION=1.6 \
+	YQ_VERSION=3.4.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -261,12 +262,14 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
 	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
-	# JQ
+	# jq
 	curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
+	# yq
+	curl -fsSL "https://github.com/mikefarah/yq/releases/download/${JQ_VERSION}/yq_linux_amd64" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus jq);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus jq yq);
 
 # All further RUN commands will run as the "docker" user
 USER docker
