@@ -130,6 +130,22 @@ terminus_login ()
 	fi
 }
 
+# Acquia CLI login
+acli_login ()
+{
+	echo-debug "Authenticating with Acquia..."
+	# This has to be done using the docker user via su to load the user environment
+	# Note: Using 'su -l' to initiate a login session and have .profile sourced for the docker user
+	local command="acli auth:login --key='${ACQUIA_CLI_KEY}' --secret='${ACQUIA_CLI_SECRET}' --no-interaction"
+	local output=$(su -l docker -c "${command}" 2>&1)
+	if [[ $? != 0 ]]; then
+		echo-debug "ERROR: Acquia authentication failed."
+		echo
+		echo "$output"
+		echo
+	fi
+}
+
 # Git settings
 git_settings ()
 {
@@ -177,6 +193,9 @@ chown "${HOST_UID:-1000}:${HOST_GID:-1000}" /var/www
 # otherwise the docker user may not have write access to /home/docker, where the auth session data is stored.
 # Automatically authenticate with Pantheon if Terminus token is present
 [[ "$TERMINUS_TOKEN" != "" ]] && terminus_login
+
+# Authenticate to Acquia CLI
+[[ "$ACQUIA_CLI_KEY" != "" ]] && [[ "$ACQUIA_CLI_SECRET" != "" ]] && acli_login
 
 # If crontab file is found within project add contents to user crontab file.
 if [[ -f ${PROJECT_ROOT}/.docksal/services/cli/crontab ]]; then

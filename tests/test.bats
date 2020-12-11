@@ -275,6 +275,11 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
+	# Check Acquia CLI version
+	run docker exec -u docker "$NAME" bash -lc 'set -x; acli --version | grep "^Acquia CLI ${ACQUIA_CLI_VERSION}$"'
+	[[ ${status} == 0 ]]
+	unset output
+
 	### Cleanup ###
 	make clean
 }
