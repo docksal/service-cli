@@ -139,10 +139,10 @@ terminus_login ()
 # Acquia CLI login
 acli_login ()
 {
-	echo-debug "Authenticating with Acquia CLI..."
+	echo-debug "Authenticating with Acquia..."
 	# This has to be done using the docker user via su to load the user environment
 	# Note: Using 'su -l' to initiate a login session and have .profile sourced for the docker user
-	local command="acli auth:login --key='${ACQUIA_CLI_KEY}' --secret='${ACQUIA_CLI_SECRET}' --no-interactive"
+	local command="acli auth:login --key='${ACQUIA_CLI_KEY}' --secret='${ACQUIA_CLI_SECRET}' --no-interaction"
 	local output=$(su -l docker -c "${command}" 2>&1)
 	if [[ $? != 0 ]]; then
 		echo-debug "ERROR: Acquia authentication failed."
