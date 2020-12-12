@@ -227,16 +227,14 @@ RUN set -xe; \
 
 # PHP tools (installed globally)
 ENV COMPOSER_DEFAULT_VERSION=2 \
-	COMPOSER_VERSION=1.10.17 \
-	COMPOSER2_VERSION=2.0.6 \
+	COMPOSER_VERSION=1.10.19 \
+	COMPOSER2_VERSION=2.0.8 \
 	DRUSH_VERSION=8.4.5 \
 	DRUSH_LAUNCHER_VERSION=0.8.0 \
-	# Pinned at 1.1.2 due to binaries not available for more recent releases on Github
-	DRUPAL_CHECK_VERSION=1.1.2 \
-	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.4 \
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.4.0 \
 	BLACKFIRE_VERSION=1.44.1 \
-	PLATFORMSH_CLI_VERSION=3.63.0 \
+	PLATFORMSH_CLI_VERSION=3.63.3 \
 	ACQUIA_CLI_VERSION=1.3.0 \
 	TERMINUS_VERSION=2.4.1 \
 	JQ_VERSION=1.6 \
@@ -316,8 +314,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.36.0 \
-	NODE_VERSION=14.15.0 \
+	NVM_VERSION=0.37.2 \
+	NODE_VERSION=14.15.1 \
 	YARN_VERSION=1.22.10
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
@@ -456,11 +454,11 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=3.6.1 \
+	CODE_SERVER_VERSION=3.7.4 \
 	VSCODE_HOME="${HOME}/code-server" \
 	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
-	VSCODE_GITLENS_VERSION=10.2.2
+	VSCODE_GITLENS_VERSION=11.0.6
 
 # Install code-server
 RUN \
