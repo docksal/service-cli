@@ -227,18 +227,18 @@ RUN set -xe; \
 
 # PHP tools (installed globally)
 ENV COMPOSER_DEFAULT_VERSION=2 \
-	COMPOSER_VERSION=1.10.17 \
-	COMPOSER2_VERSION=2.0.6 \
+	COMPOSER_VERSION=1.10.19 \
+	COMPOSER2_VERSION=2.0.8 \
 	DRUSH_VERSION=8.4.5 \
 	DRUSH_LAUNCHER_VERSION=0.8.0 \
-	# Pinned at 1.1.2 due to binaries not available for more recent releases on Github
-	DRUPAL_CHECK_VERSION=1.1.2 \
-	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.4 \
+	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.4.0 \
 	BLACKFIRE_VERSION=1.44.1 \
-	PLATFORMSH_CLI_VERSION=3.63.0 \
-	ACQUIACLI_VERSION=2.0.9 \
-	TERMINUS_VERSION=2.4.1
+	PLATFORMSH_CLI_VERSION=3.63.3 \
+	ACQUIA_CLI_VERSION=1.3.0 \
+	TERMINUS_VERSION=2.4.1 \
+	JQ_VERSION=1.6 \
+	YQ_VERSION=3.4.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -256,16 +256,18 @@ RUN set -xe; \
 	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
-	# Drupal Check CLI
-	curl -fsSL "https://github.com/mglaman/drupal-check/releases/download/${DRUPAL_CHECK_VERSION}/drupal-check.phar" -o /usr/local/bin/drupal-check; \
 	# Acquia CLI
-	curl -fsSL "https://github.com/typhonius/acquia_cli/releases/download/${ACQUIACLI_VERSION}/acquiacli.phar" -o /usr/local/bin/acquiacli; \
+	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
 	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
+	# jq
+	curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
+	# yq
+	curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drupal-check drush8 drush drupal wp blackfire platform acquiacli terminus);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus jq yq);
 
 # All further RUN commands will run as the "docker" user
 USER docker
@@ -312,8 +314,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.36.0 \
-	NODE_VERSION=14.15.0 \
+	NVM_VERSION=0.37.2 \
+	NODE_VERSION=14.15.1 \
 	YARN_VERSION=1.22.10
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
@@ -451,11 +453,11 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=3.6.1 \
+	CODE_SERVER_VERSION=3.7.4 \
 	VSCODE_HOME="${HOME}/code-server" \
 	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.13.0 \
-	VSCODE_GITLENS_VERSION=10.2.2
+	VSCODE_GITLENS_VERSION=11.0.6
 
 # Install code-server
 RUN \

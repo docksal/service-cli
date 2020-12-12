@@ -17,7 +17,14 @@ VOLUMES += -v /home/docker
 .PHONY: build test push shell run start stop logs clean release
 
 build:
-	docker build --cache-from=$(REPO):edge-$(SOFTWARE_VERSION) -t $(REPO):$(BUILD_TAG) .
+	docker build -t $(REPO):$(BUILD_TAG) .
+
+# See https://docs.docker.com/buildx/working-with-buildx/
+# See https://github.com/docker/buildx
+buildx:
+	docker buildx build --tag $(REPO):$(BUILD_TAG) .
+buildx-with-cache:
+	docker buildx build --cache-from=type=registry,ref=ghcr.io/$(REPO):$(BUILD_TAG) --cache-to=type=inline --tag=$(REPO):$(BUILD_TAG) .
 
 test:
 	IMAGE=$(REPO):$(BUILD_TAG) NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats
@@ -53,6 +60,9 @@ logs-follow:
 
 clean:
 	docker rm -vf $(NAME) >/dev/null 2>&1 || true
+
+tags:
+	@../.github/scripts/docker-tags.sh
 
 release:
 	@../scripts/docker-push.sh
