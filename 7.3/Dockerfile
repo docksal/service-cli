@@ -428,7 +428,7 @@ ENV \
 	XHPROF_OUTPUT_DIR=/tmp/xhprof
 
 # TODO: [v3] remove and set these via docker-compose
-EXPOSE 9000
+EXPOSE 9003
 EXPOSE 22
 EXPOSE 3000
 
