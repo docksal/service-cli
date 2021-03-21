@@ -19,11 +19,11 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 ## Versions and image tag naming convention
 
 - Stable versions
-  - `2.11-php7.3`, `php7.3`, `latest` - PHP 7.3
-  - `2.11-php7.4`, `php7.4` - PHP 7.4
+  - `php7.3-2.14`, `php7.3-2`, `php7.3` - PHP 7.3
+  - `php7.4-2.14`, `php7.4-2`, `php7.4`, `latest` - PHP 7.4
 - Development versions
-  - `edge-php7.3` - PHP 7.3
-  - `edge-php7.4` - PHP 7.4
+  - `php7.3-edge` - PHP 7.3
+  - `php7.4-edge` - PHP 7.4
 
 
 ## PHP
