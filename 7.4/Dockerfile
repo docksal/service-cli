@@ -160,9 +160,6 @@ RUN set -xe; \
 		libzip4 \
 		msodbcsql17 \
 	;\
-	# SSH2 must be installed from source for PHP 7.x
-	git clone https://github.com/php/pecl-networking-ssh2.git /usr/src/php/ext/ssh2 && rm -rf /usr/src/php/ext/ssh2/.git; \
-	\
 	# --with-png-dir has been removed in PHP 7.4. libpng is required
 	docker-php-ext-configure >/dev/null gd \
 		--with-freetype \
@@ -192,7 +189,6 @@ RUN set -xe; \
 		pgsql \
 		soap \
 		sockets \
-		ssh2 \
 		xsl \
 		zip \
 		sysvsem \
@@ -206,6 +202,7 @@ RUN set -xe; \
 		memcached \
 		pdo_sqlsrv \
 		redis \
+		ssh2-beta \
 		sqlsrv \
 		xdebug \
 		xhprof \
@@ -217,6 +214,7 @@ RUN set -xe; \
 		memcached \
 		pdo_sqlsrv \
 		redis \
+		ssh2 \
 		sqlsrv \
 	;\
 	# Cleanup
