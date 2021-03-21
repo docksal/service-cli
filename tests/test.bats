@@ -119,7 +119,7 @@ _healthcheck_wait ()
 	docker run --name "$NAME" -d \
 		-v /home/docker \
 		-v $(pwd)/../tests/docroot:/var/www/docroot \
-		"$IMAGE"
+		${IMAGE}:${BUILD_TAG}
 	docker cp $(pwd)/../tests/scripts "$NAME:/var/www/"
 
 	run _healthcheck_wait

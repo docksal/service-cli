@@ -2,8 +2,8 @@
 -include env_make
 
 VERSION ?= 7.3
-REPO = docksal/cli
-FROM_TAG = build-$(VERSION)
+IMAGE = docksal/cli
+FROM_TAG = $(VERSION)-build
 TAG = $(FROM_TAG)-ide
 NAME = docksal-cli-$(VERSION)-ide
 CWD = $(shell pwd)
@@ -14,19 +14,19 @@ VOLUMES += -v /home/docker
 .PHONY: build test push shell run start stop logs clean release
 
 build:
-	docker build --build-arg FROM_TAG=$(FROM_TAG) -t $(REPO):$(TAG) .
+	docker build --build-arg FROM_TAG=$(FROM_TAG) -t $(IMAGE):$(TAG) .
 
 test:
-	IMAGE=$(REPO):$(TAG) NAME=$(NAME) tests/test.bats
+	IMAGE=$(IMAGE):$(TAG) NAME=$(NAME) tests/test.bats
 
 push:
-	docker push $(REPO):$(TAG)
+	docker push $(IMAGE):$(TAG)
 
 run: clean
-	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG)
+	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(IMAGE):$(TAG)
 
 start: clean
-	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(TAG)
+	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(IMAGE):$(TAG)
 
 # Non-interactive and non-tty docker exec (uses LF instead of CRLF line endings)
 exec:

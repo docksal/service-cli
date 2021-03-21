@@ -4,8 +4,8 @@
 VERSION ?= 7.4
 
 SOFTWARE_VERSION ?= php$(VERSION)
-BUILD_TAG = build-$(SOFTWARE_VERSION)
-REPO = docksal/cli
+BUILD_TAG = $(SOFTWARE_VERSION)-build
+IMAGE = docksal/cli
 NAME = docksal-cli-$(VERSION)
 CWD = $(shell pwd)
 
@@ -17,26 +17,26 @@ VOLUMES += -v /home/docker
 .PHONY: build test push shell run start stop logs clean release
 
 build:
-	docker build -t $(REPO):$(BUILD_TAG) .
+	docker build -t $(IMAGE):$(BUILD_TAG) .
 
 # See https://docs.docker.com/buildx/working-with-buildx/
 # See https://github.com/docker/buildx
 buildx:
-	docker buildx build --tag $(REPO):$(BUILD_TAG) .
+	docker buildx build --tag $(IMAGE):$(BUILD_TAG) .
 buildx-with-cache:
-	docker buildx build --cache-from=type=registry,ref=ghcr.io/$(REPO):$(BUILD_TAG) --cache-to=type=inline --tag=$(REPO):$(BUILD_TAG) .
+	docker buildx build --cache-from=type=registry,ref=ghcr.io/$(IMAGE):$(BUILD_TAG) --cache-to=type=inline --tag=$(IMAGE):$(BUILD_TAG) .
 
 test:
-	IMAGE=$(REPO):$(BUILD_TAG) NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats
+	IMAGE=$(IMAGE) BUILD_TAG=$(BUILD_TAG) NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats
 
 push:
-	docker push $(REPO):$(BUILD_TAG)
+	docker push $(IMAGE):$(BUILD_TAG)
 
 run: clean
-	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(BUILD_TAG)
+	docker run --rm --name $(NAME) -it $(PORTS) $(VOLUMES) $(ENV) $(IMAGE):$(BUILD_TAG)
 
 start: clean
-	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(REPO):$(BUILD_TAG)
+	docker run -d --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(IMAGE):$(BUILD_TAG)
 
 # Non-interactive and non-tty docker exec (uses LF instead of CRLF line endings)
 exec:

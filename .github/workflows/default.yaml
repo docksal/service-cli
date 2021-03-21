@@ -14,7 +14,7 @@ defaults:
     shell: bash
 
 env:
-  REPO: docksal/cli
+  IMAGE: docksal/cli
   LATEST_VERSION: 7.3
   DOCKSAL_VERSION: develop
 
@@ -83,18 +83,18 @@ jobs:
           context: ${{ matrix.version }}
           file: ${{ matrix.version }}/Dockerfile
           #platforms: linux/amd64,linux/arm64
-          tags: ${{ env.REPO }}:build-php${{ matrix.version }} # Tag used locally in tests
+          tags: ${{ env.IMAGE }}:php${{ matrix.version }}-build # Tag used locally in tests
           load: true # cache image locally for use by other steps
           #push: true # cannot use "push" together with "load"
-          cache-from: type=registry,ref=ghcr.io/${{ env.REPO }}:build-php${{ matrix.version }}
+          cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE }}:php${{ matrix.version }}-build
           cache-to: type=inline # Write the cache metadata into the image configuration
       -
         # Print image info
         name: Image info
         run: |
           set -xeuo pipefail
-          docker image ls | grep "${{ env.REPO }}"
-          docker image inspect "${{ env.REPO }}:build-php${{ matrix.version }}"
+          docker image ls | grep "${{ env.IMAGE }}"
+          docker image inspect "${{ env.IMAGE }}:php${{ matrix.version }}-build"
       -
         # Cache image layers in the registry
         name: Build and cache (ghcr.io)
@@ -103,7 +103,7 @@ jobs:
           context: ${{ matrix.version }}
           file: ${{ matrix.version }}/Dockerfile
           #platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ env.REPO }}:build-php${{ matrix.version }} # Build cache tag in ghcr.io
+          tags: ghcr.io/${{ env.IMAGE }}:php${{ matrix.version }}-build # Build cache tag in ghcr.io
           push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
           cache-to: type=inline # Write the cache metadata into the image configuration
       -
