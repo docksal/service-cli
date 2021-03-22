@@ -232,7 +232,7 @@ ENV COMPOSER_DEFAULT_VERSION=2 \
 	DRUSH_LAUNCHER_VERSION=0.8.0 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.4.0 \
-	BLACKFIRE_VERSION=1.44.1 \
+	BLACKFIRE_VERSION=1.47.1 \
 	PLATFORMSH_CLI_VERSION=3.63.3 \
 	ACQUIA_CLI_VERSION=1.3.0 \
 	TERMINUS_VERSION=2.4.1 \
@@ -252,7 +252,7 @@ RUN set -xe; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Blackfire CLI
-	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
+	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_${TARGETARCH}" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Acquia CLI
