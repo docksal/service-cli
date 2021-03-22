@@ -159,7 +159,7 @@ RUN set -xe; \
 		libxpm4 \
 		libxslt1.1 \
 		libzip4 \
-		msodbcsql17 \
+		#msodbcsql17 \ # no arm64
 	;\
 	docker-php-ext-configure >/dev/null gd \
 		--with-freetype-dir=/usr/include/ \
@@ -201,10 +201,10 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		pdo_sqlsrv \
+		#pdo_sqlsrv \ # no arm64
 		redis \
-		sqlsrv \
 		ssh2-beta \
+		#sqlsrv \ # no arm64
 		xdebug \
 		xhprof \
 	;\
@@ -213,10 +213,10 @@ RUN set -xe; \
 		gnupg \
 		imagick \
 		memcached \
-		pdo_sqlsrv \
+		#pdo_sqlsrv \ # no arm64
 		redis \
-		sqlsrv \
 		ssh2 \
+		#sqlsrv \ # no arm64
 	;\
 	# Cleanup
 	docker-php-source delete; \
