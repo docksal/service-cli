@@ -88,7 +88,7 @@ RUN set -xe; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 ENV GOSU_VERSION=1.12 \
-	GOMPLATE_VERSION=3.8.0
+	GOMPLATE_VERSION=3.9.0
 RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
 	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
@@ -97,7 +97,7 @@ RUN set -xe; \
 	chown root:$(id -gn docker) /usr/local/bin/gosu; \
 	chmod +sx /usr/local/bin/gosu; \
 	# gomplate (to process configuration templates in startup.sh)
-	curl -fsSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-${TARGETARCH}-slim -o /usr/local/bin/gomplate; \
+	curl -fsSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-${TARGETARCH} -o /usr/local/bin/gomplate; \
 	chmod +x /usr/local/bin/gomplate
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
