@@ -260,13 +260,14 @@ RUN set -xe; \
 	# Pantheon Terminus
 	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
 	# jq
-	curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
+	#curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
 	# yq
 	curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus jq yq);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus yq);
+	#(cd /usr/local/bin && chmod +x jq);
 
 # All further RUN commands will run as the "docker" user
 USER docker
