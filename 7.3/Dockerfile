@@ -168,7 +168,7 @@ RUN set -xe; \
 		--with-png-dir=/usr/include/ \
 		--with-xpm-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
-	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
+	#docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
 	docker-php-ext-configure >/dev/null zip --with-libzip; \
 	\
