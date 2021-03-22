@@ -1,5 +1,6 @@
 FROM php:7.3-fpm-buster as cli
 
+ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
@@ -92,11 +93,11 @@ RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
 	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
 	# https://github.com/tianon/gosu
-	curl -fsSL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu; \
-	chown root:"$(id -gn docker)" /usr/local/bin/gosu; \
+	curl -fsSL https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-${TARGETARCH} -o /usr/local/bin/gosu; \
+	chown root:$(id -gn docker) /usr/local/bin/gosu; \
 	chmod +sx /usr/local/bin/gosu; \
 	# gomplate (to process configuration templates in startup.sh)
-	curl -fsSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
+	curl -fsSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-${TARGETARCH}-slim -o /usr/local/bin/gomplate; \
 	chmod +x /usr/local/bin/gomplate
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
@@ -460,8 +461,8 @@ ENV \
 # Install code-server
 RUN \
 	set -xe; \
-	curl -fsSL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_amd64.deb" -o /tmp/code-server_amd64.deb; \
-	sudo dpkg -i /tmp/code-server_amd64.deb; \
+	curl -fsSL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${TARGETARCH}.deb" -o /tmp/code-server_${TARGETARCH}.deb; \
+	sudo dpkg -i /tmp/code-server_${TARGETARCH}.deb; \
 	rm -rf /tmp/*.*
 
 # Settings and scripts
