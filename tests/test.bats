@@ -72,34 +72,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# List of binaries to check
-	binaries='\
-		cat \
-		convert \
-		curl \
-		dig \
-		g++ \
-		ghostscript \
-		git \
-		git-lfs \
-		gcc \
-		html2text \
-		less \
-		make \
-		mc \
-		more \
-		mysql \
-		nano \
-		nslookup \
-		ping \
-		psql \
-		pv \
-		rsync \
-		sudo \
-		unzip \
-		wget \
-		yq \
-		zip \
-	'
+	binaries=$(./tests/essential-binaries.sh)
 
 	# Check all binaries in a single shot
 	run make exec -e CMD="type $(echo ${binaries} | xargs)"
@@ -167,7 +140,7 @@ _healthcheck_wait ()
 	unset output
 
 	# Check PHP modules
-	run bash -lc "docker exec -u docker '${NAME}' php -m | diff php-modules.txt -"
+	run bash -lc "docker exec -u docker '${NAME}' php -m | diff <(./tests/php-modules.sh) -"
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -316,7 +289,6 @@ _healthcheck_wait ()
 }
 
 @test "Check Ruby tools and versions" {
-	skip # TODO: un-skip once Ruby on arm64 works
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
@@ -333,7 +305,9 @@ _healthcheck_wait ()
 	unset output
 
 	# ruby
-	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VERSION_INSTALL}"'
+	#run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VERSION_INSTALL}"'
+	# Default Ruby version in Debian 10 = 2.5.x
+	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "ruby 2.5"'
 	[[ ${status} == 0 ]]
 	unset output
 

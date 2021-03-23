@@ -154,7 +154,6 @@ RUN set -xe; \
 		libxpm4 \
 		libxslt1.1 \
 		libzip4 \
-		#msodbcsql17 \ # no arm64
 	;\
 	# --with-png-dir has been removed in PHP 7.4. libpng is required
 	docker-php-ext-configure >/dev/null gd \
@@ -196,10 +195,8 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		#pdo_sqlsrv \ # no arm64
 		redis \
 		ssh2-beta \
-		#sqlsrv \ # no arm64
 		xdebug \
 		xhprof \
 	;\
@@ -208,10 +205,8 @@ RUN set -xe; \
 		gnupg \
 		imagick \
 		memcached \
-		#pdo_sqlsrv \ # no arm64
 		redis \
 		ssh2 \
-		#sqlsrv \ # no arm64
 	;\
 	# Cleanup
 	docker-php-source delete; \
