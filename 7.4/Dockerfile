@@ -36,10 +36,7 @@ RUN set -xe; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian buster main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
-	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
-	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-	echo 'deb https://packages.microsoft.com/debian/10/prod buster main' | tee /etc/apt/sources.list.d/mssql.list;
+	echo 'deb https://packagecloud.io/github/git-lfs/debian buster main' | tee /etc/apt/sources.list.d/github_git-lfs.list;
 
 # Additional packages
 RUN set -xe; \
@@ -137,8 +134,6 @@ RUN set -xe; \
 		unixodbc-dev \
 	"; \
 	apt-get update >/dev/null; \
-	# Necessary for msodbcsql17 (MSSQL)
-	ACCEPT_EULA=Y \
 	apt-get -y --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
@@ -223,6 +218,38 @@ RUN set -xe; \
 	rm -rf /tmp/pear ~/.pearrc; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
+
+# Packages not available for arm64
+RUN set -xe; \
+	if [ "${TARGETARCH}" = "amd64" ]; then \
+		# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
+		curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
+		echo 'deb https://packages.microsoft.com/debian/10/prod buster main' | tee /etc/apt/sources.list.d/mssql.list; \
+		\
+		buildDeps=" \
+			unixodbc-dev \
+		"; \
+		apt-get update >/dev/null; \
+		# Necessary for msodbcsql17 (MSSQL)
+		ACCEPT_EULA=Y \
+		apt-get -y --no-install-recommends install >/dev/null \
+			$buildDeps \
+			msodbcsql17 \
+		;\
+		pecl update-channels; \
+		pecl install >/dev/null </dev/null \
+			pdo_sqlsrv \
+			sqlsrv \
+		;\
+		docker-php-ext-enable \
+			pdo_sqlsrv \
+			sqlsrv \
+		;\
+		# Cleanup
+		rm -rf /tmp/pear ~/.pearrc; \
+		apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
+		apt-get clean; rm -rf /var/lib/apt/lists/*; \
+	fi
 
 # PHP tools (installed globally)
 ENV COMPOSER_DEFAULT_VERSION=2 \
