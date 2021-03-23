@@ -286,15 +286,35 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
 	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
-	# jq
-	#curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
+	# jq (no arm64)
+	if [ "${TARGETARCH}" = "amd64" ]; then \
+		curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
+		chmod +x /usr/local/bin/jq; \
+	fi; \
 	# yq
 	curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus yq);
-	#(cd /usr/local/bin && chmod +x jq);
+
+# Install Python from Debian repos
+RUN set -xe; \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
+		python3 \
+	;\
+	# Cleanup
+	apt-get clean; rm -rf /var/lib/apt/lists/*
+
+# Install Ruby from Debian repos
+RUN set -xe; \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
+		ruby-full \
+	;\
+	# Cleanup
+	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # All further RUN commands will run as the "docker" user
 USER docker
