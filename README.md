@@ -118,9 +118,9 @@ Then, `rvm use 2.5.1` to use it in the current session or `rvm --default use 2.5
 
 ## Hosting provider tools
 
-- `acquiacli` for Acquia Cloud APIv2 ([Acquia](https://www.acquia.com/))
-- `terminus` ([Pantheon](https://pantheon.io/))
-- `platform` ([Platform.sh](https://platform.sh/))
+- `acli` for Acquia Cloud APIv2 ([Acquia](https://docs.acquia.com/acquia-cli/))
+- `terminus` ([Pantheon](https://pantheon.io/features/terminus-command-line-interface))
+- `platform` ([Platform.sh](https://docs.platform.sh/development/cli.html))
 
 Also, see the [Secrets](#secrets) section below for more information on managing and using your hosting provider keys.
 
@@ -163,10 +163,10 @@ The value must be base64 encoded, i.e.:
 cat /path/to/some_key_rsa | base64
 ```
 
-`SECRET_ACQUIACLI_KEY` and `SECRET_ACQUIACLI_SECRET`
+`SECRET_ACQUIA_CLI_KEY` and `SECRET_ACQUIA_CLI_SECRET`
 
 Credentials used to authenticate [Acquia CLI](https://github.com/acquia/cli) with Acquia Cloud APIv2.
-Stored as `ACQUIACLI_KEY` and `ACQUIACLI_SECRET` environment variables inside `cli`.
+Stored as `ACQUIA_CLI_KEY` and `ACQUIA_CLI_SECRET` environment variables inside `cli`.
 
 Acquia CLI is installed and available globally in `cli` as `acli`.
 
