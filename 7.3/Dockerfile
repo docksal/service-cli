@@ -375,47 +375,56 @@ RUN set -e; \
 	export YARN_PROFILE="$HOME/.profile"; \
 	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
 
-## Ruby (installed as user)
-#ENV \
-#	RVM_VERSION_INSTALL=1.29.10 \
-#	RUBY_VERSION_INSTALL=2.7.2
-## Don't use -x here, as the output may be excessive
-#RUN set -e; \
-#	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
-#	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-#	# Import and trust rvm keys
-#	# mpapis@gmail.com
-#	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
-#	echo 409B6B1796C275462A1703113804BB82D39DC0E3:6: | gpg --batch --import-ownertrust; \
-#	# piotr.kuczynski@gmail.com
-#	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
-#	echo 7D2BAF1CF37B13E2069D6956105BD0E739499BDB:6: | gpg --batch --import-ownertrust; \
-#	\
-#	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
-#	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
-#	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION_INSTALL}/binscripts/rvm-installer | bash -s -- --ignore-dotfiles --version ${RVM_VERSION_INSTALL}; \
-#	{ \
-#		echo ''; \
-#		echo 'export PATH="$PATH:$HOME/.rvm/bin"'; \
-#		echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'; \
-#	} >> $HOME/.profile; \
-#	# Reload $HOME/.profile to apply settings for the current shell
-#	. $HOME/.profile; \
-#	\
-#	# rvm.io does not currently have ruby binaries for Debian 9, so Ruby is compiled from source, which requires a bunch
-#	# of extra dependencies installed (rvm installs these automatically), which bloat this image:
-#	# rvm/ruby required packages: gawk, automake, bison, libffi-dev, libgdbm-dev, libncurses5-dev, libsqlite3-dev, libtool, libyaml-dev, sqlite3, zlib1g-dev, libgmp-dev, libreadline-dev, libssl-dev
-#	rvm install ruby-${RUBY_VERSION_INSTALL}; \
-#	rvm use ruby-${RUBY_VERSION_INSTALL} --default; \
-#	\
-#	gem install bundler; \
-#	# Have bundler install gems locally (./.bundle) by default
-#	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile; \
-#	\
-#	rvm cleanup all; \
-#	rvm gemset globalcache enable
+# Ruby (installed as user)
+# Not installing a default Ruby version via rvm - this increases build times and bloats the image.
+# Debian 10 ships with Ruby 2.5, so we'll stick with that by default.
+# It is still possible for the end user to switch to a different Ruby version via rvm.
+ENV \
+	RVM_VERSION_INSTALL=1.29.10
+	#RUBY_VERSION_INSTALL=2.7.2
+# Don't use -x here, as the output may be excessive
+RUN set -e; \
+	# Export ruby gem bin path
+	echo 'export PATH=$PATH:$(ruby -r rubygems -e "puts Gem.user_dir")/bin' >> $HOME/.profile; \
+	source $HOME/.profile; \
+	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
+	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+	# Import and trust rvm keys
+	# mpapis@gmail.com
+	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
+	echo 409B6B1796C275462A1703113804BB82D39DC0E3:6: | gpg --batch --import-ownertrust; \
+	# piotr.kuczynski@gmail.com
+	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
+	echo 7D2BAF1CF37B13E2069D6956105BD0E739499BDB:6: | gpg --batch --import-ownertrust; \
+	\
+	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
+	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
+	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION_INSTALL}/binscripts/rvm-installer | bash -s -- --ignore-dotfiles --version ${RVM_VERSION_INSTALL}; \
+	{ \
+		echo ''; \
+		echo 'export PATH="$PATH:$HOME/.rvm/bin"'; \
+		echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'; \
+	} >> $HOME/.profile; \
+	# Reload $HOME/.profile to apply settings for the current shell
+	. $HOME/.profile; \
+	\
+	# rvm.io does not currently have ruby binaries for Debian 9, so Ruby is compiled from source, which requires a bunch
+	# of extra dependencies installed (rvm installs these automatically), which bloat this image:
+	# rvm/ruby required packages: gawk, automake, bison, libffi-dev, libgdbm-dev, libncurses5-dev, libsqlite3-dev, libtool, libyaml-dev, sqlite3, zlib1g-dev, libgmp-dev, libreadline-dev, libssl-dev
+	#rvm install ruby-${RUBY_VERSION_INSTALL}; \
+	#rvm use ruby-${RUBY_VERSION_INSTALL} --default; \
+	\
+	gem install --user-install bundler; \
+	# Have bundler install gems locally (./.bundle) by default
+	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile; \
+	\
+	rvm cleanup all; \
+	rvm gemset globalcache enable
 
 # Python (installed as user)
+# Not installing a default Python version via pyenv - this bloats the image (~200MB).
+# Debian 10 ships with Python 3.7, so we'll stick with that by default.
+# It is still possible for the end user to switch to a different python version via pyenv.
 ENV \
 	PYENV_VERSION_INSTALL=1.2.21
 #	PYTHON_VERSION_INSTALL=3.8.3
@@ -428,8 +437,6 @@ RUN set -xe; \
 		echo 'export PATH="$PYENV_ROOT/bin:$PATH"'; \
 		echo 'eval "$(pyenv init -)"'; \
 	} >> $HOME/.profile
-# Disabled for now - uses too much space (~200MB).
-# The upsteam Debian 9 image ships with Python 2.7 out of the box, so we'll stick with that by default.
 #	# Reload $HOME/.profile to apply settings for the current shell
 #	. $HOME/.profile; \
 #	pyenv install ${PYTHON_VERSION_INSTALL}; \
