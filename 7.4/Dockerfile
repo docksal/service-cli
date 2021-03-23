@@ -162,7 +162,8 @@ RUN set -xe; \
 		--with-webp \
 		--with-xpm; \
 	PHP_OPENSSL=yes docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
-	#docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
+	# Using $(uname -m) (returns x86_64 / aarch64) vs ${TARGETARCH} (returns amd64 / arm64)
+	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/$(uname -m)-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
 	docker-php-ext-configure >/dev/null zip; \
 	\
