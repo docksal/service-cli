@@ -1,7 +1,3 @@
-VOLUMES = \
-	-v /home/docker \
-	-v $(CWD)/../tests:/var/www
-
 ENV = \
 	-e XDEBUG_ENABLED \
 	-e SECRET_BLACKFIRE_CLIENT_ID \

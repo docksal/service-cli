@@ -64,7 +64,7 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	make start
+	make start-bare
 
 	run _healthcheck_wait
 	unset output
@@ -87,12 +87,7 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	docker run --name "$NAME" -d \
-		-v /home/docker \
-		-v $(pwd)/../tests/docroot:/var/www/docroot \
-		${IMAGE}:${BUILD_TAG}
-	docker cp $(pwd)/../tests/scripts "$NAME:/var/www/"
+	make start-bare
 
 	run _healthcheck_wait
 	unset output
@@ -103,7 +98,7 @@ _healthcheck_wait ()
 	# "sed -E 's/[[:space:]]{2,}/ => /g'" - makes the HTML phpinfo output easier to parse. It will transforms
 	# "memory_limit                256M                                         256M"
 	# into "memory_limit => 256M => 256M", which is much easier to parse
-	phpInfo=$(docker exec -u docker "$NAME" bash -c "/var/www/scripts/php-fpm.sh phpinfo.php | sed -E 's/[[:space:]]{2,}/ => /g'")
+	phpInfo=$(docker exec -u docker "$NAME" bash -c "/var/www/docroot/php-fpm.sh phpinfo.php | sed -E 's/[[:space:]]{2,}/ => /g'")
 
 	output=$(echo "$phpInfo" | grep "memory_limit")
 	echo "$output" | grep "256M => 256M"
@@ -113,7 +108,7 @@ _healthcheck_wait ()
 	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 => /usr/bin/msmtp -t --host=mail --port=1025'
 	unset output
 
-	run docker exec -u docker "$NAME" /var/www/scripts/php-fpm.sh nonsense.php
+	run docker exec -u docker "$NAME" /var/www/docroot/php-fpm.sh nonsense.php
 	echo "$output" | grep "Status: 404 Not Found"
 	unset output
 
@@ -145,7 +140,7 @@ _healthcheck_wait ()
 	unset output
 
 	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	make clean
 }
 
 # Examples of using Makefile commands
@@ -162,7 +157,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check PHP FPM settings overrides
-	run make exec -e CMD='/var/www/scripts/php-fpm.sh phpinfo.php'
+	run make exec -e CMD='/var/www/docroot/php-fpm.sh phpinfo.php'
 	echo "$output" | grep "memory_limit" | grep "512M"
 	unset output
 

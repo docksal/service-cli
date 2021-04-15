@@ -138,7 +138,9 @@ Zend OPcache
 blackfire
 '
 
-case "$(uname -m)" in
+# Use the docker reported architecture and not the hosts (uname -m).
+# docker arch may not be the same as hosts's arch (e.g., when using a remote docker instance).
+case "$(docker info -f '{{ .Architecture }}')" in
 	x86_64) echo "${php_modules_amd64}" ;;
 	amd64) echo "${php_modules_amd64}" ;;
 	aarch64) echo "${php_modules_arm64}" ;;
