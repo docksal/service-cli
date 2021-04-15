@@ -17,8 +17,10 @@ if [[ "${1}" == "" ]]; then
 	echo "Usage: ${0} image:tag"
 	exit 1
 else
-	# Split image:tag into variables
+	# Split image:tag
 	IFS=$':' read IMAGE TAG <<< ${1};
+	# Remove registry prefix from image if present
+	IMAGE=${IMAGE#"docker.io/"}
 fi
 
 login_data() {
@@ -34,6 +36,10 @@ EOF
 TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d "$(login_data)" "https://hub.docker.com/v2/users/login/" | jq -r .token)
 
 # Delete tag
-curl -si "https://hub.docker.com/v2/repositories/${IMAGE}/tags/${TAG}/" \
+output=$(curl -sI "https://hub.docker.com/v2/repositories/${IMAGE}/tags/${TAG}/" \
 	-H "Authorization: JWT ${TOKEN}" \
 	-X DELETE
+)
+
+# Return and error if HTTP response code is not 204
+echo "${output}" | grep "HTTP/1.1 204 NO CONTENT"
