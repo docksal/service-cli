@@ -1,13 +1,15 @@
-name: Default (push)
+name: Docker Build and Push
 
 on:
+  schedule:
+    - cron: '0 10 * * 0' # everyday sunday at 10am
   push:
     branches:
       - master
       - develop
       - feature/*
     tags:
-      - v*
+      - 'v*.*.*'
 
 defaults:
   run:
@@ -15,135 +17,232 @@ defaults:
 
 env:
   IMAGE: docksal/cli
+  UPSTREAM_IMAGE: debian
   LATEST_VERSION: 7.3
   DOCKSAL_VERSION: develop
 
 jobs:
-  build-test-push:
-    name: Build, Test, Push
+  build:
+    name: "Build: ${{ matrix.version }}/${{ matrix.arch }}"
     runs-on: ubuntu-20.04
 
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
       matrix:
-        version:
-          - 7.3
-          - 7.4
+        include:
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: 7.3
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: 7.4
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: 7.3
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: 7.4
+
+    env:
+      ARCH: ${{ matrix.arch }}
+      VERSION_PREFIX: php
+      VERSION: ${{ matrix.version }}
 
     steps:
-      -
-        name: Install prerequisites for tests
-        run: |
-          set -xeuo pipefail
-          sudo apt-get -qq update
-          # Install cgi-fcgi binary used in tests
-          sudo apt-get -y --no-install-recommends install libfcgi-bin
-          # Install bats for tests
-          git clone https://github.com/bats-core/bats-core.git
-          cd bats-core
-          sudo ./install.sh /usr/local
-          bats -v
       -
         name: Checkout
         uses: actions/checkout@v2
       -
-        name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        name: Environment variables
+        run: |
+          # Export variables for further steps
+          echo "GIT_SHA7=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+          echo "BUILD_IMAGE_TAG=${IMAGE}:${VERSION_PREFIX}${VERSION}-build" >> ${GITHUB_ENV}
       -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        # Switch docker context to a remote arm64 host
+        name: Switch to arm64 builder host
+        if: ${{ env.ARCH == 'arm64' }}
+        uses: arwynfr/actions-docker-context@98fc92878d0b856c1112c79b8d0f45353206e186
+        with:
+          docker_host: "ssh://ubuntu@${{ secrets.ARM64_HOST }}"
+          context_name: arm64-host
+          ssh_key: "${{ secrets.ARM64_HOST_SSH_KEY }}"
+          ssh_cert: "${{ secrets.ARM64_HOST_SSH_CERT }}"
+          use_context: true
       -
         name: Check Docker
         run: |
           docker version
           docker info
       -
-        name: Login to DockerHub
+        name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_TOKEN }}
-#      -
-#        name: Build
-#        working-directory: ${{ matrix.version }}
-#        run: make buildx-with-cache
-      -
-        # Build for local use
-        name: Build and cache image (local)
-        id: docker_build
+        # Build and cache image in the registry
+        name: Build image
         uses: docker/build-push-action@v2
         with:
-          context: ${{ matrix.version }}
-          file: ${{ matrix.version }}/Dockerfile
-          #platforms: linux/amd64,linux/arm64
-          tags: ${{ env.IMAGE }}:php${{ matrix.version }}-build # Tag used locally in tests
-          load: true # cache image locally for use by other steps
-          #push: true # cannot use "push" together with "load"
-          cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE }}:php${{ matrix.version }}-build
-          cache-to: type=inline # Write the cache metadata into the image configuration
-      -
-        # Print image info
-        name: Image info
-        run: |
-          set -xeuo pipefail
-          docker image ls | grep "${{ env.IMAGE }}"
-          docker image inspect "${{ env.IMAGE }}:php${{ matrix.version }}-build"
-      -
-        # Cache image layers in the registry
-        name: Build and cache (ghcr.io)
-        uses: docker/build-push-action@v2
-        with:
-          context: ${{ matrix.version }}
-          file: ${{ matrix.version }}/Dockerfile
-          #platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ env.IMAGE }}:php${{ matrix.version }}-build # Build cache tag in ghcr.io
+          context: ${{ env.VERSION }}
+          file: ${{ env.VERSION }}/Dockerfile
+          build-args: VERSION=${{ env.VERSION }}
+          # Push intermediate arch-specific build tag to repo
+          tags: docker.io/${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
           push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
+          # BUILD_IMAGE_TAG - persistent multi-arch tag, updated at the end of the build (success or failure)
+          cache-from: type=registry,ref=docker.io/${{ env.BUILD_IMAGE_TAG }}
           cache-to: type=inline # Write the cache metadata into the image configuration
+
+  test:
+    name: "Test: ${{ matrix.version }}/${{ matrix.arch }}"
+    runs-on: ubuntu-20.04
+    needs: build
+    outputs:
+      status: ${{ steps.tests.outputs.status }} # Tests status (used by downstream jobs)
+
+    strategy:
+      fail-fast: false # Don't cancel other jobs if one fails
+      matrix:
+        include:
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: 7.3
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: 7.4
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: 7.3
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: 7.4
+
+    env:
+      ARCH: ${{ matrix.arch }}
+      VERSION_PREFIX: php
+      VERSION: ${{ matrix.version }}
+
+    steps:
+      -
+        name: Setup Bats
+        uses: mig4/setup-bats@v1
+        with:
+          bats-version: 1.3.0
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Environment variables
+        run: |
+          # Export variables for further steps
+          echo "GIT_SHA7=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+          echo "BUILD_IMAGE_TAG=${IMAGE}:${VERSION_PREFIX}${VERSION}-build" >> ${GITHUB_ENV}
+      -
+        # Switch docker context to a remote arm64 host
+        name: Switch to arm64 builder host
+        if: ${{ env.ARCH == 'arm64' }}
+        uses: arwynfr/actions-docker-context@98fc92878d0b856c1112c79b8d0f45353206e186
+        with:
+          docker_host: "ssh://ubuntu@${{ secrets.ARM64_HOST }}"
+          context_name: arm64-host
+          ssh_key: "${{ secrets.ARM64_HOST_SSH_KEY }}"
+          ssh_cert: "${{ secrets.ARM64_HOST_SSH_CERT }}"
+          use_context: true
+      -
+        name: Check Docker
+        run: |
+          docker version
+          docker info
       -
         # Run tests
         name: Test
-        working-directory: ${{ matrix.version }}
+        id: tests
+        working-directory: ${{ env.VERSION }}
         env:
+          BUILD_IMAGE_TAG: docker.io/${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
           SECRET_PLATFORMSH_CLI_TOKEN: ${{ secrets.SECRET_PLATFORMSH_CLI_TOKEN }}
           SECRET_TERMINUS_TOKEN: ${{ secrets.SECRET_TERMINUS_TOKEN }}
-        run: make test
+        # Run tests and set output status (used by downstream jobs)
+        run: make test && echo "::set-output name=status::pass" || echo "::set-output name=status::fail"
       -
-        # Generate image meta information
-        name: Image tags
-        id: docker_tags
-        working-directory: ${{ matrix.version }}
+        # Print image info
+        name: Docker image info
         env:
-          VERSION: ${{ matrix.version }}
-        run: make tags
-#      -
-#        # Push image to registries
-#        name: Push image (Docker Hub and GitHub Container Registry)
-#        working-directory: ${{ matrix.version }}
-#        run: make release
+          BUILD_IMAGE_TAG: docker.io/${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
+        run: |
+          set -xeuo pipefail
+          docker image ls | grep "${{ env.IMAGE }}"
+          docker image inspect "${{ env.BUILD_IMAGE_TAG }}"
+
+  push:
+    name: "Push: ${{ matrix.version }}/multi"
+    runs-on: ubuntu-20.04
+    # Wait for test to either succeed or fail
+    needs: test
+    if: always()
+
+    strategy:
+      matrix:
+        version:
+          - 7.3
+          - 7.4
+    env:
+      VERSION_PREFIX: php
+      VERSION: ${{ matrix.version }}
+
+    steps:
       -
-        # Push image to registries
-        name: Push image to registries
-        id: docker_push
-        # Don't run if the list of tags is empty
-        # Tags are only generated for develop, master and release tag builds
-        if: ${{ steps.docker_tags.outputs.tags != '' }}
-        uses: docker/build-push-action@v2
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Environment variables
+        run: |
+          # Export variables for further steps
+          echo "GIT_SHA7=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+          echo "BUILD_IMAGE_TAG=${IMAGE}:${VERSION_PREFIX}${VERSION}-build" >> ${GITHUB_ENV}
+      -
+        # Login to Docker Hub
+        name: Login to Docker Hub
+        uses: docker/login-action@v1
         with:
-          context: ${{ matrix.version }}
-          file: ${{ matrix.version }}/Dockerfile
-          #platforms: linux/amd64,linux/arm64
-          # Tag and push to Docker Hub and GitHub Container Registry
-          tags: ${{ steps.docker_tags.outputs.tags }}
-          labels: |
-            org.opencontainers.image.source=${{ github.event.repository.html_url }}
-            org.opencontainers.image.created=${{ steps.prep.outputs.created }}
-            org.opencontainers.image.revision=${{ github.sha }}
-          push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
-          cache-to: type=inline # Write the cache metadata into the image configuration
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        # Generate image tags (edge, stable, release)
+        name: Docker image tags
+        id: docker_tags
+        if: ${{ needs.tests.outputs.status == 'pass' }} # Generate persistent tags only if tests passed
+        run: .github/scripts/docker-tags.sh
+      -
+        # Create and push multi-arch image manifests
+        name: Push multi-arch images
+        env:
+          TAGS: |
+            ${{ env.BUILD_IMAGE_TAG }}
+            ${{ steps.docker_tags.outputs.tags }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }} # Needed for docker-tag-delete.sh
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }} # Needed for docker-tag-delete.sh
+        run: |
+          set -xeuo pipefail
+          IFS="${IFS}," # Also split strings by comma (in case list of tag is comma-separated)
+          for tag in ${TAGS}; do
+            if [[ "${tag}" == "" ]]; then continue; fi
+            docker manifest create --amend ${tag} \
+              ${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-amd64 \
+              ${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-arm64
+            docker manifest inspect ${tag}
+            docker manifest push ${tag}
+          done
+          # Clean up intermediate arch-specific image tags (DockerHub only)
+          .github/scripts/docker-tag-delete.sh ${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-amd64
+          .github/scripts/docker-tag-delete.sh ${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-arm64

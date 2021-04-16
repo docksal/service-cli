@@ -1,5 +1,6 @@
 FROM php:7.3-fpm-buster as cli
 
+ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
@@ -35,10 +36,7 @@ RUN set -xe; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian buster main' | tee /etc/apt/sources.list.d/github_git-lfs.list; \
-	# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
-	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-	echo 'deb https://packages.microsoft.com/debian/10/prod buster main' | tee /etc/apt/sources.list.d/mssql.list;
+	echo 'deb https://packagecloud.io/github/git-lfs/debian buster main' | tee /etc/apt/sources.list.d/github_git-lfs.list;
 
 # Additional packages
 RUN set -xe; \
@@ -87,16 +85,16 @@ RUN set -xe; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 ENV GOSU_VERSION=1.12 \
-	GOMPLATE_VERSION=3.8.0
+	GOMPLATE_VERSION=3.9.0
 RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
 	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
 	# https://github.com/tianon/gosu
-	curl -fsSL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-$(dpkg --print-architecture)" -o /usr/local/bin/gosu; \
-	chown root:"$(id -gn docker)" /usr/local/bin/gosu; \
+	curl -fsSL https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-${TARGETARCH} -o /usr/local/bin/gosu; \
+	chown root:$(id -gn docker) /usr/local/bin/gosu; \
 	chmod +sx /usr/local/bin/gosu; \
 	# gomplate (to process configuration templates in startup.sh)
-	curl -fsSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-amd64-slim -o /usr/local/bin/gomplate; \
+	curl -fsSL https://github.com/hairyhenderson/gomplate/releases/download/v${GOMPLATE_VERSION}/gomplate_linux-${TARGETARCH} -o /usr/local/bin/gomplate; \
 	chmod +x /usr/local/bin/gomplate
 
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
@@ -136,8 +134,6 @@ RUN set -xe; \
 		unixodbc-dev \
 	"; \
 	apt-get update >/dev/null; \
-	# Necessary for msodbcsql17 (MSSQL)
-	ACCEPT_EULA=Y \
 	apt-get -y --no-install-recommends install >/dev/null \
 		$buildDeps \
 		blackfire-php \
@@ -158,7 +154,6 @@ RUN set -xe; \
 		libxpm4 \
 		libxslt1.1 \
 		libzip4 \
-		msodbcsql17 \
 	;\
 	docker-php-ext-configure >/dev/null gd \
 		--with-freetype-dir=/usr/include/ \
@@ -167,7 +162,8 @@ RUN set -xe; \
 		--with-png-dir=/usr/include/ \
 		--with-xpm-dir=/usr/include/; \
 	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
-	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/x86_64-linux-gnu/; \
+	# Using $(uname -m) (returns x86_64 / aarch64) vs ${TARGETARCH} (returns amd64 / arm64)
+	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/$(uname -m)-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
 	docker-php-ext-configure >/dev/null zip --with-libzip; \
 	\
@@ -200,9 +196,7 @@ RUN set -xe; \
 		imagick \
 		# Use memcached (not memcache) for PHP 7.x
 		memcached \
-		pdo_sqlsrv \
 		redis \
-		sqlsrv \
 		ssh2-beta \
 		xdebug \
 		xhprof \
@@ -212,9 +206,7 @@ RUN set -xe; \
 		gnupg \
 		imagick \
 		memcached \
-		pdo_sqlsrv \
 		redis \
-		sqlsrv \
 		ssh2 \
 	;\
 	# Cleanup
@@ -222,6 +214,38 @@ RUN set -xe; \
 	rm -rf /tmp/pear ~/.pearrc; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
+
+# Packages not available for arm64
+RUN set -xe; \
+	if [ "${TARGETARCH}" = "amd64" ]; then \
+		# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
+		curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
+		echo 'deb https://packages.microsoft.com/debian/10/prod buster main' | tee /etc/apt/sources.list.d/mssql.list; \
+		\
+		buildDeps=" \
+			unixodbc-dev \
+		"; \
+		apt-get update >/dev/null; \
+		# Necessary for msodbcsql17 (MSSQL)
+		ACCEPT_EULA=Y \
+		apt-get -y --no-install-recommends install >/dev/null \
+			$buildDeps \
+			msodbcsql17 \
+		;\
+		pecl update-channels; \
+		pecl install >/dev/null </dev/null \
+			pdo_sqlsrv \
+			sqlsrv \
+		;\
+		docker-php-ext-enable \
+			pdo_sqlsrv \
+			sqlsrv \
+		;\
+		# Cleanup
+		rm -rf /tmp/pear ~/.pearrc; \
+		apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
+		apt-get clean; rm -rf /var/lib/apt/lists/*; \
+	fi
 
 # PHP tools (installed globally)
 ENV COMPOSER_DEFAULT_VERSION=2 \
@@ -231,7 +255,7 @@ ENV COMPOSER_DEFAULT_VERSION=2 \
 	DRUSH_LAUNCHER_VERSION=0.8.0 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.4.0 \
-	BLACKFIRE_VERSION=1.44.1 \
+	BLACKFIRE_VERSION=1.47.1 \
 	PLATFORMSH_CLI_VERSION=3.63.3 \
 	ACQUIA_CLI_VERSION=1.3.0 \
 	TERMINUS_VERSION=2.4.1 \
@@ -251,21 +275,44 @@ RUN set -xe; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Blackfire CLI
-	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_static_amd64" -o /usr/local/bin/blackfire; \
+	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_${TARGETARCH}" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
 	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
-	# jq
-	curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
+	# jq (no arm64)
+	if [ "${TARGETARCH}" = "amd64" ]; then \
+		curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
+		chmod +x /usr/local/bin/jq; \
+	fi; \
 	# yq
-	curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" -o /usr/local/bin/yq; \
+	curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus jq yq);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus yq);
+
+# Install Python3 from Debian repos
+# This adds about 30MB to uncompressed image size.
+# TODO: some other dependency in this image installs python2. Which one?
+RUN set -xe; \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
+		python3 \
+	;\
+	# Cleanup
+	apt-get clean; rm -rf /var/lib/apt/lists/*
+
+# Install Ruby from Debian repos
+RUN set -xe; \
+	apt-get update >/dev/null; \
+	apt-get -y --no-install-recommends install >/dev/null \
+		ruby-full \
+	;\
+	# Cleanup
+	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # All further RUN commands will run as the "docker" user
 USER docker
@@ -326,61 +373,79 @@ RUN set -e; \
 	export YARN_PROFILE="$HOME/.profile"; \
 	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
 
-# Ruby (installed as user)
-ENV \
-	RVM_VERSION_INSTALL=1.29.10 \
-	RUBY_VERSION_INSTALL=2.7.2
-# Don't use -x here, as the output may be excessive
-RUN set -e; \
-	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
-	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-	# Import and trust rvm keys
-	# mpapis@gmail.com
-	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
-	echo 409B6B1796C275462A1703113804BB82D39DC0E3:6: | gpg --batch --import-ownertrust; \
-	# piotr.kuczynski@gmail.com
-	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
-	echo 7D2BAF1CF37B13E2069D6956105BD0E739499BDB:6: | gpg --batch --import-ownertrust; \
-	\
-	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
-	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
-	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION_INSTALL}/binscripts/rvm-installer | bash -s -- --ignore-dotfiles --version ${RVM_VERSION_INSTALL}; \
-	{ \
-		echo ''; \
-		echo 'export PATH="$PATH:$HOME/.rvm/bin"'; \
-		echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'; \
-	} >> $HOME/.profile; \
-	# Reload $HOME/.profile to apply settings for the current shell
-	. $HOME/.profile; \
-	\
-	# rvm.io does not currently have ruby binaries for Debian 9, so Ruby is compiled from source, which requires a bunch
-	# of extra dependencies installed (rvm installs these automatically), which bloat this image:
-	# rvm/ruby required packages: gawk, automake, bison, libffi-dev, libgdbm-dev, libncurses5-dev, libsqlite3-dev, libtool, libyaml-dev, sqlite3, zlib1g-dev, libgmp-dev, libreadline-dev, libssl-dev
-	rvm install ruby-${RUBY_VERSION_INSTALL}; \
-	rvm use ruby-${RUBY_VERSION_INSTALL} --default; \
-	\
-	gem install bundler; \
-	# Have bundler install gems locally (./.bundle) by default
-	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile; \
-	\
-	rvm cleanup all; \
-	rvm gemset globalcache enable
+## Ruby (installed as user) via rvm
+## Note: Disabled. rvm + its build dependecies bloat the image (~80MB)
+## Debian 10 ships with Ruby 2.5, so we'll stick with that by default.
+## It is still possible for the end user to switch to a different Ruby version via rvm.
+#ENV \
+#	RVM_VERSION_INSTALL=1.29.10 \
+#	RUBY_VERSION_INSTALL=2.7.2
+## Don't use -x here, as the output may be excessive
+#RUN set -e; \
+#	# Export ruby gem bin path
+#	echo 'export PATH=$PATH:$(ruby -r rubygems -e "puts Gem.user_dir")/bin' >> $HOME/.profile; \
+#	. $HOME/.profile; \
+#	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
+#	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+#	# Import and trust rvm keys
+#	# mpapis@gmail.com
+#	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
+#	echo 409B6B1796C275462A1703113804BB82D39DC0E3:6: | gpg --batch --import-ownertrust; \
+#	# piotr.kuczynski@gmail.com
+#	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
+#	echo 7D2BAF1CF37B13E2069D6956105BD0E739499BDB:6: | gpg --batch --import-ownertrust; \
+#	\
+#	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
+#	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
+#	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION_INSTALL}/binscripts/rvm-installer | bash -s -- --ignore-dotfiles --version ${RVM_VERSION_INSTALL}; \
+#	{ \
+#		echo ''; \
+#		echo 'export PATH="$PATH:$HOME/.rvm/bin"'; \
+#		echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'; \
+#	} >> $HOME/.profile; \
+#	# Reload $HOME/.profile to apply settings for the current shell
+#	. $HOME/.profile; \
+#	\
+#	# rvm.io does not currently have ruby binaries for Debian 9, so Ruby is compiled from source, which requires a bunch
+#	# of extra dependencies installed (rvm installs these automatically), which bloat this image:
+#	# rvm/ruby required packages: gawk, automake, bison, libffi-dev, libgdbm-dev, libncurses5-dev, libsqlite3-dev, libtool, libyaml-dev, sqlite3, zlib1g-dev, libgmp-dev, libreadline-dev, libssl-dev
+#	rvm install ruby-${RUBY_VERSION_INSTALL}; \
+#	rvm use ruby-${RUBY_VERSION_INSTALL} --default; \
+#	\
+#	gem install --user-install bundler; \
+#	# Have bundler install gems locally (./.bundle) by default
+#	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile; \
+#	\
+#	rvm cleanup all; \
+#	rvm gemset globalcache enable
 
-# Python (installed as user)
-ENV \
-	PYENV_VERSION_INSTALL=1.2.21
+# Python (installed as user) via pyenv
+# Note: Disabled. pyenv + its build dependecies bloat the image (~300MB).
+# Debian 10 ships with Python 3.7, so we'll stick with that by default.
+# It is still possible for the end user to switch to a different python version via pyenv.
+#ENV \
+#	PYENV_VERSION_INSTALL=1.2.21 \
 #	PYTHON_VERSION_INSTALL=3.8.3
-RUN set -xe; \
-	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
-	rm -rf $HOME/.pyenv/.git; \
-	{ \
-		echo ''; \
-		echo 'export PYENV_ROOT="$HOME/.pyenv"'; \
-		echo 'export PATH="$PYENV_ROOT/bin:$PATH"'; \
-		echo 'eval "$(pyenv init -)"'; \
-	} >> $HOME/.profile
-# Disabled for now - uses too much space (~200MB).
-# The upsteam Debian 9 image ships with Python 2.7 out of the box, so we'll stick with that by default.
+#RUN set -xe; \
+#	# pyenv requires a bunch of build dependencies installed, which would bloat this image
+#	# See https://github.com/pyenv/pyenv/wiki/Common-build-problems#prerequisites
+#	sudo apt-get update >/dev/null; \
+#	sudo apt-get -y --no-install-recommends install >/dev/null \
+#		build-essential libssl-dev zlib1g-dev libbz2-dev \
+#		libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+#		xz-utils tk-dev libffi-dev liblzma-dev python-openssl git \
+#	;\
+#	# Cleanup
+#	sudo apt-get clean; sudo rm -rf /var/lib/apt/lists/*; \
+#	\
+#	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
+#	rm -rf $HOME/.pyenv/.git; \
+#	{ \
+#		echo ''; \
+#		echo 'export PYENV_ROOT="$HOME/.pyenv"'; \
+#		echo 'export PATH="$PYENV_ROOT/bin:$PATH"'; \
+#		echo 'eval "$(pyenv init -)"'; \
+#	} >> $HOME/.profile; \
 #	# Reload $HOME/.profile to apply settings for the current shell
 #	. $HOME/.profile; \
 #	pyenv install ${PYTHON_VERSION_INSTALL}; \
@@ -460,8 +525,8 @@ ENV \
 # Install code-server
 RUN \
 	set -xe; \
-	curl -fsSL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_amd64.deb" -o /tmp/code-server_amd64.deb; \
-	sudo dpkg -i /tmp/code-server_amd64.deb; \
+	curl -fsSL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${TARGETARCH}.deb" -o /tmp/code-server_${TARGETARCH}.deb; \
+	sudo dpkg -i /tmp/code-server_${TARGETARCH}.deb; \
 	rm -rf /tmp/*.*
 
 # Settings and scripts
