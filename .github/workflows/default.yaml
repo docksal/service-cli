@@ -221,7 +221,7 @@ jobs:
         # Generate image tags (edge, stable, release)
         name: Docker image tags
         id: docker_tags
-        if: ${{ needs.tests.outputs.status == 'pass' }} # Generate persistent tags only if tests passed
+        if: ${{ needs.test.outputs.status == 'pass' }} # Generate persistent tags only if tests passed
         run: .github/scripts/docker-tags.sh
       -
         # Create and push multi-arch image manifests
