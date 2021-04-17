@@ -39,6 +39,10 @@ jobs:
             arch: amd64
             version: 7.4
           -
+            platform: linux/amd64
+            arch: amd64
+            version: 8.0
+          -
             platform: linux/arm64
             arch: arm64
             version: 7.3
@@ -46,6 +50,10 @@ jobs:
             platform: linux/arm64
             arch: arm64
             version: 7.4
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: 8.0
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -196,6 +204,7 @@ jobs:
         version:
           - 7.3
           - 7.4
+          - 8.0
     env:
       VERSION_PREFIX: php
       VERSION: ${{ matrix.version }}
