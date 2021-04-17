@@ -41,7 +41,7 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: 8.0
+            version: '8.0'
           -
             platform: linux/arm64
             arch: arm64
@@ -53,7 +53,7 @@ jobs:
           -
             platform: linux/arm64
             arch: arm64
-            version: 8.0
+            version: '8.0'
 
     env:
       ARCH: ${{ matrix.arch }}
