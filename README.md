@@ -35,7 +35,6 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 - composer v1 & v2
 - drush (Drupal)
   - drush launcher with a fallback to a global drush 8
-  - registry_rebuild module
   - coder-8.x + phpcs
 - drupal console launcher (Drupal)
 - wp-cli (Wordpress)

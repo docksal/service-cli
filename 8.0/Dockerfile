@@ -342,12 +342,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 	# Currently an issue: https://github.com/consolidation/cgr/issues/40
 	#composer global require consolidation/cgr >/dev/null; \ # Not 8.0 compatible currently
 	# Cleanup
-	composer clear-cache; \
-	\
-	# Drush modules
-	# Currently an issue when installing, not compatible
-	# drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	drush cc drush
+	composer clear-cache
 
 # Node.js (installed as user)
 ENV \

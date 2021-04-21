@@ -341,11 +341,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 	# See https://pantheon.io/blog/fixing-composer-global-command
 	composer global require consolidation/cgr >/dev/null; \
 	# Cleanup
-	composer clear-cache; \
-	\
-	# Drush modules
-	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	drush cc drush
+	composer clear-cache
 
 # Node.js (installed as user)
 ENV \
