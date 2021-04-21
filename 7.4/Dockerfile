@@ -318,10 +318,6 @@ RUN set -xe; \
 USER docker
 SHELL ["/bin/bash", "-c"]
 
-# PHP tools (installed as user)
-# Note: DRUSH_BACKDROP_VERSION should be pinned at 1.2.0 as 1.3.0 introduces changes that break regular drush 8.
-ENV \
-	DRUSH_BACKDROP_VERSION=1.2.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
@@ -349,7 +345,6 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 	\
 	# Drush modules
 	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/backdrop-drush-extension/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
 	drush cc drush
 
 # Node.js (installed as user)

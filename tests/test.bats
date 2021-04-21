@@ -542,28 +542,6 @@ _healthcheck_wait ()
 	make clean
 }
 
-@test "Check Drush Backdrop Commands" {
-	[[ $SKIP == 1 ]] && skip
-	# Skip until Drush Backdrop is compatible with PHP 7.4
-	[[ "$VERSION" == "7.4" ]] && skip
-
-	### Setup ###
-	make start
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# Check Drush Backdrop command loaded
-	run docker exec -u docker "$NAME" bash -lc 'drush help backdrop-core-status'
-	[[ "${output}" =~ "Provides a birds-eye view of the current Backdrop installation, if any." ]]
-	unset output
-
-	### Cleanup ###
-	make clean
-}
-
 @test "VS Code Server" {
 	[[ $SKIP == 1 ]] && skip
 
