@@ -337,10 +337,6 @@ $HOME/.composer/vendor/wp-coding-standards/wpcs/,\
 $HOME/.composer/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,\
 $HOME/.composer/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,\
 $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat; \
-	# Install cgr to use it in-place of `composer global require` for misc globally installed cli tools.
-	# See https://pantheon.io/blog/fixing-composer-global-command
-	# Currently an issue: https://github.com/consolidation/cgr/issues/40
-	#composer global require consolidation/cgr >/dev/null; \ # Not 8.0 compatible currently
 	# Cleanup
 	composer clear-cache
 
