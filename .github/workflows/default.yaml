@@ -189,7 +189,9 @@ jobs:
           SECRET_PLATFORMSH_CLI_TOKEN: ${{ secrets.SECRET_PLATFORMSH_CLI_TOKEN }}
           SECRET_TERMINUS_TOKEN: ${{ secrets.SECRET_TERMINUS_TOKEN }}
         # Run tests and set output status (used by downstream jobs)
-        run: make test && echo "::set-output name=status::pass" || echo "::set-output name=status::fail"
+        run: |
+          make test
+          [[ $? == 0 ]] && "::set-output name=status::pass" || echo "::set-output name=status::fail"
       -
         # Print image info
         name: Docker image info
