@@ -226,14 +226,6 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
-	# Check Magento 2 Code Generator version
-	# TODO: this needs to be replaced with the actual version check
-	# See https://github.com/staempfli/magento2-code-generator/issues/15
-	#run docker exec -u docker "$NAME" bash -lc 'mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
-	run docker exec -u docker "$NAME" bash -lc 'set -x; mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
-	[[ ${status} == 0 ]]
-	unset output
-
 	# Check Terminus version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
 	[[ ${status} == 0 ]]

@@ -261,7 +261,6 @@ ENV COMPOSER_DEFAULT_VERSION=2 \
 	TERMINUS_VERSION=2.4.1 \
 	JQ_VERSION=1.6 \
 	YQ_VERSION=3.4.1 \
-	MG_CODEGEN_VERSION=1.11.2
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -290,12 +289,10 @@ RUN set -xe; \
 	fi; \
 	# yq
 	curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
-	# mg2-codegen
-	curl -fsSL "https://github.com/staempfli/magento2-code-generator/releases/download/${MG_CODEGEN_VERSION}/mg2-codegen.phar" -o /usr/local/bin/mg2-codegen; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus yq mg2-codegen);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus yq);
 
 # Install Python3 from Debian repos
 # This adds about 30MB to uncompressed image size.
