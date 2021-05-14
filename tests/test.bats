@@ -226,18 +226,14 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
-	# Check Magento 2 Code Generator version
-	# TODO: this needs to be replaced with the actual version check
-	# See https://github.com/staempfli/magento2-code-generator/issues/15
-	#run docker exec -u docker "$NAME" bash -lc 'mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
-	run docker exec -u docker "$NAME" bash -lc 'set -x; mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
-	[[ ${status} == 0 ]]
-	unset output
-
 	# Check Terminus version
-	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
-	[[ ${status} == 0 ]]
-	unset output
+	# Terminus does not yet support PHP 8.0
+	# See https://github.com/pantheon-systems/terminus/issues/2113
+	if [[ "${VERSION}" != "8.0" ]]; then
+		run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+		[[ ${status} == 0 ]]
+		unset output
+	fi
 
 	# Check Platform CLI version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
@@ -444,6 +440,10 @@ _healthcheck_wait ()
 @test "Check Pantheon integration" {
 	[[ $SKIP == 1 ]] && skip
 
+	# Terminus does not yet support PHP 8.0
+	# See https://github.com/pantheon-systems/terminus/issues/2113
+	[[ "${VERSION}" == "8.0" ]] && skip
+
 	# Confirm secret is not empty
 	[[ "${SECRET_TERMINUS_TOKEN}" != "" ]]
 
@@ -544,28 +544,6 @@ _healthcheck_wait ()
 	[[ "${output}" =~ " PHPCompatibility " ]]
 	[[ "${output}" =~ " PHPCompatibilityWP " ]]
 	[[ "${output}" =~ " PHPCompatibilityParagonieRandomCompat " ]]
-	unset output
-
-	### Cleanup ###
-	make clean
-}
-
-@test "Check Drush Backdrop Commands" {
-	[[ $SKIP == 1 ]] && skip
-	# Skip until Drush Backdrop is compatible with PHP 7.4
-	[[ "$VERSION" == "7.4" ]] && skip
-
-	### Setup ###
-	make start
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# Check Drush Backdrop command loaded
-	run docker exec -u docker "$NAME" bash -lc 'drush help backdrop-core-status'
-	[[ "${output}" =~ "Provides a birds-eye view of the current Backdrop installation, if any." ]]
 	unset output
 
 	### Cleanup ###

@@ -318,11 +318,6 @@ RUN set -xe; \
 USER docker
 SHELL ["/bin/bash", "-c"]
 
-# PHP tools (installed as user)
-# Note: DRUSH_BACKDROP_VERSION should be pinned at 1.2.0 as 1.3.0 introduces changes that break regular drush 8.
-ENV \
-	MG_CODEGEN_VERSION=1.11.2 \
-	DRUSH_BACKDROP_VERSION=1.2.0
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
@@ -342,20 +337,8 @@ $HOME/.composer/vendor/wp-coding-standards/wpcs/,\
 $HOME/.composer/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,\
 $HOME/.composer/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,\
 $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat; \
-	# Install cgr to use it in-place of `composer global require` for misc globally installed cli tools.
-	# See https://pantheon.io/blog/fixing-composer-global-command
-	composer global require consolidation/cgr >/dev/null; \
-	# Magento2 Code Generator
-	# Cannot be properly installed and used as a phar binary
-	# See https://github.com/staempfli/magento2-code-generator/issues/11
-	cgr staempfli/magento2-code-generator:${MG_CODEGEN_VERSION} >/dev/null; \
 	# Cleanup
-	composer clear-cache; \
-	\
-	# Drush modules
-	drush dl registry_rebuild --default-major=7 --destination=$HOME/.drush >/dev/null; \
-	mkdir $HOME/.drush/backdrop && curl -fsSL "https://github.com/backdrop-contrib/backdrop-drush-extension/archive/${DRUSH_BACKDROP_VERSION}.tar.gz" | tar xz -C $HOME/.drush/backdrop --strip-components 1; \
-	drush cc drush
+	composer clear-cache
 
 # Node.js (installed as user)
 ENV \

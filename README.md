@@ -21,9 +21,11 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 - Stable versions
   - `php7.3-2.14`, `php7.3-2`, `php7.3` - PHP 7.3
   - `php7.4-2.14`, `php7.4-2`, `php7.4`, `latest` - PHP 7.4
+  - `php8.0-2.14`, `php8.0`, `php8.0` - PHP 8.0
 - Development versions
   - `php7.3-edge` - PHP 7.3
   - `php7.4-edge` - PHP 7.4
+  - `php8.0-edge` - PHP 8.0
 
 
 ## PHP
@@ -33,7 +35,6 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 - composer v1 & v2
 - drush (Drupal)
   - drush launcher with a fallback to a global drush 8
-  - registry_rebuild module
   - coder-8.x + phpcs
 - drupal console launcher (Drupal)
 - wp-cli (Wordpress)
