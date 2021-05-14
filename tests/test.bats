@@ -229,7 +229,7 @@ _healthcheck_wait ()
 	# Check Terminus version
 	# Terminus does not yet support PHP 8.0
 	# See https://github.com/pantheon-systems/terminus/issues/2113
-	if [[ "${VERSION}" == "8.0" ]]; then
+	if [[ "${VERSION}" != "8.0" ]]; then
 		run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
 		[[ ${status} == 0 ]]
 		unset output
@@ -439,6 +439,10 @@ _healthcheck_wait ()
 
 @test "Check Pantheon integration" {
 	[[ $SKIP == 1 ]] && skip
+
+	# Terminus does not yet support PHP 8.0
+	# See https://github.com/pantheon-systems/terminus/issues/2113
+	[[ "${VERSION}" == "8.0" ]] && skip
 
 	# Confirm secret is not empty
 	[[ "${SECRET_TERMINUS_TOKEN}" != "" ]]
