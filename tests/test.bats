@@ -227,9 +227,13 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Terminus version
-	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
-	[[ ${status} == 0 ]]
-	unset output
+	# Terminus does not yet support PHP 8.0
+	# See https://github.com/pantheon-systems/terminus/issues/2113
+	if [[ "${VERSION}" == "8.0" ]]; then
+		run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+		[[ ${status} == 0 ]]
+		unset output
+	fi
 
 	# Check Platform CLI version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
