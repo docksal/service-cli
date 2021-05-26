@@ -73,12 +73,12 @@ cli
 ## NodeJS
 
 - nvm
-- node v12.18.1 (following NodeJS LTS release cycle)
+- node v14.17.0 (following NodeJS LTS release cycle)
 - yarn
 
 NodeJS is installed via `nvm` in the `docker` user's profile inside the image (`/home/docker/.nvm`).
 
-If you need a different version of node, use `nvm` to install it, e.g, `nvm install 11.6.0`.
+If you need a different version of node, use `nvm` to install it, e.g., `nvm install 11.6.0`.
 Then, use `nvm use 11.6.0` to use it in the current session or `nvm alias default 11.6.0` to use it by default.
 
 ## Python
@@ -88,7 +88,7 @@ Then, use `nvm use 11.6.0` to use it in the current session or `nvm alias defaul
 
 This image comes with a system level installed Python version from upstream (Debian 9).
 
-Additional versions can be installed via `pyenv`, e.g. `pyenv install 3.7.0`.
+Additional versions can be installed via `pyenv`, e.g., `pyenv install 3.7.0`.
 Then, use `pyenv local 3.7.0` to use it in the current session or `pyenv global 3.7.0` to set is as the default.
 
 Note: additional versions will be installed in the `docker` user's profile inside the image (`/home/docker/.pyenv`).
@@ -102,7 +102,7 @@ Note: additional versions will be installed in the `docker` user's profile insid
 
 Ruby is installed via `rvm` in the `docker` user's profile inside the image (`/home/docker/.rvm`).
 
-If you need a different version, use `rvm` to install it, e.g, `rvm install 2.5.1`.
+If you need a different version, use `rvm` to install it, e.g., `rvm install 2.5.1`.
 Then, `rvm use 2.5.1` to use it in the current session or `rvm --default use 2.5.1` to use it by default.
 
 ## Notable console tools
@@ -155,18 +155,18 @@ by the SSH client **in addition** to the keys loaded in `docksal-ssh-agent` when
 from within `cli`.
 
 This is useful when you need a project stack to inherit a private SSH key that is not shared with other project stacks
-on the same host (e.g. in shared CI environments).
+on the same host (e.g., in shared CI environments).
 
-The value must be base64 encoded, i.e:
+The value must be base64 encoded, i.e.:
 
 ```bash
 cat /path/to/some_key_rsa | base64
 ```
 
-`SECRET_ACQUIA_CLI_KEY` and `SECRET_ACQUIA_CLI_SECRET`
+`SECRET_ACQUIACLI_KEY` and `SECRET_ACQUIACLI_SECRET`
 
 Credentials used to authenticate [Acquia CLI](https://github.com/acquia/cli) with Acquia Cloud APIv2.
-Stored as `ACQUIA_CLI_KEY` and `ACQUIA_CLI_SECRET` environment variables inside `cli`.
+Stored as `ACQUIACLI_KEY` and `ACQUIACLI_SECRET` environment variables inside `cli`.
 
 Acquia CLI is installed and available globally in `cli` as `acli`.
 
