@@ -250,17 +250,17 @@ RUN set -xe; \
 # PHP tools (installed globally)
 ENV COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.22 \
-	COMPOSER2_VERSION=2.0.14 \
+	COMPOSER2_VERSION=2.1.3 \
 	DRUSH_VERSION=8.4.8 \
 	DRUSH_LAUNCHER_VERSION=0.9.1 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
-	WPCLI_VERSION=2.4.0 \
-	BLACKFIRE_VERSION=1.47.1 \
+	WPCLI_VERSION=2.5.0 \
+	BLACKFIRE_VERSION=1.49.3 \
 	PLATFORMSH_CLI_VERSION=3.66.0 \
 	ACQUIA_CLI_VERSION=1.12.1 \
-	TERMINUS_VERSION=2.5.0 \
+	TERMINUS_VERSION=2.6.0 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=3.4.1
+	YQ_VERSION=4.10.0
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -288,7 +288,7 @@ RUN set -xe; \
 		chmod +x /usr/local/bin/jq; \
 	fi; \
 	# yq
-	curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
+	curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
@@ -343,7 +343,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.38.0 \
-	NODE_VERSION=14.17.0 \
+	NODE_VERSION=14.17.3 \
 	YARN_VERSION=1.22.10
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
