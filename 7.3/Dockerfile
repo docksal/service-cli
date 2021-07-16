@@ -260,7 +260,7 @@ ENV COMPOSER_DEFAULT_VERSION=2 \
 	ACQUIA_CLI_VERSION=1.12.1 \
 	TERMINUS_VERSION=2.6.0 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=3.4.1
+	YQ_VERSION=4.10.0
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -288,7 +288,7 @@ RUN set -xe; \
 		chmod +x /usr/local/bin/jq; \
 	fi; \
 	# yq
-	curl -fsSL "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
+	curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
