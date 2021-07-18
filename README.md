@@ -73,7 +73,7 @@ cli
 ## NodeJS
 
 - nvm
-- node v14.17.0 (following NodeJS LTS release cycle)
+- node v14.17.3 (following NodeJS LTS release cycle)
 - yarn
 
 NodeJS is installed via `nvm` in the `docker` user's profile inside the image (`/home/docker/.nvm`).
