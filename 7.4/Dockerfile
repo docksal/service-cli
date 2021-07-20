@@ -260,7 +260,7 @@ ENV COMPOSER_DEFAULT_VERSION=2 \
 	ACQUIA_CLI_VERSION=1.13.0 \
 	TERMINUS_VERSION=2.6.0 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=4.11.0
+	YQ_VERSION=4.11.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
