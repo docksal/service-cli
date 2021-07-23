@@ -160,9 +160,6 @@ RUN set -xe; \
 		--with-jpeg \
 		--with-webp \
 		--with-xpm; \
-	# Install imagemagick by source as it isn't ready for 8.0
-	mkdir -p /usr/src/php/ext/imagick; \
-	curl -fsSL https://github.com/Imagick/imagick/archive/448c1cd0d58ba2838b9b6dff71c9b7e70a401b90.tar.gz | tar xvz -C "/usr/src/php/ext/imagick" --strip 1; \
 	PHP_OPENSSL=yes docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	# Using $(uname -m) (returns x86_64 / aarch64) vs ${TARGETARCH} (returns amd64 / arm64)
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/$(uname -m)-linux-gnu/; \
@@ -176,7 +173,6 @@ RUN set -xe; \
 		exif \
 		gd \
 		gettext \
-		imagick \
 		imap \
 		intl \
 		ldap \
@@ -196,6 +192,7 @@ RUN set -xe; \
 	pecl install >/dev/null </dev/null \
 		apcu \
 		gnupg \
+		imagick \
 		memcached \
 		redis \
 		ssh2-beta \
@@ -205,6 +202,7 @@ RUN set -xe; \
 	docker-php-ext-enable \
 		apcu \
 		gnupg \
+		imagick \
 		memcached \
 		redis \
 		ssh2 \
