@@ -111,8 +111,6 @@ jobs:
     name: "Test: ${{ matrix.version }}/${{ matrix.arch }}"
     runs-on: ubuntu-20.04
     needs: build
-    outputs:
-      status: ${{ steps.tests.outputs.status }} # Tests status (used by downstream jobs)
 
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
@@ -188,23 +186,23 @@ jobs:
           BUILD_IMAGE_TAG: docker.io/${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
           SECRET_PLATFORMSH_CLI_TOKEN: ${{ secrets.SECRET_PLATFORMSH_CLI_TOKEN }}
           SECRET_TERMINUS_TOKEN: ${{ secrets.SECRET_TERMINUS_TOKEN }}
-        # Run tests and set output status (used by downstream jobs)
         run: |
           make test
-          [[ $? == 0 ]] && "::set-output name=status::pass" || echo "::set-output name=status::fail"
-      -
-        # Print image info
-        name: Docker image info
-        env:
-          BUILD_IMAGE_TAG: docker.io/${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
-        run: |
-          set -xeuo pipefail
-          docker image ls | grep "${{ env.IMAGE }}"
-          docker image inspect "${{ env.BUILD_IMAGE_TAG }}"
+          ([[ $? == 0 ]] && echo "pass" || echo "fail") | tee ${{ github.workspace }}/test-results-${VERSION_PREFIX}${VERSION}-${ARCH}.txt
+      # Store tests results as an artifact (used by downstream jobs)
+      # Note: Cannot use "::set-output name=var_name::var_value" as var_name would need to be dynamic here.
+      # Dynamic variable names cannot be used when mapping step outputs to job outputs.
+      # Step outputs cannot be accessed directly from other jobs. Dead end.
+      - name: Store test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: ${{ github.workspace }}/test-results-*.txt
 
   push:
     name: "Push: ${{ matrix.version }}/multi"
     runs-on: ubuntu-20.04
+
     # Wait for test to either succeed or fail
     needs: test
     if: always()
@@ -215,6 +213,7 @@ jobs:
           - '7.3'
           - '7.4'
           - '8.0'
+
     env:
       VERSION_PREFIX: php
       VERSION: ${{ matrix.version }}
@@ -237,15 +236,27 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        # Generate image tags (edge, stable, release)
+        name: Retrieve test results
+        uses: actions/download-artifact@v2
+        with:
+          name: test-results
+      -
+        # Generate persistent tags (edge, stable, release)
         name: Docker image tags
         id: docker_tags
-        if: ${{ needs.test.outputs.status == 'pass' }} # Generate persistent tags only if tests passed
-        run: .github/scripts/docker-tags.sh
+        # Don't push broken builds to persistent tags (both amd64 and arm64 tests must pass)
+        run: |
+          amd64_tests=$(cat test-results-${VERSION_PREFIX}${VERSION}-amd64.txt)
+          arm64_tests=$(cat test-results-${VERSION_PREFIX}${VERSION}-arm64.txt)
+          if [[ "${amd64_tests}" == "pass" ]] && [[ "${arm64_tests}" == "pass" ]]; then
+            .github/scripts/docker-tags.sh
+          fi
       -
         # Create and push multi-arch image manifests
         name: Push multi-arch images
         env:
+          # build tags are always pushed (build caching, debugging needs)
+          # edge, stage, release are only pushed if tests were successful (see docker_tags step)
           TAGS: |
             ${{ env.BUILD_IMAGE_TAG }}
             ${{ steps.docker_tags.outputs.tags }}
