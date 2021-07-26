@@ -18,7 +18,7 @@ defaults:
 env:
   IMAGE: docksal/cli
   UPSTREAM_IMAGE: debian
-  LATEST_VERSION: '7.3'
+  LATEST_VERSION: '8.0'
   DOCKSAL_VERSION: develop
 
 jobs:
