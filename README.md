@@ -1,44 +1,48 @@
 # CLI Docker image for Docksal
 
-This image is focused on console tools necessary to develop LAMP stack (and other web) applications.
+This image focuses on console tools necessary to develop LAMP stack (and other web) applications.
 
 This image(s) is part of the [Docksal](https://docksal.io) image library.
 
 
 ## Features
 
-- php/php-fpm (w/ xdebug), nodejs (via nvm), python (via pyenv), ruby (via rvm)
-- Framework specific tools for Drupal, Wordpress, Magento
+- php/php-fpm (w/ xdebug), nodejs (via nvm), python, ruby
+- Framework specific tools for Drupal and Wordpress
 - Miscellaneous cli tools for day to day web development
 - Hosting provider cli tools (Acquia, Pantheon, Platform.sh)
 - Cron job scheduling
 - Custom startup script support
 - [VS Code Server](https://github.com/cdr/code-server) (VS Code in the browser)
+- Multi-platform images (amd64/arm64) starting with v3.0.0
 
 
 ## Versions and image tag naming convention
 
-- Stable versions
-  - `php7.3-2.14`, `php7.3-2`, `php7.3` - PHP 7.3
-  - `php7.4-2.14`, `php7.4-2`, `php7.4`, `latest` - PHP 7.4
-  - `php8.0-2.14`, `php8.0`, `php8.0` - PHP 8.0
-- Development versions
+- Stable versions v3 (amd64/arm64)
+  - `php7.3-3.0`, `php7.3-2`, `php7.3` - PHP 7.3
+  - `php7.4-3.0`, `php7.4-2`, `php7.4` - PHP 7.4
+  - `php8.0-3.0`, `php8.0`, `php8.0`, `latest` - PHP 8.0
+- Development versions (amd64/arm64)
   - `php7.3-edge` - PHP 7.3
   - `php7.4-edge` - PHP 7.4
   - `php8.0-edge` - PHP 8.0
+- Previous stable versions v2 (amd64)
+  - `php7.3-2.13`, `php7.3-2`, `php7.3` - PHP 7.3
+  - `php7.4-2.13`, `php7.4-2`, `php7.4` - PHP 7.4
+  - `php8.0-2.13`, `php8.0`, `php8.0` - PHP 8.0
 
 
 ## PHP
 
 - php-fpm && php-cli
-- xdebug
+- xdebug v3
 - composer v1 & v2
 - drush (Drupal)
   - drush launcher with a fallback to a global drush 8
   - coder-8.x + phpcs
 - drupal console launcher (Drupal)
 - wp-cli (Wordpress)
-- mg2-codegen (Magento 2)
 
 This image uses the official `php-fpm` images from [Docker Hub](https://hub.docker.com/_/php/) as the base.
 This means that PHP and all modules are installed from source. Extra modules have to be installed in the same
@@ -49,7 +53,7 @@ manner (installing them with `apt-get` won't work).
 - SQLite - via `sqlite3`, `pdo_sqlite`
 - MySQL - via `mysqli`, `mysqlnd`, `pdo_mysql`
 - PostgreSQL - via `pgsql`, `pdo_pgsql`
-- MSSQL - via `sqlsrv` and `pdo_sqlsrv`
+- MSSQL - via `sqlsrv` and `pdo_sqlsrv` (amd64 only)
 
 
 ### Using PHP Xdebug
@@ -83,36 +87,21 @@ Then, use `nvm use 11.6.0` to use it in the current session or `nvm alias defaul
 
 ## Python
 
-- pyenv
-- python 3.8.3
-
 This image comes with a system level installed Python version from upstream (Debian 9).
-
-Additional versions can be installed via `pyenv`, e.g., `pyenv install 3.7.0`.
-Then, use `pyenv local 3.7.0` to use it in the current session or `pyenv global 3.7.0` to set is as the default.
-
-Note: additional versions will be installed in the `docker` user's profile inside the image (`/home/docker/.pyenv`).
 
 ## Ruby
 
-- rvm
-- ruby v2.7.1
-- gem
-- bundler
-
-Ruby is installed via `rvm` in the `docker` user's profile inside the image (`/home/docker/.rvm`).
-
-If you need a different version, use `rvm` to install it, e.g., `rvm install 2.5.1`.
-Then, `rvm use 2.5.1` to use it in the current session or `rvm --default use 2.5.1` to use it by default.
+This image comes with a system level installed Ruby version from upstream (Debian 9).
 
 ## Notable console tools
 
 - git with git-lfs
 - curl, wget
 - zip, unzip
-- mysql, pgsql and mssql cli clients
+- jq, yq
+- mysql, pgsql, and sqlsrv cli clients
 - imagemagick, ghostscript
-- mc, rsync
+- mc, nano, rsync
 - mhsendmail
 - cron
 
@@ -204,14 +193,15 @@ GIT_USER_NAME="Docksal CLI"
 
 [Coder](https://coder.com/) is a free, open-source web IDE.
 
-Starting with version 2.8, there is the `ide` flavor of the images, which comes with Coder pre-installed, e.g.:
+VS Code Server is pre-installed along with GitLens and PHP Xdebug extensions.
 
-```
-2.11-php7.3-ide
-2.11-php7.4-ide
-```
+### Configuration
 
-`IDE_PASSWORD`
+`IDE_ENABLED` (default: 0)
+
+Set to `1` to start the image in IDE mode. VS Code web UI will is listening on port `8080`.
+
+`IDE_PASSWORD` (default: '')
 
 Store your preferred password in this variable if you need to password protect the IDE environment.
 
