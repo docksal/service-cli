@@ -1,4 +1,4 @@
-FROM php:7.3-fpm-buster as cli
+FROM php:8.0-fpm-buster as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -156,16 +156,15 @@ RUN set -xe; \
 		libzip4 \
 	;\
 	docker-php-ext-configure >/dev/null gd \
-		--with-freetype-dir=/usr/include/ \
-		--with-jpeg-dir=/usr/include/ \
-		--with-webp-dir=/usr/include/ \
-		--with-png-dir=/usr/include/ \
-		--with-xpm-dir=/usr/include/; \
-	docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
+		--with-freetype \
+		--with-jpeg \
+		--with-webp \
+		--with-xpm; \
+	PHP_OPENSSL=yes docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
 	# Using $(uname -m) (returns x86_64 / aarch64) vs ${TARGETARCH} (returns amd64 / arm64)
 	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/$(uname -m)-linux-gnu/; \
 	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
-	docker-php-ext-configure >/dev/null zip --with-libzip; \
+	docker-php-ext-configure >/dev/null zip; \
 	\
 	docker-php-ext-install >/dev/null -j$(nproc) \
 		bcmath \
@@ -194,7 +193,6 @@ RUN set -xe; \
 		apcu \
 		gnupg \
 		imagick \
-		# Use memcached (not memcache) for PHP 7.x
 		memcached \
 		redis \
 		ssh2-beta \
@@ -452,10 +450,11 @@ COPY ping-web.sh /opt/ping-web.sh
 # PHP default settings, global overrides and fpm overrides
 # PHP_VERSION is set upstream. The source code for the exact PHP version may not be available in Github
 # TODO: For now, will just hardcode a specific version available on https://github.com/php/php-src/
-ADD https://raw.githubusercontent.com/php/php-src/php-7.3.24/php.ini-development /usr/local/etc/php/php.ini
+ADD https://raw.githubusercontent.com/php/php-src/PHP-8.0.5/php.ini-development /usr/local/etc/php/php.ini
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
 COPY config/php/xhprof.ini /opt/docker-php-ext-xhprof.ini
+COPY config/php/opcache.ini /opt/docker-php-ext-opcache.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
 ENV \

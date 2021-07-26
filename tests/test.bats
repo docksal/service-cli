@@ -64,7 +64,7 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	make start
+	make start-bare
 
 	run _healthcheck_wait
 	unset output
@@ -72,35 +72,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# List of binaries to check
-	binaries='\
-		cat \
-		convert \
-		curl \
-		dig \
-		g++ \
-		ghostscript \
-		git \
-		git-lfs \
-		gcc \
-		html2text \
-		jq \
-		less \
-		make \
-		mc \
-		more \
-		mysql \
-		nano \
-		nslookup \
-		ping \
-		psql \
-		pv \
-		rsync \
-		sudo \
-		unzip \
-		wget \
-		yq \
-		zip \
-	'
+	binaries=$(./tests/essential-binaries.sh)
 
 	# Check all binaries in a single shot
 	run make exec -e CMD="type $(echo ${binaries} | xargs)"
@@ -115,12 +87,7 @@ _healthcheck_wait ()
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
-	docker run --name "$NAME" -d \
-		-v /home/docker \
-		-v $(pwd)/../tests/docroot:/var/www/docroot \
-		"$IMAGE"
-	docker cp $(pwd)/../tests/scripts "$NAME:/var/www/"
+	make start-bare
 
 	run _healthcheck_wait
 	unset output
@@ -131,7 +98,7 @@ _healthcheck_wait ()
 	# "sed -E 's/[[:space:]]{2,}/ => /g'" - makes the HTML phpinfo output easier to parse. It will transforms
 	# "memory_limit                256M                                         256M"
 	# into "memory_limit => 256M => 256M", which is much easier to parse
-	phpInfo=$(docker exec -u docker "$NAME" bash -c "/var/www/scripts/php-fpm.sh phpinfo.php | sed -E 's/[[:space:]]{2,}/ => /g'")
+	phpInfo=$(docker exec -u docker "$NAME" bash -c "/var/www/docroot/php-fpm.sh phpinfo.php | sed -E 's/[[:space:]]{2,}/ => /g'")
 
 	output=$(echo "$phpInfo" | grep "memory_limit")
 	echo "$output" | grep "256M => 256M"
@@ -141,7 +108,7 @@ _healthcheck_wait ()
 	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 => /usr/bin/msmtp -t --host=mail --port=1025'
 	unset output
 
-	run docker exec -u docker "$NAME" /var/www/scripts/php-fpm.sh nonsense.php
+	run docker exec -u docker "$NAME" /var/www/docroot/php-fpm.sh nonsense.php
 	echo "$output" | grep "Status: 404 Not Found"
 	unset output
 
@@ -168,12 +135,12 @@ _healthcheck_wait ()
 	unset output
 
 	# Check PHP modules
-	run bash -lc "docker exec -u docker '${NAME}' php -m | diff php-modules.txt -"
+	run bash -lc "docker exec -u docker '${NAME}' php -m | diff <(./tests/php-modules.sh) -"
 	[[ ${status} == 0 ]]
 	unset output
 
 	### Cleanup ###
-	docker rm -vf "$NAME" >/dev/null 2>&1 || true
+	make clean
 }
 
 # Examples of using Makefile commands
@@ -190,7 +157,7 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check PHP FPM settings overrides
-	run make exec -e CMD='/var/www/scripts/php-fpm.sh phpinfo.php'
+	run make exec -e CMD='/var/www/docroot/php-fpm.sh phpinfo.php'
 	echo "$output" | grep "memory_limit" | grep "512M"
 	unset output
 
@@ -259,18 +226,14 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
-	# Check Magento 2 Code Generator version
-	# TODO: this needs to be replaced with the actual version check
-	# See https://github.com/staempfli/magento2-code-generator/issues/15
-	#run docker exec -u docker "$NAME" bash -lc 'mg2-codegen --version | grep "^mg2-codegen ${MG_CODEGEN_VERSION}$"'
-	run docker exec -u docker "$NAME" bash -lc 'set -x; mg2-codegen --version | grep "^mg2-codegen @git-version@$"'
-	[[ ${status} == 0 ]]
-	unset output
-
 	# Check Terminus version
-	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
-	[[ ${status} == 0 ]]
-	unset output
+	# Terminus does not yet support PHP 8.0
+	# See https://github.com/pantheon-systems/terminus/issues/2113
+	if [[ "${VERSION}" != "8.0" ]]; then
+		run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+		[[ ${status} == 0 ]]
+		unset output
+	fi
 
 	# Check Platform CLI version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
@@ -333,7 +296,9 @@ _healthcheck_wait ()
 	unset output
 
 	# ruby
-	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VERSION_INSTALL}"'
+	#run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VERSION_INSTALL}"'
+	# Default Ruby version in Debian 10 = 2.5.x
+	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "ruby 2.5"'
 	[[ ${status} == 0 ]]
 	unset output
 
@@ -475,6 +440,10 @@ _healthcheck_wait ()
 @test "Check Pantheon integration" {
 	[[ $SKIP == 1 ]] && skip
 
+	# Terminus does not yet support PHP 8.0
+	# See https://github.com/pantheon-systems/terminus/issues/2113
+	[[ "${VERSION}" == "8.0" ]] && skip
+
 	# Confirm secret is not empty
 	[[ "${SECRET_TERMINUS_TOKEN}" != "" ]]
 
@@ -575,28 +544,6 @@ _healthcheck_wait ()
 	[[ "${output}" =~ " PHPCompatibility " ]]
 	[[ "${output}" =~ " PHPCompatibilityWP " ]]
 	[[ "${output}" =~ " PHPCompatibilityParagonieRandomCompat " ]]
-	unset output
-
-	### Cleanup ###
-	make clean
-}
-
-@test "Check Drush Backdrop Commands" {
-	[[ $SKIP == 1 ]] && skip
-	# Skip until Drush Backdrop is compatible with PHP 7.4
-	[[ "$VERSION" == "7.4" ]] && skip
-
-	### Setup ###
-	make start
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# Check Drush Backdrop command loaded
-	run docker exec -u docker "$NAME" bash -lc 'drush help backdrop-core-status'
-	[[ "${output}" =~ "Provides a birds-eye view of the current Backdrop installation, if any." ]]
 	unset output
 
 	### Cleanup ###

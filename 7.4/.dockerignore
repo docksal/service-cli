@@ -1,4 +1,4 @@
+tests
 .dockerignore
 Dockerfile
 Makefile
-php-modules.txt
