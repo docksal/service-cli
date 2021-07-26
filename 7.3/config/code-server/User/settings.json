@@ -32,5 +32,6 @@
     "*.tpl.php": "php",
     "*.test": "php",
     "*.php": "php"
-  }
+  },
+  "workbench.colorTheme": "Default Dark+"
 }
