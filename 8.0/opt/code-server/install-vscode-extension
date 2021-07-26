@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-PLUGIN_URL=$1
-PLUGIN_DIRECTORY=$2
-
-curl -fsSL "${PLUGIN_URL}" -o /tmp/extension.zip
-unzip -qq /tmp/extension.zip -d /tmp/extension
-mv /tmp/extension/extension ${VSCODE_EXT_DIRECTORY}/${PLUGIN_DIRECTORY}
-rm -rf /tmp/extension.zip /tmp/extension

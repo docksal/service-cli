@@ -42,22 +42,18 @@ xhprof_enable ()
 
 opcache_preload_enable()
 {
-        echo-debug "Enabling opcache preload..."
-        ln -s /opt/docker-php-ext-opcache.ini /usr/local/etc/php/conf.d/
+	echo-debug "Enabling opcache preload..."
+	ln -s /opt/docker-php-ext-opcache.ini /usr/local/etc/php/conf.d/
 }
 
 ide_mode_enable ()
 {
 	echo-debug "Enabling web IDE..."
 	# Enabled only code-server service (disabled all other services)
-	# TODO: [v3] split IDE/cli and php-fpm entirely
+	# TODO: split IDE/cli and php-fpm entirely
 	rm -f /etc/supervisor/conf.d/supervisord-*.conf
-	if [[ "$IDE_PASSWORD" != "" ]]; then
-		export PASSWORD="${IDE_PASSWORD}"
-	fi
 	render_tmpl "/etc/supervisor/conf.d/supervisord-code-server.conf"
-	mkdir -p ${VSCODE_HOME}/User
-	ln -s /opt/code-server/settings.json ${VSCODE_HOME}/User/
+	render_tmpl "${VSCODE_HOME}/config.yaml"
 }
 
 # Creates symlinks to project level overrides if they exist

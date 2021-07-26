@@ -502,27 +502,24 @@ ARG HOME=/home/docker
 
 ENV \
 	CODE_SERVER_VERSION=3.11.0 \
-	VSCODE_HOME="${HOME}/code-server" \
-	VSCODE_EXT_DIRECTORY="${HOME}/code-server/extensions" \
 	VSCODE_XDEBUG_VERSION=1.16.1 \
-	VSCODE_GITLENS_VERSION=11.6.0
+	VSCODE_GITLENS_VERSION=11.6.0 \
+	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
-RUN \
-	set -xe; \
+RUN set -xe; \
 	curl -fsSL "https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_${TARGETARCH}.deb" -o /tmp/code-server_${TARGETARCH}.deb; \
 	sudo dpkg -i /tmp/code-server_${TARGETARCH}.deb; \
 	rm -rf /tmp/*.*
 
-# Settings and scripts
-COPY --chown=docker:docker opt/code-server /opt/code-server
+# Settings
+COPY --chown=docker:docker config/code-server ${VSCODE_HOME}
 
 # Install extensions
-RUN \
-	set -xe; \
-	mkdir -p ${VSCODE_EXT_DIRECTORY}; \
-	/opt/code-server/install-vscode-extension https://github.com/felixfbecker/vscode-php-debug/releases/download/v${VSCODE_XDEBUG_VERSION}/php-debug.vsix felixfbecker.php-debug-${VSCODE_XDEBUG_VERSION}; \
-	/opt/code-server/install-vscode-extension https://github.com/eamodio/vscode-gitlens/releases/download/v${VSCODE_GITLENS_VERSION}/gitlens-${VSCODE_GITLENS_VERSION}.vsix eamodio.gitlens-${VSCODE_GITLENS_VERSION}
+# Note: Have to use --user-data-dir with --install-extension instead of --config
+RUN set -xe; \
+	code-server --user-data-dir=${VSCODE_HOME} --install-extension eamodio.gitlens@11.6.0; \
+	code-server --user-data-dir=${VSCODE_HOME} --install-extension felixfbecker.php-debug@1.16.1
 
 # Switch back to root (IMPORTANT!)
 USER root

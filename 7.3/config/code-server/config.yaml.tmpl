@@ -1,0 +1,9 @@
+user-data-dir: {{ getenv "VSCODE_HOME" }}
+bind-addr: 0.0.0.0:8080
+cert: false
+{{ if (getenv "IDE_PASSWORD") }}
+auth: password
+password: {{ getenv "IDE_PASSWORD" }}
+{{ else }}
+auth: none
+{{ end }}
