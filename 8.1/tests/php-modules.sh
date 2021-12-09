@@ -18,7 +18,6 @@ filter
 ftp
 gd
 gettext
-gnupg
 hash
 iconv
 imagick
@@ -88,7 +87,6 @@ filter
 ftp
 gd
 gettext
-gnupg
 hash
 iconv
 imagick

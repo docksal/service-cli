@@ -191,7 +191,7 @@ RUN set -xe; \
 	pecl update-channels; \
 	pecl install >/dev/null </dev/null \
 		apcu \
-		gnupg \
+		#gnupg \ # Not compatible with PHP 8.1
 		imagick \
 		memcached \
 		redis \
@@ -201,7 +201,7 @@ RUN set -xe; \
 	;\
 	docker-php-ext-enable \
 		apcu \
-		gnupg \
+		#gnupg \ # Not compatible with PHP 8.1
 		imagick \
 		memcached \
 		redis \
