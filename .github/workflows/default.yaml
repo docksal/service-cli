@@ -69,8 +69,9 @@ jobs:
         name: Environment variables
         run: |
           # Export variables for further steps
-          echo "GIT_SHA7=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
-          echo "BUILD_IMAGE_TAG=${IMAGE}:${VERSION_PREFIX}${VERSION}-build" >> ${GITHUB_ENV}
+          echo GIT_SHA7="${GITHUB_SHA:0:7}" | tee -a ${GITHUB_ENV}
+          echo BUILD_DIR="${VERSION:-.}" | tee -a ${GITHUB_ENV}
+          echo BUILD_IMAGE_TAG="${IMAGE}:${VERSION_PREFIX}${VERSION}-build" | tee -a ${GITHUB_ENV}
       -
         # Switch docker context to a remote arm64 host
         name: Switch to arm64 builder host
@@ -98,14 +99,14 @@ jobs:
         name: Build image
         uses: docker/build-push-action@v2
         with:
-          context: ${{ env.VERSION }}
-          file: ${{ env.VERSION }}/Dockerfile
+          context: ${{ env.BUILD_DIR }}
+          file: ${{ env.BUILD_DIR }}/Dockerfile
           build-args: VERSION=${{ env.VERSION }}
           # Push intermediate arch-specific build tag to repo
-          tags: docker.io/${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
+          tags: ${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
           push: ${{ github.event_name != 'pull_request' }} # Don't push for PRs
           # BUILD_IMAGE_TAG - persistent multi-arch tag, updated at the end of the build (success or failure)
-          cache-from: type=registry,ref=docker.io/${{ env.BUILD_IMAGE_TAG }}
+          cache-from: type=registry,ref=${{ env.BUILD_IMAGE_TAG }}
           cache-to: type=inline # Write the cache metadata into the image configuration
 
   test:
@@ -160,8 +161,9 @@ jobs:
         name: Environment variables
         run: |
           # Export variables for further steps
-          echo "GIT_SHA7=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
-          echo "BUILD_IMAGE_TAG=${IMAGE}:${VERSION_PREFIX}${VERSION}-build" >> ${GITHUB_ENV}
+          echo GIT_SHA7="${GITHUB_SHA:0:7}" | tee -a ${GITHUB_ENV}
+          echo BUILD_DIR="${VERSION:-.}" | tee -a ${GITHUB_ENV}
+          echo BUILD_IMAGE_TAG="${IMAGE}:${VERSION_PREFIX}${VERSION}-build" | tee -a ${GITHUB_ENV}
       -
         # Switch docker context to a remote arm64 host
         name: Switch to arm64 builder host
@@ -182,9 +184,9 @@ jobs:
         # Run tests
         name: Test
         id: tests
-        working-directory: ${{ env.VERSION }}
+        working-directory: ${{ env.BUILD_DIR }}
         env:
-          BUILD_IMAGE_TAG: docker.io/${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
+          BUILD_IMAGE_TAG: ${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-${{ env.ARCH }}
           SECRET_PLATFORMSH_CLI_TOKEN: ${{ secrets.SECRET_PLATFORMSH_CLI_TOKEN }}
           SECRET_TERMINUS_TOKEN: ${{ secrets.SECRET_TERMINUS_TOKEN }}
         run: |
@@ -227,8 +229,9 @@ jobs:
         name: Environment variables
         run: |
           # Export variables for further steps
-          echo "GIT_SHA7=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
-          echo "BUILD_IMAGE_TAG=${IMAGE}:${VERSION_PREFIX}${VERSION}-build" >> ${GITHUB_ENV}
+          echo GIT_SHA7="${GITHUB_SHA:0:7}" | tee -a ${GITHUB_ENV}
+          echo BUILD_DIR="${VERSION:-.}" | tee -a ${GITHUB_ENV}
+          echo BUILD_IMAGE_TAG="${IMAGE}:${VERSION_PREFIX}${VERSION}-build" | tee -a ${GITHUB_ENV}
       -
         # Login to Docker Hub
         name: Login to Docker Hub
