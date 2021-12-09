@@ -20,13 +20,15 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 ## Versions and image tag naming convention
 
 - Stable versions v3 (amd64/arm64)
-  - `php7.3-3.0`, `php7.3-2`, `php7.3` - PHP 7.3
   - `php7.4-3.0`, `php7.4-2`, `php7.4` - PHP 7.4
   - `php8.0-3.0`, `php8.0`, `php8.0`, `latest` - PHP 8.0
+  - `php8.1-3.0`, `php8.1`, `php8.1`, `latest` - PHP 8.1
 - Development versions (amd64/arm64)
-  - `php7.3-edge` - PHP 7.3
   - `php7.4-edge` - PHP 7.4
   - `php8.0-edge` - PHP 8.0
+  - `php8.1-edge` - PHP 8.0
+- Previous stable versions v3 (amd64/arm64)
+  - `php7.3-3.0`, `php7.3-2`, `php7.3` - PHP 7.3 
 - Previous stable versions v2 (amd64)
   - `php7.3-2.13`, `php7.3-2`, `php7.3` - PHP 7.3
   - `php7.4-2.13`, `php7.4-2`, `php7.4` - PHP 7.4
