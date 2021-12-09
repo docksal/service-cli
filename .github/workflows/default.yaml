@@ -34,10 +34,6 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: '7.3'
-          -
-            platform: linux/amd64
-            arch: amd64
             version: '7.4'
           -
             platform: linux/amd64
@@ -47,10 +43,6 @@ jobs:
             platform: linux/amd64
             arch: amd64
             version: '8.1'
-          -
-            platform: linux/arm64
-            arch: arm64
-            version: '7.3'
           -
             platform: linux/arm64
             arch: arm64
@@ -131,10 +123,6 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: '7.3'
-          -
-            platform: linux/amd64
-            arch: amd64
             version: '7.4'
           -
             platform: linux/amd64
@@ -144,10 +132,6 @@ jobs:
             platform: linux/amd64
             arch: amd64
             version: '8.1'
-          -
-            platform: linux/arm64
-            arch: arm64
-            version: '7.3'
           -
             platform: linux/arm64
             arch: arm64
@@ -233,7 +217,6 @@ jobs:
     strategy:
       matrix:
         version:
-          - '7.3'
           - '7.4'
           - '8.0'
           - '8.1'

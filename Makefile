@@ -1,6 +1,6 @@
 # Makefile
 #
-DIRS = 7.3 7.4 8.0 8.1
+DIRS = 7.4 8.0 8.1
 # the sets of directories to do various things in
 BUILDDIRS = $(DIRS:%=build-%)
 INSTALLDIRS = $(DIRS:%=install-%)
