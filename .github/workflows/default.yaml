@@ -2,7 +2,7 @@ name: Docker Build and Push
 
 on:
   schedule:
-    - cron: '0 10 * * 0' # everyday sunday at 10am
+    - cron: '0 10 * * 0' # Every Sunday at 10AM
   push:
     branches:
       - master
@@ -10,6 +10,7 @@ on:
       - feature/*
     tags:
       - 'v*.*.*'
+  workflow_dispatch: # Allow manually triggering a build
 
 defaults:
   run:
