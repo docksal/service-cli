@@ -166,16 +166,18 @@ jobs:
           echo GIT_SHA7="${GITHUB_SHA:0:7}" | tee -a ${GITHUB_ENV}
           echo BUILD_DIR="${VERSION:-.}" | tee -a ${GITHUB_ENV}
           echo BUILD_IMAGE_TAG="${IMAGE}:${VERSION_PREFIX}${VERSION}-build" | tee -a ${GITHUB_ENV}
+          # Pull the host public SSH key at runtime instead of relying on a static value stored in secrets.
+          echo ARM64_HOST_SSH_CERT="$(ssh-keyscan -t rsa ${{ secrets.ARM64_HOST }} 2>/dev/null)" | tee -a ${GITHUB_ENV}
       -
         # Switch docker context to a remote arm64 host
         name: Switch to arm64 builder host
         if: ${{ env.ARCH == 'arm64' }}
-        uses: arwynfr/actions-docker-context@98fc92878d0b856c1112c79b8d0f45353206e186
+        uses: arwynfr/actions-docker-context@v2
         with:
           docker_host: "ssh://ubuntu@${{ secrets.ARM64_HOST }}"
           context_name: arm64-host
           ssh_key: "${{ secrets.ARM64_HOST_SSH_KEY }}"
-          ssh_cert: "${{ secrets.ARM64_HOST_SSH_CERT }}"
+          ssh_cert: "${{ env.ARM64_HOST_SSH_CERT }}"
           use_context: true
       -
         name: Check Docker
