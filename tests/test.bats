@@ -227,9 +227,10 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Terminus version
-	# Terminus v2 is not compatible with PHP 8.0 or PHP 8.1
-	# See https://github.com/pantheon-systems/terminus/issues/2113
-	if [[ "${VERSION}" != "8.0" ]] && [[ "${VERSION}" != "8.1" ]]; then
+	# Terminus v3 is not yet fully compatible with PHP 8.1
+	# TODO: Re-enable tests for Terminus v3 on PHP 8.1 once stable.
+	# See: https://github.com/pantheon-systems/terminus/issues/2256
+	if [[ "${VERSION}" != "8.1" ]]; then
 		run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
 		[[ ${status} == 0 ]]
 		unset output
@@ -440,9 +441,9 @@ _healthcheck_wait ()
 @test "Check Pantheon integration" {
 	[[ $SKIP == 1 ]] && skip
 
-	# Terminus v2 is not compatible with PHP 8.0 or PHP 8.1
-	# See https://github.com/pantheon-systems/terminus/issues/2113
-	[[ "${VERSION}" == "8.0" ]] && skip
+	# Terminus v3 is not yet fully compatible with PHP 8.1
+	# TODO: Re-enable tests for Terminus v3 on PHP 8.1 once stable.
+	# See: https://github.com/pantheon-systems/terminus/issues/2256
 	[[ "${VERSION}" == "8.1" ]] && skip
 
 	# Confirm secret is not empty
@@ -466,7 +467,15 @@ _healthcheck_wait ()
 	[[ "${output}" == "TERMINUS_TOKEN: ${SECRET_TERMINUS_TOKEN}" ]]
 	unset output
 
-	# Confirm authentication works
+	# Confirm we are logged in with the expected user
+	run docker exec -u docker "${NAME}" bash -lc 'terminus site:list'
+	[[ ${status} == 0 ]]
+	[[ ! "${output}" =~ "You are not logged in." ]]
+	unset output
+
+	# Confirm we are logged in with the expected user
+	# terminus auth:whoami is finicky/buggy and needs another command to run to create a session first.
+	# See https://github.com/docksal/service-cli/issues/258
 	run docker exec -u docker "${NAME}" bash -lc 'terminus auth:whoami'
 	[[ ${status} == 0 ]]
 	[[ ! "${output}" =~ "You are not logged in." ]]
