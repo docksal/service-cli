@@ -449,9 +449,7 @@ COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
 COPY ping-web.sh /opt/ping-web.sh
 # PHP default settings, global overrides and fpm overrides
-# PHP_VERSION is set upstream. The source code for the exact PHP version may not be available in Github
-# TODO: For now, will just hardcode a specific version available on https://github.com/php/php-src/
-ADD https://raw.githubusercontent.com/php/php-src/PHP-8.1.0/php.ini-development /usr/local/etc/php/php.ini
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
 COPY config/php/xhprof.ini /opt/docker-php-ext-xhprof.ini
