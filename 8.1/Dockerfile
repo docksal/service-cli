@@ -231,10 +231,9 @@ RUN set -xe; \
 			msodbcsql17 \
 		;\
 		pecl update-channels; \
-		# TODO: Using beta. Switch to stable once PHP 8.1 support is finalized.
 		pecl install >/dev/null </dev/null \
-			pdo_sqlsrv-beta \
-			sqlsrv-beta \
+			pdo_sqlsrv \
+			sqlsrv \
 		;\
 		docker-php-ext-enable \
 			pdo_sqlsrv \
