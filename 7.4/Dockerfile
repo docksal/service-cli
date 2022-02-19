@@ -357,7 +357,7 @@ RUN set -e; \
 
 ## Ruby (installed as user) via rvm
 ## Note: Disabled. rvm + its build dependecies bloat the image (~80MB)
-## Debian 10 ships with Ruby 2.5, so we'll stick with that by default.
+## Debian 11 ships with Ruby 2.7, so we'll stick with that by default.
 ## It is still possible for the end user to switch to a different Ruby version via rvm.
 #ENV \
 #	RVM_VERSION_INSTALL=1.29.10 \

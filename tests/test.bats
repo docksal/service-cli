@@ -298,8 +298,8 @@ _healthcheck_wait ()
 
 	# ruby
 	#run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VERSION_INSTALL}"'
-	# Default Ruby version in Debian 10 = 2.5.x
-	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "ruby 2.5"'
+	# Default Ruby version in Debian 11 = 2.7.x
+	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "ruby 2.7"'
 	[[ ${status} == 0 ]]
 	unset output
 
