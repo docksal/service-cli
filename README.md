@@ -90,11 +90,11 @@ Then, use `nvm use 11.6.0` to use it in the current session or `nvm alias defaul
 
 ## Python
 
-This image comes with a system level installed Python version from upstream (Debian 11).
+This image comes with a system level installed Python v3.9.x from upstream Debian 11.
 
 ## Ruby
 
-This image comes with a system level installed Ruby version from upstream (Debian 11).
+This image comes with a system level installed Ruby v2.7.x from upstream Debian 11.
 
 ## Notable console tools
 
