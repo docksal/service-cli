@@ -7,6 +7,7 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 
 ## Features
 
+- Based on the official php-fpm Debian 11 (bullseye) images 
 - php/php-fpm (w/ xdebug), nodejs (via nvm), python, ruby
 - Framework specific tools for Drupal and Wordpress
 - Miscellaneous cli tools for day to day web development
@@ -89,11 +90,11 @@ Then, use `nvm use 11.6.0` to use it in the current session or `nvm alias defaul
 
 ## Python
 
-This image comes with a system level installed Python version from upstream (Debian 9).
+This image comes with a system level installed Python version from upstream (Debian 11).
 
 ## Ruby
 
-This image comes with a system level installed Ruby version from upstream (Debian 9).
+This image comes with a system level installed Ruby version from upstream (Debian 11).
 
 ## Notable console tools
 
