@@ -1,4 +1,4 @@
-FROM php:8.0-fpm-buster as cli
+FROM php:8.0-fpm-bullseye as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -36,7 +36,7 @@ RUN set -xe; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian buster main' | tee /etc/apt/sources.list.d/github_git-lfs.list;
+	echo 'deb https://packagecloud.io/github/git-lfs/debian bullseye main' | tee /etc/apt/sources.list.d/github_git-lfs.list;
 
 # Additional packages
 RUN set -xe; \
@@ -59,7 +59,7 @@ RUN set -xe; \
 		libfcgi-bin \
 		mc \
 		msmtp \
-		# Debian 10 ships with MariaDB instead of MySQL
+		# Debian ships with MariaDB instead of MySQL
 		mariadb-client \
 		nano \
 		openssh-client \
@@ -111,7 +111,6 @@ ENV NOTVISIBLE "in users profile"
 # PHP
 RUN set -xe; \
 	# Note: essential build tools (g++, gcc, make, etc) are included upstream as persistent packages.
-	# See https://github.com/docker-library/php/blob/406fcd31e62d633f62ac0d7bc5fc29aa1b3929fc/7.2/buster/fpm/Dockerfile#L18-L40
 	buildDeps=" \
 		libc-client2007e-dev \
 		libfreetype6-dev \
@@ -140,7 +139,7 @@ RUN set -xe; \
 		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
-		libicu63 \
+		libicu67 \
 		libjpeg62-turbo \
 		libldap-2.4-2 \
 		libmagickcore-6.q16-*-extra \
@@ -218,7 +217,7 @@ RUN set -xe; \
 	if [ "${TARGETARCH}" = "amd64" ]; then \
 		# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
 		curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-		echo 'deb https://packages.microsoft.com/debian/10/prod buster main' | tee /etc/apt/sources.list.d/mssql.list; \
+		echo 'deb https://packages.microsoft.com/debian/11/prod bullseye main' | tee /etc/apt/sources.list.d/mssql.list; \
 		\
 		buildDeps=" \
 			unixodbc-dev \
@@ -358,7 +357,7 @@ RUN set -e; \
 
 ## Ruby (installed as user) via rvm
 ## Note: Disabled. rvm + its build dependecies bloat the image (~80MB)
-## Debian 10 ships with Ruby 2.5, so we'll stick with that by default.
+## Debian 11 ships with Ruby 2.7, so we'll stick with that by default.
 ## It is still possible for the end user to switch to a different Ruby version via rvm.
 #ENV \
 #	RVM_VERSION_INSTALL=1.29.10 \
