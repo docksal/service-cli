@@ -105,7 +105,7 @@ _healthcheck_wait ()
 	unset output
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
-	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 => /usr/bin/msmtp -t --host=mail --port=1025'
+	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 --from=docker@cli'
 	unset output
 
 	run docker exec -u docker "$NAME" /var/www/docroot/php-fpm.sh nonsense.php
@@ -131,7 +131,7 @@ _healthcheck_wait ()
 	unset output
 
 	output=$(echo "$phpInfo" | grep "sendmail_path")
-	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 => /usr/bin/msmtp -t --host=mail --port=1025'
+	echo "$output" | grep '/usr/bin/msmtp -t --host=mail --port=1025 --from=docker@cli'
 	unset output
 
 	# Check PHP modules
