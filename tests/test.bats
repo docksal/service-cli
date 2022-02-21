@@ -397,7 +397,7 @@ _healthcheck_wait ()
 
 	# docksal/cli container healthcheck completes right before a customer startup scripts is executed
 	# Give the custom startup script a little time to complete, otherwise this test will be randomly failing.
-	sleep 1
+	sleep 2
 
 	run docker exec -u docker "${NAME}" cat /tmp/test-startup.txt
 	[[ ${status} == 0 ]]
