@@ -1,4 +1,4 @@
-FROM php:7.4-fpm-buster as cli
+FROM php:7.4-fpm-bullseye as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -36,7 +36,7 @@ RUN set -xe; \
 	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian buster main' | tee /etc/apt/sources.list.d/github_git-lfs.list;
+	echo 'deb https://packagecloud.io/github/git-lfs/debian bullseye main' | tee /etc/apt/sources.list.d/github_git-lfs.list;
 
 # Additional packages
 RUN set -xe; \
@@ -59,7 +59,7 @@ RUN set -xe; \
 		libfcgi-bin \
 		mc \
 		msmtp \
-		# Debian 10 ships with MariaDB instead of MySQL
+		# Debian ships with MariaDB instead of MySQL
 		mariadb-client \
 		nano \
 		openssh-client \
@@ -111,7 +111,6 @@ ENV NOTVISIBLE "in users profile"
 # PHP
 RUN set -xe; \
 	# Note: essential build tools (g++, gcc, make, etc) are included upstream as persistent packages.
-	# See https://github.com/docker-library/php/blob/406fcd31e62d633f62ac0d7bc5fc29aa1b3929fc/7.2/buster/fpm/Dockerfile#L18-L40
 	buildDeps=" \
 		libc-client2007e-dev \
 		libfreetype6-dev \
@@ -140,7 +139,7 @@ RUN set -xe; \
 		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
-		libicu63 \
+		libicu67 \
 		libjpeg62-turbo \
 		libldap-2.4-2 \
 		libmagickcore-6.q16-*-extra \
@@ -155,7 +154,6 @@ RUN set -xe; \
 		libxslt1.1 \
 		libzip4 \
 	;\
-	# --with-png-dir has been removed in PHP 7.4. libpng is required
 	docker-php-ext-configure >/dev/null gd \
 		--with-freetype \
 		--with-jpeg \
@@ -194,7 +192,6 @@ RUN set -xe; \
 		apcu \
 		gnupg \
 		imagick \
-		# Use memcached (not memcache) for PHP 7.x
 		memcached \
 		redis \
 		ssh2-beta \
@@ -220,7 +217,7 @@ RUN set -xe; \
 	if [ "${TARGETARCH}" = "amd64" ]; then \
 		# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
 		curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-		echo 'deb https://packages.microsoft.com/debian/10/prod buster main' | tee /etc/apt/sources.list.d/mssql.list; \
+		echo 'deb https://packages.microsoft.com/debian/11/prod bullseye main' | tee /etc/apt/sources.list.d/mssql.list; \
 		\
 		buildDeps=" \
 			unixodbc-dev \
@@ -249,18 +246,18 @@ RUN set -xe; \
 
 # PHP tools (installed globally)
 ENV COMPOSER_DEFAULT_VERSION=2 \
-	COMPOSER_VERSION=1.10.22 \
-	COMPOSER2_VERSION=2.1.5 \
-	DRUSH_VERSION=8.4.8 \
-	DRUSH_LAUNCHER_VERSION=0.9.1 \
+	COMPOSER_VERSION=1.10.25 \
+	COMPOSER2_VERSION=2.2.6 \
+	DRUSH_VERSION=8.4.10 \
+	DRUSH_LAUNCHER_VERSION=0.10.1 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
-	WPCLI_VERSION=2.5.0 \
-	BLACKFIRE_VERSION=1.49.3 \
-	PLATFORMSH_CLI_VERSION=3.66.0 \
-	ACQUIA_CLI_VERSION=1.13.1 \
-	TERMINUS_VERSION=2.6.0 \
+	WPCLI_VERSION=2.6.0 \
+	BLACKFIRE_VERSION=2.6.0 \
+	PLATFORMSH_CLI_VERSION=3.76.2 \
+	ACQUIA_CLI_VERSION=1.22.0 \
+	TERMINUS_VERSION=3.0.6 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=4.11.2
+	YQ_VERSION=4.20.2
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -275,7 +272,9 @@ RUN set -xe; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Blackfire CLI
-	curl -fsSL "https://packages.blackfire.io/binaries/blackfire-agent/${BLACKFIRE_VERSION}/blackfire-cli-linux_${TARGETARCH}" -o /usr/local/bin/blackfire; \
+	# Find out the most recent version number:
+	# curl -X GET -Is https://blackfire.io/api/v1/releases/cli/linux/amd64 | grep location | awk '{print $2}'
+	curl -fsSL "https://packages.blackfire.io/binaries/blackfire/${BLACKFIRE_VERSION}/blackfire-linux_${TARGETARCH}" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Acquia CLI
@@ -360,7 +359,7 @@ RUN set -e; \
 
 ## Ruby (installed as user) via rvm
 ## Note: Disabled. rvm + its build dependecies bloat the image (~80MB)
-## Debian 10 ships with Ruby 2.5, so we'll stick with that by default.
+## Debian 11 ships with Ruby 2.7, so we'll stick with that by default.
 ## It is still possible for the end user to switch to a different Ruby version via rvm.
 #ENV \
 #	RVM_VERSION_INSTALL=1.29.10 \
@@ -450,9 +449,7 @@ COPY startup.sh /opt/startup.sh
 COPY healthcheck.sh /opt/healthcheck.sh
 COPY ping-web.sh /opt/ping-web.sh
 # PHP default settings, global overrides and fpm overrides
-# PHP_VERSION is set upstream. The source code for the exact PHP version may not be available in Github
-# TODO: For now, will just hardcode a specific version available on https://github.com/php/php-src/
-ADD https://raw.githubusercontent.com/php/php-src/php-7.4.12/php.ini-development /usr/local/etc/php/php.ini
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
 COPY config/php/xhprof.ini /opt/docker-php-ext-xhprof.ini

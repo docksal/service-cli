@@ -3,7 +3,7 @@
 
 IMAGE ?= docksal/cli
 VERSION_PREFIX ?= php
-VERSION ?= 7.3
+VERSION ?= 8.1
 BUILD_IMAGE_TAG ?= $(IMAGE):$(VERSION_PREFIX)$(VERSION)-build
 NAME = docksal-cli-$(VERSION)-$(GIT_SHA7)
 CWD = $(shell pwd)
@@ -13,7 +13,9 @@ VOLUMES = -v /home/docker
 
 .EXPORT_ALL_VARIABLES:
 
-.PHONY: build test push shell run start stop logs clean release
+.PHONY: build exec test push shell run start stop logs clean release
+
+default: build
 
 build:
 	docker build -t $(BUILD_IMAGE_TAG) .
@@ -23,7 +25,7 @@ build:
 buildx:
 	docker buildx build --tag $(BUILD_IMAGE_TAG) .
 buildx-with-cache:
-	docker buildx build --cache-from=type=registry,ref=ghcr.io/$(BUILD_IMAGE_TAG) --cache-to=type=inline --tag=$(BUILD_IMAGE_TAG) .
+	docker buildx build --cache-from=type=registry,ref=$(BUILD_IMAGE_TAG) --cache-to=type=inline --tag=$(BUILD_IMAGE_TAG) .
 
 test:
 	NAME=$(NAME) VERSION=$(VERSION) ../tests/test.bats
@@ -72,8 +74,3 @@ clean:
 
 tags:
 	@../.github/scripts/docker-tags.sh
-
-release:
-	@../scripts/docker-push.sh
-
-default: build
