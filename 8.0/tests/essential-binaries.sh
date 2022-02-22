@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 binaries_amd64=\
-'cat
+'bundler
+cat
 convert
 curl
 dig
@@ -18,11 +19,16 @@ mc
 more
 mysql
 nano
+node
+nvm
 nslookup
+php
 ping
 psql
 pv
+python3
 rsync
+ruby
 sudo
 unzip
 wget
@@ -30,7 +36,8 @@ yq
 zip'
 
 binaries_arm64=\
-'cat
+'bundler
+cat
 convert
 curl
 dig
@@ -46,11 +53,16 @@ mc
 more
 mysql
 nano
+node
+nvm
 nslookup
+php
 ping
 psql
 pv
+python3
 rsync
+ruby
 sudo
 unzip
 wget
