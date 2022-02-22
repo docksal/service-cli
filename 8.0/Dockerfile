@@ -403,6 +403,16 @@ RUN set -e; \
 #	rvm cleanup all; \
 #	rvm gemset globalcache enable
 
+## Ruby bundler
+## Don't use -x here, as the output may be excessive
+RUN set -e; \
+	# Export ruby gem bin path
+	echo 'export PATH=$PATH:$(ruby -r rubygems -e "puts Gem.user_dir")/bin' >> $HOME/.profile; \
+	. $HOME/.profile; \
+	gem install --user-install bundler; \
+	# Have bundler install gems in the current directory (./.bundle) by default
+	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile
+
 # Python (installed as user) via pyenv
 # Note: Disabled. pyenv + its build dependecies bloat the image (~300MB).
 # Debian 10 ships with Python 3.7, so we'll stick with that by default.
