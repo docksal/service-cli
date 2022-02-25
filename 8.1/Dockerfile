@@ -343,9 +343,9 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.38.0 \
-	NODE_VERSION=14.17.3 \
-	YARN_VERSION=1.22.10
+	NVM_VERSION=0.39.1 \
+	NODE_VERSION=16.14.0 \
+	YARN_VERSION=1.22.17
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
