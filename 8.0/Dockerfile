@@ -293,13 +293,12 @@ RUN set -xe; \
 	# Make all downloaded binaries executable in one shot
 	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus yq);
 
-# Install Python3 from Debian repos
-# This adds about 30MB to uncompressed image size.
-# TODO: some other dependency in this image installs python2. Which one?
+# Install Python 3 + pip from Debian repos
 RUN set -xe; \
 	apt-get update >/dev/null; \
 	apt-get -y --no-install-recommends install >/dev/null \
 		python3 \
+		python3-pip \
 	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
