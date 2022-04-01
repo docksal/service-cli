@@ -247,17 +247,17 @@ RUN set -xe; \
 # PHP tools (installed globally)
 ENV COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.25 \
-	COMPOSER2_VERSION=2.2.6 \
+	COMPOSER2_VERSION=2.2.10 \
 	DRUSH_VERSION=8.4.10 \
 	DRUSH_LAUNCHER_VERSION=0.10.1 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.6.0 \
 	BLACKFIRE_VERSION=2.6.0 \
-	PLATFORMSH_CLI_VERSION=3.76.2 \
-	ACQUIA_CLI_VERSION=1.22.0 \
-	TERMINUS_VERSION=3.0.6 \
+	PLATFORMSH_CLI_VERSION=3.77.0 \
+	ACQUIA_CLI_VERSION=1.27.0 \
+	TERMINUS_VERSION=3.0.7 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=4.20.2
+	YQ_VERSION=4.24.2
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -342,9 +342,9 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.38.0 \
-	NODE_VERSION=14.17.3 \
-	YARN_VERSION=1.22.10
+	NVM_VERSION=0.39.1 \
+	NODE_VERSION=16.14.0 \
+	YARN_VERSION=1.22.17
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
