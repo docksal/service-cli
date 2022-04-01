@@ -80,7 +80,7 @@ jobs:
         if: ${{ env.ARCH == 'arm64' }}
         uses: arwynfr/actions-docker-context@v2
         with:
-          docker_host: "ssh://ubuntu@${{ secrets.ARM64_HOST }}"
+          docker_host: "ssh://build-agent@${{ secrets.ARM64_HOST }}"
           context_name: arm64-host
           ssh_key: "${{ secrets.ARM64_HOST_SSH_KEY }}"
           ssh_cert: "${{ env.ARM64_HOST_SSH_CERT }}"
