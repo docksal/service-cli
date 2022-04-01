@@ -24,6 +24,7 @@ nvm
 nslookup
 php
 ping
+pip
 psql
 pv
 python3
