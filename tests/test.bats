@@ -445,6 +445,10 @@ _healthcheck_wait ()
 @test "Check Pantheon integration" {
 	[[ $SKIP == 1 ]] && skip
 
+	# Disabled for the time being
+	# TODO: Figure out why these tests fail sporadically, then re-enable
+	skip
+
 	# Terminus v3 is not yet fully compatible with PHP 8.1
 	# TODO: Re-enable tests for Terminus v3 on PHP 8.1 once stable.
 	# See: https://github.com/pantheon-systems/terminus/issues/2256
