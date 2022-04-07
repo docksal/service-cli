@@ -329,7 +329,9 @@ RUN set -e; \
 	# Reload updated PATH from profile to make composer/drush/etc. visible below
 	. $HOME/.profile; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
-	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp >/dev/null; \
+	# Set allow-plugins. See https://getcomposer.org/allow-plugins
+	composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true; \
+	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp; \
 	# Don't fix the indentation or installed_paths will not be set correctly
 	phpcs --config-set installed_paths \
 $HOME/.composer/vendor/drupal/coder/coder_sniffer/,\
