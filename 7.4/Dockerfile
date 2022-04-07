@@ -508,9 +508,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=3.11.0 \
-	VSCODE_XDEBUG_VERSION=1.16.1 \
-	VSCODE_GITLENS_VERSION=11.6.0 \
+	CODE_SERVER_VERSION=4.2.0 \
+	VSCODE_GITLENS_VERSION=12.0.5 \
+	VSCODE_XDEBUG_VERSION=1.25.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
@@ -525,8 +525,8 @@ COPY --chown=docker:docker config/code-server ${VSCODE_HOME}
 # Install extensions
 # Note: Have to use --user-data-dir with --install-extension instead of --config
 RUN set -xe; \
-	code-server --user-data-dir=${VSCODE_HOME} --install-extension eamodio.gitlens@11.6.0; \
-	code-server --user-data-dir=${VSCODE_HOME} --install-extension felixfbecker.php-debug@1.16.1
+	code-server --user-data-dir=${VSCODE_HOME} --install-extension eamodio.gitlens@${VSCODE_GITLENS_VERSION}; \
+	code-server --user-data-dir=${VSCODE_HOME} --install-extension felixfbecker.php-debug@${VSCODE_XDEBUG_VERSION}
 
 # Switch back to root (IMPORTANT!)
 USER root
