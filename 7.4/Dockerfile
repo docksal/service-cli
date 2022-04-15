@@ -246,18 +246,18 @@ RUN set -xe; \
 
 # PHP tools (installed globally)
 ENV COMPOSER_DEFAULT_VERSION=2 \
-	COMPOSER_VERSION=1.10.25 \
-	COMPOSER2_VERSION=2.2.10 \
+	COMPOSER_VERSION=1.10.26 \
+	COMPOSER2_VERSION=2.2.12 \
 	DRUSH_VERSION=8.4.10 \
 	DRUSH_LAUNCHER_VERSION=0.10.1 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.6.0 \
 	BLACKFIRE_VERSION=2.6.0 \
 	PLATFORMSH_CLI_VERSION=3.77.0 \
-	ACQUIA_CLI_VERSION=1.27.0 \
+	ACQUIA_CLI_VERSION=1.30.0 \
 	TERMINUS_VERSION=3.0.7 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=4.24.2
+	YQ_VERSION=4.24.5
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -329,7 +329,9 @@ RUN set -e; \
 	# Reload updated PATH from profile to make composer/drush/etc. visible below
 	. $HOME/.profile; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
-	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp >/dev/null; \
+	# Set allow-plugins. See https://getcomposer.org/allow-plugins
+	composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true; \
+	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp; \
 	# Don't fix the indentation or installed_paths will not be set correctly
 	phpcs --config-set installed_paths \
 $HOME/.composer/vendor/drupal/coder/coder_sniffer/,\
@@ -508,9 +510,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=3.11.0 \
-	VSCODE_XDEBUG_VERSION=1.16.1 \
-	VSCODE_GITLENS_VERSION=11.6.0 \
+	CODE_SERVER_VERSION=4.2.0 \
+	VSCODE_GITLENS_VERSION=12.0.5 \
+	VSCODE_XDEBUG_VERSION=1.25.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
@@ -525,8 +527,8 @@ COPY --chown=docker:docker config/code-server ${VSCODE_HOME}
 # Install extensions
 # Note: Have to use --user-data-dir with --install-extension instead of --config
 RUN set -xe; \
-	code-server --user-data-dir=${VSCODE_HOME} --install-extension eamodio.gitlens@11.6.0; \
-	code-server --user-data-dir=${VSCODE_HOME} --install-extension felixfbecker.php-debug@1.16.1
+	code-server --user-data-dir=${VSCODE_HOME} --install-extension eamodio.gitlens@${VSCODE_GITLENS_VERSION}; \
+	code-server --user-data-dir=${VSCODE_HOME} --install-extension felixfbecker.php-debug@${VSCODE_XDEBUG_VERSION}
 
 # Switch back to root (IMPORTANT!)
 USER root
