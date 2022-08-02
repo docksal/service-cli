@@ -18,7 +18,7 @@ if [[ "${1}" == "" ]]; then
 	exit 1
 else
 	# Split image:tag
-	IFS=$':' read IMAGE TAG <<< ${1};
+	IFS=$':' read IMAGE TAG <<< "${1}";
 	# Remove registry prefix from image if present
 	IMAGE=${IMAGE#"docker.io/"}
 fi
@@ -42,4 +42,4 @@ output=$(curl -sI "https://hub.docker.com/v2/repositories/${IMAGE}/tags/${TAG}/"
 )
 
 # Return and error if HTTP response code is not 204
-echo "${output}" | grep "HTTP/1.1 204 NO CONTENT"
+echo "${output}" | grep -i "HTTP/1.1 204 No Content"
