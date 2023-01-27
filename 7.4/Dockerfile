@@ -200,7 +200,8 @@ RUN set -xe; \
 		memcached \
 		redis \
 		ssh2-beta \
-		xdebug \
+		# xdebug v3.1.6 is the last version to support PHP 7.4
+		xdebug-3.1.6 \
 		xhprof \
 	;\
 	docker-php-ext-enable \
