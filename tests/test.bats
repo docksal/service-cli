@@ -505,8 +505,10 @@ _healthcheck_wait ()
 
 	### Tests ###
 
-	# Give cron 60s to invoke the scheduled test job
-	sleep 60
+	# Wait for cron to run.
+	# This test keeps failing randomly...
+	# Worst case, the wait would need to be 120s (double the 60s minimal interval possible with cron).
+	sleep 90
 	# Confirm cron has run and file contents has changed
 	run docker exec -u docker "$NAME" bash -lc 'tail -1 /tmp/date.txt'
 	[[ "${output}" =~ "The current date is " ]]

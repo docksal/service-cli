@@ -25,7 +25,7 @@ env:
 jobs:
   build:
     name: "Build: ${{ matrix.version }}/${{ matrix.arch }}"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
@@ -64,7 +64,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       -
         name: Environment variables
         run: |
@@ -92,14 +92,14 @@ jobs:
           docker info
       -
         name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         # Build and cache image in the registry
         name: Build image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: ${{ env.BUILD_DIR }}
           file: ${{ env.BUILD_DIR }}/Dockerfile
@@ -113,7 +113,7 @@ jobs:
 
   test:
     name: "Test: ${{ matrix.version }}/${{ matrix.arch }}"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: build
 
     strategy:
@@ -158,7 +158,7 @@ jobs:
           bats-version: '1.3.0'
       -
         name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       -
         name: Environment variables
         run: |
@@ -201,14 +201,14 @@ jobs:
       # Dynamic variable names cannot be used when mapping step outputs to job outputs.
       # Step outputs cannot be accessed directly from other jobs. Dead end.
       - name: Store test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: test-results
           path: ${{ github.workspace }}/test-results-*.txt
 
   push:
     name: "Push: ${{ matrix.version }}/multi"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Wait for test to either succeed or fail
     needs: test
@@ -228,7 +228,7 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       -
         name: Environment variables
         run: |
@@ -239,7 +239,7 @@ jobs:
       -
         # Login to Docker Hub
         name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
