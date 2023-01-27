@@ -84,8 +84,8 @@ RUN set -xe; \
 	usermod -a -G sudo docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-ENV GOSU_VERSION=1.12 \
-	GOMPLATE_VERSION=3.9.0
+ENV GOSU_VERSION=1.16 \
+	GOMPLATE_VERSION=3.11.3
 RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
 	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
@@ -253,11 +253,11 @@ ENV COMPOSER_DEFAULT_VERSION=2 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.7.1 \
 	BLACKFIRE_VERSION=2.10.0 \
-	PLATFORMSH_CLI_VERSION=3.88.1 \
-	ACQUIA_CLI_VERSION=1.30.1 \
+	PLATFORMSH_CLI_VERSION=4.0.2 \
+	ACQUIA_CLI_VERSION=2.7.0 \
 	TERMINUS_VERSION=3.1.2 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=4.30.6
+	YQ_VERSION=4.30.8
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -344,9 +344,9 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.39.1 \
-	NODE_VERSION=16.16.0 \
-	YARN_VERSION=1.22.18
+	NVM_VERSION=0.39.3 \
+	NODE_VERSION=18.13.0 \
+	YARN_VERSION=1.22.19
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
@@ -510,9 +510,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=4.5.1 \
-	VSCODE_GITLENS_VERSION=12.1.2 \
-	VSCODE_XDEBUG_VERSION=1.27.0 \
+	CODE_SERVER_VERSION=4.9.1 \
+	VSCODE_GITLENS_VERSION=13.2.0 \
+	VSCODE_XDEBUG_VERSION=1.30.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
