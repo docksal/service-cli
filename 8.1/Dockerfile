@@ -84,7 +84,12 @@ RUN set -xe; \
 	usermod -a -G sudo docker; \
 	echo 'docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-ENV GOSU_VERSION=1.16 \
+# gosu v1.14+ discorages using it as a non-root user (https://github.com/tianon/gosu/issues/11), which we rely on here.
+# See https://github.com/tianon/gosu/pull/89/commits/8afd3dec5fb4fe0356e4fb5d358fe235f7311181
+# We'll stick with v1.13 for the time being.
+# TODO: Replace gosu with sudo/su in startup.sh
+ENV \
+	GOSU_VERSION=1.13 \
 	GOMPLATE_VERSION=3.11.3
 RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
@@ -245,7 +250,8 @@ RUN set -xe; \
 	fi
 
 # PHP tools (installed globally)
-ENV COMPOSER_DEFAULT_VERSION=2 \
+ENV \
+	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.26 \
 	COMPOSER2_VERSION=2.5.1 \
 	DRUSH_VERSION=8.4.11 \
