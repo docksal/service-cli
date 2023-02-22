@@ -259,7 +259,7 @@ ENV \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.7.1 \
 	BLACKFIRE_VERSION=2.10.0 \
-	PLATFORMSH_CLI_VERSION=4.0.2 \
+	PLATFORMSH_CLI_VERSION=4.1.2 \
 	ACQUIA_CLI_VERSION=2.8.0 \
 	TERMINUS_VERSION=3.1.3 \
 	JQ_VERSION=1.6 \
@@ -282,7 +282,7 @@ RUN set -xe; \
 	# curl -X GET -Is https://blackfire.io/api/v1/releases/cli/linux/amd64 | grep location | awk '{print $2}'
 	curl -fsSL "https://packages.blackfire.io/binaries/blackfire/${BLACKFIRE_VERSION}/blackfire-linux_${TARGETARCH}" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
-	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	curl -fsSL "https://github.com/platformsh/legacy-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
