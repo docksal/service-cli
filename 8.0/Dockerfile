@@ -217,37 +217,37 @@ RUN set -xe; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
-# Packages not available for arm64
+# MSSQL PHP client
 RUN set -xe; \
-	if [ "${TARGETARCH}" = "amd64" ]; then \
-		# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
-		curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-		echo 'deb https://packages.microsoft.com/debian/11/prod bullseye main' | tee /etc/apt/sources.list.d/mssql.list; \
-		\
-		buildDeps=" \
-			unixodbc-dev \
-		"; \
-		apt-get update >/dev/null; \
-		# Necessary for msodbcsql17 (MSSQL)
-		ACCEPT_EULA=Y \
-		apt-get -y --no-install-recommends install >/dev/null \
-			$buildDeps \
-			msodbcsql17 \
-		;\
-		pecl update-channels; \
-		pecl install >/dev/null </dev/null \
-			pdo_sqlsrv \
-			sqlsrv \
-		;\
-		docker-php-ext-enable \
-			pdo_sqlsrv \
-			sqlsrv \
-		;\
-		# Cleanup
-		rm -rf /tmp/pear ~/.pearrc; \
-		apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
-		apt-get clean; rm -rf /var/lib/apt/lists/*; \
-	fi
+	# Repo for msodbcsql18 (MS ODBC driver), required by pecl/sqlsrv and pecl/pdo_sqlsrv
+	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
+	# TODO: Using Ubuntu 22.04 packages as a temporary fix (until addressed upstream in MS repos).
+	#curl -fsSL https://packages.microsoft.com/config/debian/11/prod.list -o /etc/apt/sources.list.d/mssql.list; \
+	curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list -o /etc/apt/sources.list.d/mssql.list; \
+	\
+	buildDeps=" \
+		unixodbc-dev \
+	"; \
+	apt-get update >/dev/null; \
+	# Necessary for msodbcsql18 (MSSQL)
+	ACCEPT_EULA=Y \
+	apt-get -y --no-install-recommends install >/dev/null \
+		$buildDeps \
+		msodbcsql18 \
+	;\
+	pecl update-channels; \
+	pecl install >/dev/null </dev/null \
+		pdo_sqlsrv \
+		sqlsrv \
+	;\
+	docker-php-ext-enable \
+		pdo_sqlsrv \
+		sqlsrv \
+	;\
+	# Cleanup
+	rm -rf /tmp/pear ~/.pearrc; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
+	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
 ENV \
