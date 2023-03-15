@@ -42,6 +42,7 @@ pdo_sqlsrv
 pgsql
 Phar
 posix
+random
 readline
 redis
 Reflection
@@ -112,6 +113,7 @@ pdo_sqlsrv
 pgsql
 Phar
 posix
+random
 readline
 redis
 Reflection
