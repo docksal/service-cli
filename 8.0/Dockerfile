@@ -253,17 +253,18 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.26 \
-	COMPOSER2_VERSION=2.5.1 \
+	COMPOSER2_VERSION=2.5.4 \
 	DRUSH_VERSION=8.4.11 \
 	DRUSH_LAUNCHER_VERSION=0.10.1 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.7.1 \
 	BLACKFIRE_VERSION=2.10.0 \
-	PLATFORMSH_CLI_VERSION=4.0.2 \
-	ACQUIA_CLI_VERSION=2.7.0 \
-	TERMINUS_VERSION=3.1.2 \
+	PLATFORMSH_CLI_VERSION=4.2.1 \
+	# Pinned at 2.8.0 for now. See https://github.com/acquia/cli/issues/1426
+	ACQUIA_CLI_VERSION=2.8.0 \
+	TERMINUS_VERSION=3.1.4 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=4.30.8
+	YQ_VERSION=4.31.2
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -282,7 +283,7 @@ RUN set -xe; \
 	# curl -X GET -Is https://blackfire.io/api/v1/releases/cli/linux/amd64 | grep location | awk '{print $2}'
 	curl -fsSL "https://packages.blackfire.io/binaries/blackfire/${BLACKFIRE_VERSION}/blackfire-linux_${TARGETARCH}" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
-	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	curl -fsSL "https://github.com/platformsh/legacy-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
@@ -351,7 +352,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.39.3 \
-	NODE_VERSION=18.13.0 \
+	NODE_VERSION=18.15.0 \
 	YARN_VERSION=1.22.19
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
