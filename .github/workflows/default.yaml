@@ -19,7 +19,7 @@ defaults:
 env:
   IMAGE: docksal/cli
   UPSTREAM_IMAGE: debian
-  LATEST_VERSION: '8.1'
+  LATEST_VERSION: '8.2'
   DOCKSAL_VERSION: develop
 
 jobs:
@@ -34,19 +34,15 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: '7.4'
-          -
-            platform: linux/amd64
-            arch: amd64
             version: '8.0'
           -
             platform: linux/amd64
             arch: amd64
             version: '8.1'
           -
-            platform: linux/arm64
-            arch: arm64
-            version: '7.4'
+            platform: linux/amd64
+            arch: amd64
+            version: '8.2'
           -
             platform: linux/arm64
             arch: arm64
@@ -55,6 +51,10 @@ jobs:
             platform: linux/arm64
             arch: arm64
             version: '8.1'
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: '8.2'
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -123,19 +123,15 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: '7.4'
-          -
-            platform: linux/amd64
-            arch: amd64
             version: '8.0'
           -
             platform: linux/amd64
             arch: amd64
             version: '8.1'
           -
-            platform: linux/arm64
-            arch: arm64
-            version: '7.4'
+            platform: linux/amd64
+            arch: amd64
+            version: '8.2'
           -
             platform: linux/arm64
             arch: arm64
@@ -144,6 +140,10 @@ jobs:
             platform: linux/arm64
             arch: arm64
             version: '8.1'
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: '8.2'
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -217,9 +217,9 @@ jobs:
     strategy:
       matrix:
         version:
-          - '7.4'
           - '8.0'
           - '8.1'
+          - '8.2'
 
     env:
       VERSION_PREFIX: php

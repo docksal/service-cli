@@ -9,7 +9,7 @@
 # Declare expected variables
 IMAGE=${IMAGE} # docksal/cli
 VERSION_PREFIX=${VERSION_PREFIX} # php
-VERSION=${VERSION} # 7.4
+VERSION=${VERSION} # 8.1
 VERSION_SUFFIX=${VERSION_SUFFIX} # ide
 REGISTRY="${REGISTRY}" # ghcr.io
 GITHUB_REF=${GITHUB_REF} # refs/heads/develop, refs/heads/master, refs/tags/v1.0.0

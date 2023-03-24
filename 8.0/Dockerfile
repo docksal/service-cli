@@ -1,4 +1,4 @@
-FROM php:8.0.27-fpm-bullseye as cli
+FROM php:8.0.28-fpm-bullseye as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -217,53 +217,53 @@ RUN set -xe; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
-# Packages not available for arm64
+# MSSQL PHP client
 RUN set -xe; \
-	if [ "${TARGETARCH}" = "amd64" ]; then \
-		# MSQSQL repo - msodbcsql17, pecl/sqlsrv and pecl/pdo_sqlsrv (PHP 7.0+ only)
-		curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-		echo 'deb https://packages.microsoft.com/debian/11/prod bullseye main' | tee /etc/apt/sources.list.d/mssql.list; \
-		\
-		buildDeps=" \
-			unixodbc-dev \
-		"; \
-		apt-get update >/dev/null; \
-		# Necessary for msodbcsql17 (MSSQL)
-		ACCEPT_EULA=Y \
-		apt-get -y --no-install-recommends install >/dev/null \
-			$buildDeps \
-			msodbcsql17 \
-		;\
-		pecl update-channels; \
-		pecl install >/dev/null </dev/null \
-			pdo_sqlsrv \
-			sqlsrv \
-		;\
-		docker-php-ext-enable \
-			pdo_sqlsrv \
-			sqlsrv \
-		;\
-		# Cleanup
-		rm -rf /tmp/pear ~/.pearrc; \
-		apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
-		apt-get clean; rm -rf /var/lib/apt/lists/*; \
-	fi
+	# Repo for msodbcsql18 (MS ODBC driver), required by pecl/sqlsrv and pecl/pdo_sqlsrv
+	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
+	# TODO: Using Ubuntu 22.04 packages as a temporary fix (until addressed upstream in MS repos).
+	#curl -fsSL https://packages.microsoft.com/config/debian/11/prod.list -o /etc/apt/sources.list.d/mssql.list; \
+	curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list -o /etc/apt/sources.list.d/mssql.list; \
+	\
+	buildDeps=" \
+		unixodbc-dev \
+	"; \
+	apt-get update >/dev/null; \
+	# Necessary for msodbcsql18 (MSSQL)
+	ACCEPT_EULA=Y \
+	apt-get -y --no-install-recommends install >/dev/null \
+		$buildDeps \
+		msodbcsql18 \
+	;\
+	pecl update-channels; \
+	pecl install >/dev/null </dev/null \
+		pdo_sqlsrv \
+		sqlsrv \
+	;\
+	docker-php-ext-enable \
+		pdo_sqlsrv \
+		sqlsrv \
+	;\
+	# Cleanup
+	rm -rf /tmp/pear ~/.pearrc; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
+	apt-get clean; rm -rf /var/lib/apt/lists/*
 
 # PHP tools (installed globally)
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.26 \
-	COMPOSER2_VERSION=2.5.1 \
-	DRUSH_VERSION=8.4.11 \
+	COMPOSER2_VERSION=2.5.5 \
+	DRUSH_VERSION=8.4.12 \
 	DRUSH_LAUNCHER_VERSION=0.10.1 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.7.1 \
 	BLACKFIRE_VERSION=2.10.0 \
-	PLATFORMSH_CLI_VERSION=4.0.2 \
-	ACQUIA_CLI_VERSION=2.7.0 \
-	TERMINUS_VERSION=3.1.2 \
+	PLATFORMSH_CLI_VERSION=4.4.0 \
+	ACQUIA_CLI_VERSION=2.9.3 \
+	TERMINUS_VERSION=3.1.4 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=4.30.8
+	YQ_VERSION=4.32.2
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -282,7 +282,7 @@ RUN set -xe; \
 	# curl -X GET -Is https://blackfire.io/api/v1/releases/cli/linux/amd64 | grep location | awk '{print $2}'
 	curl -fsSL "https://packages.blackfire.io/binaries/blackfire/${BLACKFIRE_VERSION}/blackfire-linux_${TARGETARCH}" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
-	curl -fsSL "https://github.com/platformsh/platformsh-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	curl -fsSL "https://github.com/platformsh/legacy-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
@@ -351,7 +351,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.39.3 \
-	NODE_VERSION=18.13.0 \
+	NODE_VERSION=18.15.0 \
 	YARN_VERSION=1.22.19
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
@@ -516,9 +516,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=4.9.1 \
-	VSCODE_GITLENS_VERSION=13.2.0 \
-	VSCODE_XDEBUG_VERSION=1.30.0 \
+	CODE_SERVER_VERSION=4.10.1 \
+	VSCODE_GITLENS_VERSION=13.2.2 \
+	VSCODE_XDEBUG_VERSION=1.32.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
