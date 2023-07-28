@@ -350,7 +350,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.39.3 \
+	NVM_VERSION=0.39.4 \
 	NODE_VERSION=18.16.0 \
 	YARN_VERSION=1.22.19
 # Don't use -x here, as the output may be excessive
