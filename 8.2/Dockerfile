@@ -1,4 +1,4 @@
-FROM php:8.2.3-fpm-bullseye as cli
+FROM php:8.2.8-fpm-bullseye as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -253,17 +253,17 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.26 \
-	COMPOSER2_VERSION=2.5.5 \
+	COMPOSER2_VERSION=2.5.8 \
 	DRUSH_VERSION=8.4.12 \
-	DRUSH_LAUNCHER_VERSION=0.10.1 \
+	DRUSH_LAUNCHER_VERSION=0.10.2 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
-	WPCLI_VERSION=2.7.1 \
+	WPCLI_VERSION=2.8.1 \
 	BLACKFIRE_VERSION=2.10.0 \
-	PLATFORMSH_CLI_VERSION=4.4.0 \
-	ACQUIA_CLI_VERSION=2.9.3 \
-	TERMINUS_VERSION=3.1.4 \
+	PLATFORMSH_CLI_VERSION=4.7.2 \
+	ACQUIA_CLI_VERSION=2.13.0 \
+	TERMINUS_VERSION=3.2.1 \
 	JQ_VERSION=1.6 \
-	YQ_VERSION=4.32.2
+	YQ_VERSION=4.34.2
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -350,8 +350,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.39.3 \
-	NODE_VERSION=18.15.0 \
+	NVM_VERSION=0.39.4 \
+	NODE_VERSION=18.17.0 \
 	YARN_VERSION=1.22.19
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
