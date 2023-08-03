@@ -1,4 +1,4 @@
-FROM php:8.0.28-fpm-bullseye as cli
+FROM php:8.0.29-fpm-bullseye as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
