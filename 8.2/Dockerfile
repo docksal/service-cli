@@ -255,7 +255,6 @@ ENV \
 	COMPOSER_VERSION=1.10.26 \
 	COMPOSER2_VERSION=2.5.8 \
 	DRUSH_VERSION=8.4.12 \
-	DRUSH_LAUNCHER_VERSION=0.10.2 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.8.1 \
 	BLACKFIRE_VERSION=2.10.0 \
@@ -271,8 +270,6 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER2_VERSION}/composer.phar" -o /usr/local/bin/composer2; \
 	# Drush 8 (global fallback)
 	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
-	# Drush Launcher
-	curl -fsSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console Launcher
 	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_LAUNCHER_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Wordpress CLI
