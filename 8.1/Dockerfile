@@ -262,7 +262,7 @@ ENV \
 	PLATFORMSH_CLI_VERSION=4.9.0 \
 	ACQUIA_CLI_VERSION=2.15.0 \
 	TERMINUS_VERSION=3.2.1 \
-	JQ_VERSION=1.6 \
+	JQ_VERSION=1.7 \
 	YQ_VERSION=4.35.1
 RUN set -xe; \
 	# Composer 1.x
@@ -289,8 +289,11 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
 	# jq (no arm64)
 	if [ "${TARGETARCH}" = "amd64" ]; then \
-		curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
+		curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-amd64" -o /usr/local/bin/jq; \
 		chmod +x /usr/local/bin/jq; \
+    elif [ "${TARGETARCH}" = "arm64" ]; then \
+        curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-arm64" -o /usr/local/bin/jq; \
+        chmod +x /usr/local/bin/jq; \
 	fi; \
 	# yq
 	curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
