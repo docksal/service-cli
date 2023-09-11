@@ -253,16 +253,16 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.26 \
-	COMPOSER2_VERSION=2.5.8 \
+	COMPOSER2_VERSION=2.6.2 \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.8.1 \
 	BLACKFIRE_VERSION=2.10.0 \
-	PLATFORMSH_CLI_VERSION=4.7.2 \
-	ACQUIA_CLI_VERSION=2.13.0 \
+	PLATFORMSH_CLI_VERSION=4.9.0 \
+	ACQUIA_CLI_VERSION=2.15.0 \
 	TERMINUS_VERSION=3.2.1 \
-	JQ_VERSION=1.6 \
-	YQ_VERSION=4.34.2
+	JQ_VERSION=1.7 \
+	YQ_VERSION=4.35.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -284,11 +284,8 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
 	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
-	# jq (no arm64)
-	if [ "${TARGETARCH}" = "amd64" ]; then \
-		curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
-		chmod +x /usr/local/bin/jq; \
-	fi; \
+	# jq
+	curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-${TARGETARCH}" -o /usr/local/bin/jq; \
 	# yq
 	curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
@@ -347,7 +344,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.39.4 \
+	NVM_VERSION=0.39.5 \
 	NODE_VERSION=18.17.0 \
 	YARN_VERSION=1.22.19
 # Don't use -x here, as the output may be excessive
