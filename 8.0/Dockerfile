@@ -287,14 +287,8 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
 	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
-	# jq (separate builds for amd64 and arm64)
-	if [ "${TARGETARCH}" = "amd64" ]; then \
-		curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-amd64" -o /usr/local/bin/jq; \
-		chmod +x /usr/local/bin/jq; \
-    elif [ "${TARGETARCH}" = "arm64" ]; then \
-        curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-arm64" -o /usr/local/bin/jq; \
-        chmod +x /usr/local/bin/jq; \
-	fi; \
+	# jq
+	curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-${TARGETARCH}" -o /usr/local/bin/jq; \
 	# yq
 	curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
