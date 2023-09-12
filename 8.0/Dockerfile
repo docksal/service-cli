@@ -255,7 +255,6 @@ ENV \
 	COMPOSER_VERSION=1.10.26 \
 	COMPOSER2_VERSION=2.6.2 \
 	DRUSH_VERSION=8.4.12 \
-	DRUSH_LAUNCHER_VERSION=0.10.1 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.8.1 \
 	BLACKFIRE_VERSION=2.10.0 \
@@ -271,8 +270,6 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER2_VERSION}/composer.phar" -o /usr/local/bin/composer2; \
 	# Drush 8 (global fallback)
 	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
-	# Drush Launcher
-	curl -fsSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console Launcher
 	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_LAUNCHER_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Wordpress CLI
@@ -294,7 +291,7 @@ RUN set -xe; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus jq yq);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drupal wp blackfire platform acli terminus jq yq);
 
 # Install Python 3 + pip from Debian repos
 RUN set -xe; \
@@ -322,14 +319,12 @@ SHELL ["/bin/bash", "-c"]
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
-	# Set drush8 as a global fallback for Drush Launcher
-	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin project level and global directories to PATH
 	# Project level comes first and thus takes precedence over the global one
 	echo -e "\n"'export PATH="$PATH:${PROJECT_ROOT:-/var/www}/vendor/bin"' >> $HOME/.profile; \
 	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
-	# Reload updated PATH from profile to make composer/drush/etc. visible below
+	# Reload updated PATH from profile to make composer/etc. visible below
 	. $HOME/.profile; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
 	# Set allow-plugins. See https://getcomposer.org/allow-plugins

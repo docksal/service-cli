@@ -291,7 +291,7 @@ RUN set -xe; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus jq yq);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drupal wp blackfire platform acli terminus jq yq);
 
 # Install Python 3 + pip from Debian repos
 RUN set -xe; \
@@ -319,14 +319,12 @@ SHELL ["/bin/bash", "-c"]
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
-	# Set drush8 as a global fallback for Drush Launcher
-	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin project level and global directories to PATH
 	# Project level comes first and thus takes precedence over the global one
 	echo -e "\n"'export PATH="$PATH:${PROJECT_ROOT:-/var/www}/vendor/bin"' >> $HOME/.profile; \
 	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
-	# Reload updated PATH from profile to make composer/drush/etc. visible below
+	# Reload updated PATH from profile to make composer/etc. visible below
 	. $HOME/.profile; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
 	# Set allow-plugins. See https://getcomposer.org/allow-plugins

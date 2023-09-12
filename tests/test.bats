@@ -201,8 +201,8 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
-	# Check Drush version
-	run docker exec -u docker "$NAME" bash -lc 'set -x; drush --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
+	# Check Drush 8 version (legacy)
+	run docker exec -u docker "$NAME" bash -lc 'set -x; drush8 --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
 	[[ ${status} == 0 ]]
 	unset output
 
