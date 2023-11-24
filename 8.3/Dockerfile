@@ -1,4 +1,4 @@
-FROM php:8.0.30-fpm-bullseye as cli
+FROM php:8.3.0RC6-fpm-bookworm as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -27,16 +27,6 @@ RUN set -xe; \
 RUN set -xe; \
 	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 ENV LC_ALL en_US.utf8
-
-# Enable additional repos
-RUN set -xe; \
-	sed -i 's/main/main contrib non-free/' /etc/apt/sources.list; \
-	# blackfire.io repo
-	curl -fsSL https://packages.blackfire.io/gpg.key | apt-key add -; \
-	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
-	# git-lfs repo
-	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian bullseye main' | tee /etc/apt/sources.list.d/github_git-lfs.list;
 
 # Additional packages
 RUN set -xe; \
@@ -140,14 +130,13 @@ RUN set -xe; \
 	apt-get update >/dev/null; \
 	apt-get -y --no-install-recommends install >/dev/null \
 		$buildDeps \
-		blackfire-php \
 		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
-		libicu67 \
+		libicu72 \
 		libjpeg62-turbo \
-		libldap-2.4-2 \
-		libmagickcore-6.q16-*-extra \
+		libldap-2.5-0 \
+		libmagickcore-6.q16-6-extra \
 		libmagickwand-6.q16-6 \
 		libmemcached11 \
 		libmemcachedutil2 \
@@ -196,17 +185,20 @@ RUN set -xe; \
 	pecl install >/dev/null </dev/null \
 		apcu \
 		gnupg \
-		imagick \
+		# imagick does not install on Debian 12 / PHP 8.3
+		#imagick \
 		memcached \
 		redis \
-		ssh2-beta \
-		xdebug \
+		ssh2 \
+		# xdebug PHP 8.3 compatibility is in beta \
+		xdebug-beta \
 		xhprof \
 	;\
 	docker-php-ext-enable \
 		apcu \
 		gnupg \
-		imagick \
+		# imagick does not install on Debian 12 / PHP 8.3
+		#imagick \
 		memcached \
 		redis \
 		ssh2 \
@@ -222,7 +214,7 @@ RUN set -xe; \
 	# Repo for msodbcsql18 (MS ODBC driver), required by pecl/sqlsrv and pecl/pdo_sqlsrv
 	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
 	# TODO: Using Ubuntu 22.04 packages as a temporary fix (until addressed upstream in MS repos).
-	#curl -fsSL https://packages.microsoft.com/config/debian/11/prod.list -o /etc/apt/sources.list.d/mssql.list; \
+	#curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list -o /etc/apt/sources.list.d/mssql.list; \
 	curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list -o /etc/apt/sources.list.d/mssql.list; \
 	\
 	buildDeps=" \
@@ -257,7 +249,6 @@ ENV \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.9.0 \
-	BLACKFIRE_VERSION=2.10.0 \
 	PLATFORMSH_CLI_VERSION=4.10.4 \
 	ACQUIA_CLI_VERSION=2.18.0 \
 	TERMINUS_VERSION=3.2.2 \
@@ -274,10 +265,6 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_LAUNCHER_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
-	# Blackfire CLI
-	# Find out the most recent version number:
-	# curl -X GET -Is https://blackfire.io/api/v1/releases/cli/linux/amd64 | grep location | awk '{print $2}'
-	curl -fsSL "https://packages.blackfire.io/binaries/blackfire/${BLACKFIRE_VERSION}/blackfire-linux_${TARGETARCH}" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/legacy-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Acquia CLI
@@ -291,7 +278,7 @@ RUN set -xe; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drupal wp blackfire platform acli terminus jq yq);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drupal wp platform acli terminus jq yq);
 
 # Install Python 3 + pip from Debian repos
 RUN set -xe; \
@@ -356,52 +343,6 @@ RUN set -e; \
 	export YARN_PROFILE="$HOME/.profile"; \
 	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
 
-## Ruby (installed as user) via rvm
-## Note: Disabled. rvm + its build dependecies bloat the image (~80MB)
-## Debian 11 ships with Ruby 2.7, so we'll stick with that by default.
-## It is still possible for the end user to switch to a different Ruby version via rvm.
-#ENV \
-#	RVM_VERSION_INSTALL=1.29.10 \
-#	RUBY_VERSION_INSTALL=2.7.2
-## Don't use -x here, as the output may be excessive
-#RUN set -e; \
-#	# Export ruby gem bin path
-#	echo 'export PATH=$PATH:$(ruby -r rubygems -e "puts Gem.user_dir")/bin' >> $HOME/.profile; \
-#	. $HOME/.profile; \
-#	# Public GPG servers are not realiable, so downloading keys from rvm.io instead.
-#	#gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-#	# Import and trust rvm keys
-#	# mpapis@gmail.com
-#	curl -sSL https://rvm.io/mpapis.asc | gpg --batch --import -; \
-#	echo 409B6B1796C275462A1703113804BB82D39DC0E3:6: | gpg --batch --import-ownertrust; \
-#	# piotr.kuczynski@gmail.com
-#	curl -sSL https://rvm.io/pkuczynski.asc | gpg --batch --import -; \
-#	echo 7D2BAF1CF37B13E2069D6956105BD0E739499BDB:6: | gpg --batch --import-ownertrust; \
-#	\
-#	echo 'rvm_autoupdate_flag=0' >> $HOME/.rvmrc; \
-#	echo 'rvm_silence_path_mismatch_check_flag=1' >> $HOME/.rvmrc; \
-#	curl -fsSL https://raw.githubusercontent.com/rvm/rvm/${RVM_VERSION_INSTALL}/binscripts/rvm-installer | bash -s -- --ignore-dotfiles --version ${RVM_VERSION_INSTALL}; \
-#	{ \
-#		echo ''; \
-#		echo 'export PATH="$PATH:$HOME/.rvm/bin"'; \
-#		echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"'; \
-#	} >> $HOME/.profile; \
-#	# Reload $HOME/.profile to apply settings for the current shell
-#	. $HOME/.profile; \
-#	\
-#	# rvm.io does not currently have ruby binaries for Debian 9, so Ruby is compiled from source, which requires a bunch
-#	# of extra dependencies installed (rvm installs these automatically), which bloat this image:
-#	# rvm/ruby required packages: gawk, automake, bison, libffi-dev, libgdbm-dev, libncurses5-dev, libsqlite3-dev, libtool, libyaml-dev, sqlite3, zlib1g-dev, libgmp-dev, libreadline-dev, libssl-dev
-#	rvm install ruby-${RUBY_VERSION_INSTALL}; \
-#	rvm use ruby-${RUBY_VERSION_INSTALL} --default; \
-#	\
-#	gem install --user-install bundler; \
-#	# Have bundler install gems locally (./.bundle) by default
-#	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile; \
-#	\
-#	rvm cleanup all; \
-#	rvm gemset globalcache enable
-
 ## Ruby bundler
 ## Don't use -x here, as the output may be excessive
 RUN set -e; \
@@ -411,38 +352,6 @@ RUN set -e; \
 	gem install --user-install bundler; \
 	# Have bundler install gems in the current directory (./.bundle) by default
 	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile
-
-# Python (installed as user) via pyenv
-# Note: Disabled. pyenv + its build dependecies bloat the image (~300MB).
-# Debian 10 ships with Python 3.7, so we'll stick with that by default.
-# It is still possible for the end user to switch to a different python version via pyenv.
-#ENV \
-#	PYENV_VERSION_INSTALL=1.2.21 \
-#	PYTHON_VERSION_INSTALL=3.8.3
-#RUN set -xe; \
-#	# pyenv requires a bunch of build dependencies installed, which would bloat this image
-#	# See https://github.com/pyenv/pyenv/wiki/Common-build-problems#prerequisites
-#	sudo apt-get update >/dev/null; \
-#	sudo apt-get -y --no-install-recommends install >/dev/null \
-#		build-essential libssl-dev zlib1g-dev libbz2-dev \
-#		libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
-#		xz-utils tk-dev libffi-dev liblzma-dev python-openssl git \
-#	;\
-#	# Cleanup
-#	sudo apt-get clean; sudo rm -rf /var/lib/apt/lists/*; \
-#	\
-#	git clone --depth 1 -b v${PYENV_VERSION_INSTALL} https://github.com/pyenv/pyenv.git $HOME/.pyenv; \
-#	rm -rf $HOME/.pyenv/.git; \
-#	{ \
-#		echo ''; \
-#		echo 'export PYENV_ROOT="$HOME/.pyenv"'; \
-#		echo 'export PATH="$PYENV_ROOT/bin:$PATH"'; \
-#		echo 'eval "$(pyenv init -)"'; \
-#	} >> $HOME/.profile; \
-#	# Reload $HOME/.profile to apply settings for the current shell
-#	. $HOME/.profile; \
-#	pyenv install ${PYTHON_VERSION_INSTALL}; \
-#	pyenv global ${PYTHON_VERSION_INSTALL}
 
 # Notify web container about started fin exec
 RUN echo '(/opt/ping-web.sh &)' >> $HOME/.profile

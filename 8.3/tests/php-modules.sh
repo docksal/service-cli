@@ -4,7 +4,6 @@ php_modules_amd64=\
 '[PHP Modules]
 apcu
 bcmath
-blackfire
 bz2
 calendar
 Core
@@ -21,7 +20,6 @@ gettext
 gnupg
 hash
 iconv
-imagick
 imap
 intl
 json
@@ -42,6 +40,7 @@ pdo_sqlsrv
 pgsql
 Phar
 posix
+random
 readline
 redis
 Reflection
@@ -67,14 +66,12 @@ zlib
 
 [Zend Modules]
 Zend OPcache
-blackfire
 '
 
 php_modules_arm64=\
 '[PHP Modules]
 apcu
 bcmath
-blackfire
 bz2
 calendar
 Core
@@ -91,7 +88,6 @@ gettext
 gnupg
 hash
 iconv
-imagick
 imap
 intl
 json
@@ -112,6 +108,7 @@ pdo_sqlsrv
 pgsql
 Phar
 posix
+random
 readline
 redis
 Reflection
@@ -137,7 +134,6 @@ zlib
 
 [Zend Modules]
 Zend OPcache
-blackfire
 '
 
 # Use the docker reported architecture and not the hosts (uname -m).
