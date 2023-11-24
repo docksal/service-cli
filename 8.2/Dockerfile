@@ -31,9 +31,6 @@ ENV LC_ALL en_US.utf8
 # Enable additional repos
 RUN set -xe; \
 	sed -i 's/main/main contrib non-free/' /etc/apt/sources.list; \
-	# blackfire.io repo
-	curl -fsSL https://packages.blackfire.io/gpg.key | apt-key add -; \
-	echo "deb https://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list; \
 	# git-lfs repo
 	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
 	echo 'deb https://packagecloud.io/github/git-lfs/debian bullseye main' | tee /etc/apt/sources.list.d/github_git-lfs.list;
@@ -140,7 +137,6 @@ RUN set -xe; \
 	apt-get update >/dev/null; \
 	apt-get -y --no-install-recommends install >/dev/null \
 		$buildDeps \
-		blackfire-php \
 		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
@@ -257,7 +253,6 @@ ENV \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.9.0 \
-	BLACKFIRE_VERSION=2.10.0 \
 	PLATFORMSH_CLI_VERSION=4.10.4 \
 	ACQUIA_CLI_VERSION=2.18.0 \
 	TERMINUS_VERSION=3.2.2 \
@@ -274,10 +269,6 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_LAUNCHER_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
-	# Blackfire CLI
-	# Find out the most recent version number:
-	# curl -X GET -Is https://blackfire.io/api/v1/releases/cli/linux/amd64 | grep location | awk '{print $2}'
-	curl -fsSL "https://packages.blackfire.io/binaries/blackfire/${BLACKFIRE_VERSION}/blackfire-linux_${TARGETARCH}" -o /usr/local/bin/blackfire; \
 	# Platform.sh CLI
 	curl -fsSL "https://github.com/platformsh/legacy-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
 	# Acquia CLI
@@ -291,7 +282,7 @@ RUN set -xe; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drupal wp blackfire platform acli terminus jq yq);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drupal wp platform acli terminus jq yq);
 
 # Install Python 3 + pip from Debian repos
 RUN set -xe; \
