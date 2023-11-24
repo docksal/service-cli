@@ -1,0 +1,6 @@
+# VS Code Server web IDE
+[program:code-server]
+# Using bash -lc here to load docker user profile (necessary for nvn/node to initialize)
+command = gosu docker bash -lc '/usr/bin/code-server --config=${VSCODE_HOME}/config.yaml /var/www'
+stdout_logfile = /var/log/supervisor/code-server-stdout
+stderr_logfile = /var/log/supervisor/code-server-stderr
