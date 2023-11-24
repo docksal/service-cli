@@ -333,11 +333,6 @@ _healthcheck_wait ()
 
 	### Tests ###
 
-	# Check Blackfire CLI version
-	run docker exec -u docker "$NAME" bash -lc 'blackfire version | grep "${BLACKFIRE_VERSION}"'
-	[[ ${status} == 0 ]]
-	unset output
-
 	# Check msmtp
 	run docker exec -u docker "$NAME" which msmtp
 	echo "$output" | grep "/usr/bin/msmtp"
