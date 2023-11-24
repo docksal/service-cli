@@ -133,10 +133,10 @@ RUN set -xe; \
 		libc-client2007e \
 		libfreetype6 \
 		libgpgme11 \
-		libicu67 \
+		libicu72 \
 		libjpeg62-turbo \
-		libldap-2.4-2 \
-		libmagickcore-6.q16-*-extra \
+		libldap-2.5-0 \
+		libmagickcore-6.q16-6-extra \
 		libmagickwand-6.q16-6 \
 		libmemcached11 \
 		libmemcachedutil2 \
