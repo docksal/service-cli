@@ -1,4 +1,4 @@
-FROM php:8.2.8-fpm-bullseye as cli
+FROM php:8.2.12-fpm-bullseye as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -252,17 +252,17 @@ RUN set -xe; \
 # PHP tools (installed globally)
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
-	COMPOSER_VERSION=1.10.26 \
-	COMPOSER2_VERSION=2.6.2 \
+	COMPOSER_VERSION=1.10.27 \
+	COMPOSER2_VERSION=2.6.5 \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
-	WPCLI_VERSION=2.8.1 \
+	WPCLI_VERSION=2.9.0 \
 	BLACKFIRE_VERSION=2.10.0 \
-	PLATFORMSH_CLI_VERSION=4.9.0 \
-	ACQUIA_CLI_VERSION=2.15.0 \
-	TERMINUS_VERSION=3.2.1 \
+	PLATFORMSH_CLI_VERSION=4.10.4 \
+	ACQUIA_CLI_VERSION=2.18.0 \
+	TERMINUS_VERSION=3.2.2 \
 	JQ_VERSION=1.7 \
-	YQ_VERSION=4.35.1
+	YQ_VERSION=4.35.2
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
