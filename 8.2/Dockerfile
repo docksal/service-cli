@@ -28,13 +28,6 @@ RUN set -xe; \
 	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 ENV LC_ALL en_US.utf8
 
-# Enable additional repos
-RUN set -xe; \
-	sed -i 's/main/main contrib non-free/' /etc/apt/sources.list; \
-	# git-lfs repo
-	curl -fsSL https://packagecloud.io/github/git-lfs/gpgkey | apt-key add -; \
-	echo 'deb https://packagecloud.io/github/git-lfs/debian bullseye main' | tee /etc/apt/sources.list.d/github_git-lfs.list;
-
 # Additional packages
 RUN set -xe; \
 	# Create man direcotries, otherwise some packages may not install (e.g. postgresql-client)
