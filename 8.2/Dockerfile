@@ -1,4 +1,4 @@
-FROM php:8.2.8-fpm-bullseye as cli
+FROM php:8.2.12-fpm-bullseye as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -252,18 +252,17 @@ RUN set -xe; \
 # PHP tools (installed globally)
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
-	COMPOSER_VERSION=1.10.26 \
-	COMPOSER2_VERSION=2.5.8 \
+	COMPOSER_VERSION=1.10.27 \
+	COMPOSER2_VERSION=2.6.5 \
 	DRUSH_VERSION=8.4.12 \
-	DRUSH_LAUNCHER_VERSION=0.10.2 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
-	WPCLI_VERSION=2.8.1 \
+	WPCLI_VERSION=2.9.0 \
 	BLACKFIRE_VERSION=2.10.0 \
-	PLATFORMSH_CLI_VERSION=4.7.2 \
-	ACQUIA_CLI_VERSION=2.13.0 \
-	TERMINUS_VERSION=3.2.1 \
-	JQ_VERSION=1.6 \
-	YQ_VERSION=4.34.2
+	PLATFORMSH_CLI_VERSION=4.10.4 \
+	ACQUIA_CLI_VERSION=2.18.0 \
+	TERMINUS_VERSION=3.2.2 \
+	JQ_VERSION=1.7 \
+	YQ_VERSION=4.35.2
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -271,8 +270,6 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER2_VERSION}/composer.phar" -o /usr/local/bin/composer2; \
 	# Drush 8 (global fallback)
 	curl -fsSL "https://github.com/drush-ops/drush/releases/download/${DRUSH_VERSION}/drush.phar" -o /usr/local/bin/drush8; \
-	# Drush Launcher
-	curl -fsSL "https://github.com/drush-ops/drush-launcher/releases/download/${DRUSH_LAUNCHER_VERSION}/drush.phar" -o /usr/local/bin/drush; \
 	# Drupal Console Launcher
 	curl -fsSL "https://github.com/hechoendrupal/drupal-console-launcher/releases/download/${DRUPAL_CONSOLE_LAUNCHER_VERSION}/drupal.phar" -o /usr/local/bin/drupal; \
 	# Wordpress CLI
@@ -287,17 +284,14 @@ RUN set -xe; \
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
 	curl -fsSL "https://github.com/pantheon-systems/terminus/releases/download/${TERMINUS_VERSION}/terminus.phar" -o /usr/local/bin/terminus; \
-	# jq (no arm64)
-	if [ "${TARGETARCH}" = "amd64" ]; then \
-		curl -fsSL "https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64" -o /usr/local/bin/jq; \
-		chmod +x /usr/local/bin/jq; \
-	fi; \
+	# jq
+	curl -fsSL "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-${TARGETARCH}" -o /usr/local/bin/jq; \
 	# yq
 	curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drush drupal wp blackfire platform acli terminus yq);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drupal wp blackfire platform acli terminus jq yq);
 
 # Install Python 3 + pip from Debian repos
 RUN set -xe; \
@@ -325,14 +319,12 @@ SHELL ["/bin/bash", "-c"]
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	\
-	# Set drush8 as a global fallback for Drush Launcher
-	echo -e "\n""export DRUSH_LAUNCHER_FALLBACK=/usr/local/bin/drush8" >> $HOME/.profile; \
 	# Composer based dependencies
 	# Add composer bin project level and global directories to PATH
 	# Project level comes first and thus takes precedence over the global one
 	echo -e "\n"'export PATH="$PATH:${PROJECT_ROOT:-/var/www}/vendor/bin"' >> $HOME/.profile; \
 	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
-	# Reload updated PATH from profile to make composer/drush/etc. visible below
+	# Reload updated PATH from profile to make composer/etc. visible below
 	. $HOME/.profile; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
 	# Set allow-plugins. See https://getcomposer.org/allow-plugins
@@ -350,7 +342,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.39.4 \
+	NVM_VERSION=0.39.5 \
 	NODE_VERSION=18.17.0 \
 	YARN_VERSION=1.22.19
 # Don't use -x here, as the output may be excessive

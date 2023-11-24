@@ -47,6 +47,7 @@ ghostscript
 git
 git-lfs
 gcc
+jq
 html2text
 less
 make
