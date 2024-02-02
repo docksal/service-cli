@@ -329,7 +329,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 ENV \
 	NVM_VERSION=0.39.7 \
 	NODE_VERSION=20.11.0 \
-	YARN_VERSION=1.22.21
+	# yarn releases above 1.22.19 don't install
+	YARN_VERSION=1.22.19
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
