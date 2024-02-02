@@ -432,7 +432,7 @@ COPY --chown=docker:docker config/code-server ${VSCODE_HOME}
 # Note: Have to use --user-data-dir with --install-extension instead of --config
 RUN set -xe; \
 	code-server --user-data-dir=${VSCODE_HOME} --install-extension eamodio.gitlens@${VSCODE_GITLENS_VERSION}; \
-	code-server --user-data-dir=${VSCODE_HOME} --install-extension felixfbecker.php-debug@${VSCODE_XDEBUG_VERSION}
+	code-server --user-data-dir=${VSCODE_HOME} --install-extension xdebug.php-debug@${VSCODE_XDEBUG_VERSION}
 
 # Switch back to root (IMPORTANT!)
 USER root
