@@ -217,7 +217,8 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Terminus version
-	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+	# --no-ansi is used to strip color codes from the output, otherwise the grep will fail
+	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --no-ansi --version | grep "^Terminus ${TERMINUS_VERSION}$"'
 	[[ ${status} == 0 ]]
 	unset output
 
