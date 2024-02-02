@@ -190,8 +190,7 @@ RUN set -xe; \
 		memcached \
 		redis \
 		ssh2 \
-		# xdebug PHP 8.3 compatibility is in beta \
-		xdebug-beta \
+		xdebug \
 		xhprof \
 	;\
 	docker-php-ext-enable \
