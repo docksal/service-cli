@@ -246,11 +246,11 @@ ENV \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.9.0 \
-	PLATFORMSH_CLI_VERSION=4.10.4 \
-	ACQUIA_CLI_VERSION=2.18.0 \
-	TERMINUS_VERSION=3.2.2 \
-	JQ_VERSION=1.7 \
-	YQ_VERSION=4.35.2
+	PLATFORMSH_CLI_VERSION=5.0.8 \
+	ACQUIA_CLI_VERSION=2.22.1 \
+	TERMINUS_VERSION=3.3.3 \
+	JQ_VERSION=1.7.1 \
+	YQ_VERSION=4.40.5
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -326,9 +326,9 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.39.5 \
-	NODE_VERSION=18.17.0 \
-	YARN_VERSION=1.22.19
+	NVM_VERSION=0.39.7 \
+	NODE_VERSION=20.11.0 \
+	YARN_VERSION=1.22.21
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
