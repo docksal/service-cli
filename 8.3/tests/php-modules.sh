@@ -20,6 +20,7 @@ gettext
 gnupg
 hash
 iconv
+imagick
 imap
 intl
 json
@@ -88,6 +89,7 @@ gettext
 gnupg
 hash
 iconv
+imagick
 imap
 intl
 json
