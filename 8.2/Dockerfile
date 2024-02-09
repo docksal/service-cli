@@ -209,11 +209,9 @@ RUN set -xe; \
 
 # MSSQL PHP client
 RUN set -xe; \
-	# Repo for msodbcsql18 (MS ODBC driver), required by pecl/sqlsrv and pecl/pdo_sqlsrv
-	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-	# TODO: Using Ubuntu 22.04 packages as a temporary fix (until addressed upstream in MS repos).
-	#curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list -o /etc/apt/sources.list.d/mssql.list; \
-	curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list -o /etc/apt/sources.list.d/mssql.list; \
+	# Repo and key for msodbcsql18 (MS ODBC driver), required by pecl/sqlsrv and pecl/pdo_sqlsrv
+	curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list -o /etc/apt/sources.list.d/mssql.list; \
+	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg; \
 	\
 	buildDeps=" \
 		unixodbc-dev \
