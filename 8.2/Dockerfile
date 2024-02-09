@@ -164,6 +164,7 @@ RUN set -xe; \
 		bz2 \
 		calendar\
 		exif \
+		ftp \
 		gd \
 		gettext \
 		imap \
