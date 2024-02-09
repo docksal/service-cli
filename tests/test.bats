@@ -217,14 +217,10 @@ _healthcheck_wait ()
 	unset output
 
 	# Check Terminus version
-	# Terminus v3 is not yet fully compatible with PHP 8.1
-	# TODO: Re-enable tests for Terminus v3 on PHP 8.1 once stable.
-	# See: https://github.com/pantheon-systems/terminus/issues/2256
-	if [[ "${VERSION}" != "8.1" ]]; then
-		run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "^Terminus ${TERMINUS_VERSION}$"'
-		[[ ${status} == 0 ]]
-		unset output
-	fi
+	# --no-ansi is used to strip color codes from the output, otherwise the grep will fail
+	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --no-ansi --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+	[[ ${status} == 0 ]]
+	unset output
 
 	# Check Platform CLI version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
@@ -240,7 +236,7 @@ _healthcheck_wait ()
 	make clean
 }
 
-@test "Check NodeJS tools and versions" {
+@test "Check misc tools and versions" {
 	[[ $SKIP == 1 ]] && skip
 
 	### Setup ###
@@ -266,75 +262,13 @@ _healthcheck_wait ()
 	[[ ${status} == 0 ]]
 	unset output
 
-	### Cleanup ###
-	make clean
-}
-
-@test "Check Ruby tools and versions" {
-	[[ $SKIP == 1 ]] && skip
-
-	### Setup ###
-	make start
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# rvm
-	run docker exec -u docker "$NAME" bash -lc 'rvm --version 2>&1 | grep "${RVM_VERSION_INSTALL}"'
+	# Stock Ruby version in Debian 12 is 3.1.x
+	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "ruby 3.1"'
 	[[ ${status} == 0 ]]
 	unset output
 
-	# ruby
-	#run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "${RUBY_VERSION_INSTALL}"'
-	# Default Ruby version in Debian 11 = 2.7.x
-	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "ruby 2.7"'
-	[[ ${status} == 0 ]]
-	unset output
-
-	### Cleanup ###
-	make clean
-}
-
-@test "Check Python tools and versions" {
-	[[ $SKIP == 1 ]] && skip
-
-	### Setup ###
-	make start
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# pyenv
-	run docker exec -u docker "$NAME" bash -lc 'pyenv --version 2>&1 | grep "${PYENV_VERSION_INSTALL}"'
-	[[ ${status} == 0 ]]
-	unset output
-
-	# pyenv
-	run docker exec -u docker "$NAME" bash -lc 'python --version 2>&1 | grep "${PYTHON_VERSION_INSTALL}"'
-	[[ ${status} == 0 ]]
-	unset output
-
-	### Cleanup ###
-	make clean
-}
-
-@test "Check misc tools and versions" {
-	[[ $SKIP == 1 ]] && skip
-
-	### Setup ###
-	make start
-
-	run _healthcheck_wait
-	unset output
-
-	### Tests ###
-
-	# Check Blackfire CLI version
-	run docker exec -u docker "$NAME" bash -lc 'blackfire version | grep "${BLACKFIRE_VERSION}"'
+	# Stock Python version in Debian 12 is 3.11.x
+	run docker exec -u docker "$NAME" bash -lc 'python3 --version 2>&1 | grep "Python 3.11"'
 	[[ ${status} == 0 ]]
 	unset output
 

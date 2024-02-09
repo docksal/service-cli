@@ -4,7 +4,6 @@ php_modules_amd64=\
 '[PHP Modules]
 apcu
 bcmath
-blackfire
 bz2
 calendar
 Core
@@ -67,14 +66,12 @@ zlib
 
 [Zend Modules]
 Zend OPcache
-blackfire
 '
 
 php_modules_arm64=\
 '[PHP Modules]
 apcu
 bcmath
-blackfire
 bz2
 calendar
 Core
@@ -137,7 +134,6 @@ zlib
 
 [Zend Modules]
 Zend OPcache
-blackfire
 '
 
 # Use the docker reported architecture and not the hosts (uname -m).
