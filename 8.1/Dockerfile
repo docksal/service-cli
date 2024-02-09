@@ -1,4 +1,4 @@
-FROM php:8.1.25-fpm-bookworm as cli
+FROM php:8.1.27-fpm-bookworm as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -208,11 +208,9 @@ RUN set -xe; \
 
 # MSSQL PHP client
 RUN set -xe; \
-	# Repo for msodbcsql18 (MS ODBC driver), required by pecl/sqlsrv and pecl/pdo_sqlsrv
-	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -; \
-	# TODO: Using Ubuntu 22.04 packages as a temporary fix (until addressed upstream in MS repos).
-	#curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list -o /etc/apt/sources.list.d/mssql.list; \
-	curl -fsSL https://packages.microsoft.com/config/ubuntu/22.04/prod.list -o /etc/apt/sources.list.d/mssql.list; \
+	# Repo and key for msodbcsql18 (MS ODBC driver), required by pecl/sqlsrv and pecl/pdo_sqlsrv
+	curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list -o /etc/apt/sources.list.d/mssql.list; \
+	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg; \
 	\
 	buildDeps=" \
 		unixodbc-dev \
@@ -246,11 +244,12 @@ ENV \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.9.0 \
-	PLATFORMSH_CLI_VERSION=4.10.4 \
-	ACQUIA_CLI_VERSION=2.18.0 \
-	TERMINUS_VERSION=3.2.2 \
-	JQ_VERSION=1.7 \
-	YQ_VERSION=4.35.2
+	# platformsh/legacy-cli
+	PLATFORMSH_CLI_VERSION=4.14.1 \
+	ACQUIA_CLI_VERSION=2.22.1 \
+	TERMINUS_VERSION=3.3.3 \
+	JQ_VERSION=1.7.1 \
+	YQ_VERSION=4.40.5
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -326,8 +325,9 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.39.5 \
-	NODE_VERSION=18.17.0 \
+	NVM_VERSION=0.39.7 \
+	NODE_VERSION=20.11.0 \
+	# yarn releases above 1.22.19 don't install
 	YARN_VERSION=1.22.19
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
@@ -414,9 +414,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=4.10.1 \
-	VSCODE_GITLENS_VERSION=13.2.2 \
-	VSCODE_XDEBUG_VERSION=1.32.0 \
+	CODE_SERVER_VERSION=4.20.1 \
+	VSCODE_GITLENS_VERSION=14.7.0 \
+	VSCODE_XDEBUG_VERSION=1.34.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
@@ -432,7 +432,7 @@ COPY --chown=docker:docker config/code-server ${VSCODE_HOME}
 # Note: Have to use --user-data-dir with --install-extension instead of --config
 RUN set -xe; \
 	code-server --user-data-dir=${VSCODE_HOME} --install-extension eamodio.gitlens@${VSCODE_GITLENS_VERSION}; \
-	code-server --user-data-dir=${VSCODE_HOME} --install-extension felixfbecker.php-debug@${VSCODE_XDEBUG_VERSION}
+	code-server --user-data-dir=${VSCODE_HOME} --install-extension xdebug.php-debug@${VSCODE_XDEBUG_VERSION}
 
 # Switch back to root (IMPORTANT!)
 USER root
