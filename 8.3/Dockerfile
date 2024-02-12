@@ -250,16 +250,16 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.27 \
-	COMPOSER2_VERSION=2.7.0 \
+	COMPOSER2_VERSION=2.7.1 \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
-	WPCLI_VERSION=2.9.0 \
+	WPCLI_VERSION=2.10.0 \
 	# platformsh/legacy-cli
 	PLATFORMSH_CLI_VERSION=4.14.1 \
-	ACQUIA_CLI_VERSION=2.22.1 \
+	ACQUIA_CLI_VERSION=2.22.2 \
 	TERMINUS_VERSION=3.3.3 \
 	JQ_VERSION=1.7.1 \
-	YQ_VERSION=4.40.5
+	YQ_VERSION=4.40.7
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
