@@ -1,15 +1,15 @@
-name: Docker Build and Push
+name: Build, Test, Push
 
 on:
   schedule:
-    - cron: '0 10 * * 0' # Every Sunday at 10AM
+    - cron: "0 10 * * 0" # Every Sunday at 10AM
   push:
     branches:
       - master
       - develop
       - feature/*
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
   workflow_dispatch: # Allow manually triggering a build
 
 defaults:
@@ -19,7 +19,7 @@ defaults:
 env:
   IMAGE: docksal/cli
   UPSTREAM_IMAGE: debian
-  LATEST_VERSION: '8.2'
+  LATEST_VERSION: "8.2"
   DOCKSAL_VERSION: develop
 
 jobs:
@@ -34,27 +34,27 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: '8.1'
+            version: "8.1"
           -
             platform: linux/amd64
             arch: amd64
-            version: '8.2'
+            version: "8.2"
           -
             platform: linux/amd64
             arch: amd64
-            version: '8.3'
+            version: "8.3"
           -
             platform: linux/arm64
             arch: arm64
-            version: '8.1'
+            version: "8.1"
           -
             platform: linux/arm64
             arch: arm64
-            version: '8.2'
+            version: "8.2"
           -
             platform: linux/arm64
             arch: arm64
-            version: '8.3'
+            version: "8.3"
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -76,6 +76,7 @@ jobs:
           echo ARM64_HOST_SSH_CERT="$(ssh-keyscan -t rsa ${{ secrets.ARM64_HOST }} 2>/dev/null)" | tee -a ${GITHUB_ENV}
       -
         # Switch docker context to a remote arm64 host
+        # Used for building heavy images that take too long to build using QEMU + for native arm64 testing.
         name: Switch to arm64 builder host
         if: ${{ env.ARCH == 'arm64' }}
         uses: arwynfr/actions-docker-context@v2
@@ -123,27 +124,27 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: '8.1'
+            version: "8.1"
           -
             platform: linux/amd64
             arch: amd64
-            version: '8.2'
+            version: "8.2"
           -
             platform: linux/amd64
             arch: amd64
-            version: '8.3'
+            version: "8.3"
           -
             platform: linux/arm64
             arch: arm64
-            version: '8.1'
+            version: "8.1"
           -
             platform: linux/arm64
             arch: arm64
-            version: '8.2'
+            version: "8.2"
           -
             platform: linux/arm64
             arch: arm64
-            version: '8.3'
+            version: "8.3"
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -168,6 +169,7 @@ jobs:
           echo ARM64_HOST_SSH_CERT="$(ssh-keyscan -t rsa ${{ secrets.ARM64_HOST }} 2>/dev/null)" | tee -a ${GITHUB_ENV}
       -
         # Switch docker context to a remote arm64 host
+        # Used for building heavy images that take too long to build using QEMU + for native arm64 testing.
         name: Switch to arm64 builder host
         if: ${{ env.ARCH == 'arm64' }}
         uses: arwynfr/actions-docker-context@v2
@@ -217,9 +219,9 @@ jobs:
     strategy:
       matrix:
         version:
-          - '8.1'
-          - '8.2'
-          - '8.3'
+          - "8.1"
+          - "8.2"
+          - "8.3"
 
     env:
       VERSION_PREFIX: php

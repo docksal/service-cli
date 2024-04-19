@@ -35,7 +35,7 @@ set_output() {
 	# Print with new lines for output in build logs
 	(IFS=$'\n'; echo "${outputArr[*]}")
 	# Using newlines in output variables does not seem to work, so we'll use comas
-	(IFS=$','; echo "::set-output name=tags::${outputArr[*]}")
+	(IFS=$','; echo tags="${outputArr[*]}" | tee -a ${$GITHUB_OUTPUT})
 }
 
 # Image tags
