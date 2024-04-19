@@ -359,7 +359,7 @@ _healthcheck_wait ()
 	unset output
 
 	# Confirm authentication works
-	run docker exec -u docker "${NAME}" bash -lc 'platform auth:info -n'
+	run docker exec -u docker "${NAME}" bash -lc 'platform auth:info --no-interaction'
 	[[ ${status} == 0 ]]
 	[[ ! "${output}" =~ "Invalid API token" ]]
 	[[ "${output}" =~ "developer@docksal.io" ]]
