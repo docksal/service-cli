@@ -4,10 +4,9 @@ This image focuses on console tools necessary to develop LAMP stack (and other w
 
 This image(s) is part of the [Docksal](https://docksal.io) image library.
 
-
 ## Features
 
-- Based on the official php-fpm Debian 11 (bullseye) images 
+- Based on the official php-fpm Debian 12 (bookworm) images 
 - php/php-fpm (w/ xdebug), nodejs (via nvm), python, ruby
 - Framework specific tools for Drupal and Wordpress
 - Miscellaneous cli tools for day to day web development
@@ -17,23 +16,16 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 - [VS Code Server](https://github.com/cdr/code-server) (VS Code in the browser)
 - Multi-platform images (amd64/arm64) starting with v3.0.0
 
-
 ## Versions and image tag naming convention
 
-- Stable versions v3 (amd64/arm64)
-  - `php8.0-3.0`, `php8.0`, `php8.0` - PHP 8.0
-  - `php8.1-3.0`, `php8.1`, `php8.1`, `latest` - PHP 8.1
-- Development versions (amd64/arm64)
-  - `php8.0-edge` - PHP 8.0
-  - `php8.1-edge` - PHP 8.0
-- Legacy versions v3 (amd64/arm64)
-  - `php7.3-3.0`, `php7.3-2`, `php7.3` - PHP 7.3 
-  - `php7.4-3.3`, `php7.4-3`, `php7.4` - PHP 7.4
-- Legacy versions v2 (amd64)
-  - `php7.3-2.13`, `php7.3-2`, `php7.3` - PHP 7.3
-  - `php7.4-2.13`, `php7.4-2`, `php7.4` - PHP 7.4
-  - `php8.0-2.13`, `php8.0`, `php8.0` - PHP 8.0
-
+- Stable versions v3
+  - `php8.1-3.8`, `php8.1` - PHP 8.1
+  - `php8.2-3.8`, `php8.2` - PHP 8.2
+  - `php8.3-3.8`, `php8.3`, `latest` - PHP 8.3
+- Development versions
+  - `php8.1-edge` - PHP 8.1
+  - `php8.2-edge` - PHP 8.2
+  - `php8.3-edge` - PHP 8.3
 
 ## PHP
 
@@ -54,8 +46,7 @@ manner (installing them with `apt-get` won't work).
 - SQLite - via `sqlite3`, `pdo_sqlite`
 - MySQL - via `mysqli`, `mysqlnd`, `pdo_mysql`
 - PostgreSQL - via `pgsql`, `pdo_pgsql`
-- MSSQL - via `sqlsrv` and `pdo_sqlsrv` (amd64 only)
-
+- MSSQL - via `sqlsrv` and `pdo_sqlsrv`
 
 ### Using PHP Xdebug
 
@@ -74,17 +65,16 @@ cli
 
 [See docs](https://docs.docksal.io/tools/xdebug/) on using Xdebug for web and cli PHP debugging.
 
-
 ## NodeJS
 
 - nvm
-- node v14.17.3 (following NodeJS LTS release cycle)
-- yarn
+- node v20.12.2 (following NodeJS LTS release cycle)
+- yarn (classic v1)
 
 NodeJS is installed via `nvm` in the `docker` user's profile inside the image (`/home/docker/.nvm`).
 
-If you need a different version of node, use `nvm` to install it, e.g., `nvm install 11.6.0`.
-Then, use `nvm use 11.6.0` to use it in the current session or `nvm alias default 11.6.0` to use it by default.
+If you need a different version of node, use `nvm` to install it, e.g., `nvm install 21.7.3`.
+Then, use `nvm use 21.7.3` to use it in the current session or `nvm alias default 21.7.3` to use it by default.
 
 ## Python
 
@@ -103,7 +93,6 @@ This image comes with a system level installed Ruby v2.7.x from upstream Debian 
 - mysql, pgsql, and sqlsrv cli clients
 - imagemagick, ghostscript
 - mc, nano, rsync
-- mhsendmail
 - cron
 
 ## Hosting provider tools
@@ -114,13 +103,11 @@ This image comes with a system level installed Ruby v2.7.x from upstream Debian 
 
 Also, see the [Secrets](#secrets) section below for more information on managing and using your hosting provider keys.
 
-
 ## Customizing startup
 
 To run a custom startup script anytime the `cli` container has started, create a `startup.sh` file within the
 `.docksal/services/cli` directory. Additionally, make sure that the file is executable as well so that the container
 does not run into issues when attempting to execute the file.
-
 
 ## Scheduling cron jobs
 
@@ -187,7 +174,6 @@ These can be passed as environment variables and will be applied at the containe
 GIT_USER_EMAIL="git@example.com"
 GIT_USER_NAME="Docksal CLI"
 ```
-
 
 <a name="ide"></a>
 ## Coder (Visual Studio Code web IDE)
