@@ -1,4 +1,4 @@
-FROM php:8.3.2-fpm-bookworm as cli
+FROM php:8.3.6-fpm-bookworm as cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -250,16 +250,16 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.27 \
-	COMPOSER2_VERSION=2.7.0 \
+	COMPOSER2_VERSION=2.7.2 \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
-	WPCLI_VERSION=2.9.0 \
+	WPCLI_VERSION=2.10.0 \
 	# platformsh/legacy-cli
-	PLATFORMSH_CLI_VERSION=4.14.1 \
-	ACQUIA_CLI_VERSION=2.22.1 \
-	TERMINUS_VERSION=3.3.3 \
+	PLATFORMSH_CLI_VERSION=4.18.0 \
+	ACQUIA_CLI_VERSION=2.25.0 \
+	TERMINUS_VERSION=3.3.5 \
 	JQ_VERSION=1.7.1 \
-	YQ_VERSION=4.40.5
+	YQ_VERSION=4.43.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -336,9 +336,10 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 # Node.js (installed as user)
 ENV \
 	NVM_VERSION=0.39.7 \
-	NODE_VERSION=20.11.0 \
-	# yarn releases above 1.22.19 don't install
-	YARN_VERSION=1.22.19
+	NODE_VERSION=20.12.2 \
+	# Yarn (Classic v1)
+	# https://github.com/yarnpkg/yarn/releases
+	YARN_VERSION=1.22.22
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
@@ -346,9 +347,11 @@ RUN set -e; \
 	curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash >/dev/null; \
 	# Reload profile to load nvm (needed by Yarn installation below)
 	. $HOME/.profile; \
-	# Yarn
-	export YARN_PROFILE="$HOME/.profile"; \
-	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
+	# Yarn (Classic v1)
+	# Installing via npm to allow fore override with never versions via corepack
+	npm install -g yarn@${YARN_VERSION}; \
+	# Enable corepack (allows installing project level yarn v2+ via yarn)
+	corepack enable
 
 ## Ruby bundler
 ## Don't use -x here, as the output may be excessive
@@ -424,8 +427,8 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=4.20.1 \
-	VSCODE_GITLENS_VERSION=14.7.0 \
+	CODE_SERVER_VERSION=4.23.1 \
+	VSCODE_GITLENS_VERSION=14.9.0 \
 	VSCODE_XDEBUG_VERSION=1.34.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
