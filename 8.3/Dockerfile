@@ -337,8 +337,9 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 ENV \
 	NVM_VERSION=0.39.7 \
 	NODE_VERSION=20.11.0 \
-	# yarn releases above 1.22.19 don't install
-	YARN_VERSION=1.22.19
+	# Yarn (Classic v1)
+	# https://github.com/yarnpkg/yarn/releases
+	YARN_VERSION=1.22.22
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# NVM and a defaut Node.js version
@@ -346,9 +347,11 @@ RUN set -e; \
 	curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash >/dev/null; \
 	# Reload profile to load nvm (needed by Yarn installation below)
 	. $HOME/.profile; \
-	# Yarn
-	export YARN_PROFILE="$HOME/.profile"; \
-	curl -fsSL https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VERSION} >/dev/null
+	# Yarn (Classic v1)
+	# Installing via npm to allow fore override with never versions via corepack
+	npm install -g yarn@${YARN_VERSION}; \
+	# Enable corepack (allows installing project level yarn v2+ via yarn)
+	corepack enable
 
 ## Ruby bundler
 ## Don't use -x here, as the output may be excessive
