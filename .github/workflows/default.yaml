@@ -79,7 +79,7 @@ jobs:
         # Used for building heavy images that take too long to build using QEMU + for native arm64 testing.
         name: Switch to arm64 builder host
         if: ${{ env.ARCH == 'arm64' }}
-        uses: arwynfr/actions-docker-context@v2
+        uses: docksal/actions/docker-context@main
         with:
           docker_host: "ssh://build-agent@${{ secrets.ARM64_HOST }}"
           context_name: arm64-host
@@ -154,7 +154,7 @@ jobs:
     steps:
       -
         name: Setup Bats
-        uses: bats-core/bats-action@1.5.4
+        uses: bats-core/bats-action@2.0.0
       -
         name: Checkout
         uses: actions/checkout@v4
@@ -172,7 +172,7 @@ jobs:
         # Used for building heavy images that take too long to build using QEMU + for native arm64 testing.
         name: Switch to arm64 builder host
         if: ${{ env.ARCH == 'arm64' }}
-        uses: arwynfr/actions-docker-context@v2
+        uses: docksal/actions/docker-context@main
         with:
           docker_host: "ssh://build-agent@${{ secrets.ARM64_HOST }}"
           context_name: arm64-host
