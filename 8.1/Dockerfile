@@ -251,6 +251,8 @@ ENV \
 	JQ_VERSION=1.7.1 \
 	YQ_VERSION=4.44.3
 RUN set -xe; \
+	# Docker PHP Extension Installer
+	curl -sSLf "https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions" -o /usr/local/bin/install-php-extensions; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
 	# Composer 2.x
@@ -274,7 +276,7 @@ RUN set -xe; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drupal wp platform acli terminus jq yq);
+	(cd /usr/local/bin && chmod +x install-php-extensions composer1 composer2 drush8 drupal wp platform acli terminus jq yq);
 
 # Install Python 3 + pip from Debian repos
 RUN set -xe; \
