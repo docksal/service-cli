@@ -327,7 +327,7 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.40.0 \
+	NVM_VERSION=0.40.1 \
 	NODE_VERSION=20.16.0 \
 	# Yarn (Classic v1)
 	# https://github.com/yarnpkg/yarn/releases
