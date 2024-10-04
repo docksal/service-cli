@@ -57,8 +57,6 @@ ssh2
 standard
 sysvsem
 tokenizer
-xdebug
-xhprof
 xml
 xmlreader
 xmlwriter
@@ -68,7 +66,6 @@ zip
 zlib
 
 [Zend Modules]
-Xdebug
 Zend OPcache
 '
 
@@ -129,8 +126,6 @@ ssh2
 standard
 sysvsem
 tokenizer
-xdebug
-xhprof
 xml
 xmlreader
 xmlwriter
@@ -140,7 +135,6 @@ zip
 zlib
 
 [Zend Modules]
-Xdebug
 Zend OPcache
 '
 
