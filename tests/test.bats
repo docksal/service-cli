@@ -135,8 +135,8 @@ _healthcheck_wait ()
 	unset output
 
 	# Check PHP modules
-	run bash -lc "docker exec -u docker '${NAME}' php -m | diff <(./tests/php-modules.sh) -"
-	[[ ${status} == 0 ]]
+	output=$(docker exec -u docker "$NAME" php -m | diff <(./tests/php-modules.sh) -)
+	[[ ${output} == "" ]]
 	unset output
 
 	### Cleanup ###
