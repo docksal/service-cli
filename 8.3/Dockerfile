@@ -145,12 +145,15 @@ RUN set -xe; \
 		ssh2 \
 		xdebug \
 		xhprof \
-# MSSQL PHP client
+		# MSSQL PHP client
 		pdo_sqlsrv \
 		sqlsrv \
 	;\
-	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*
+	# Disable xdebug and xhprof by default to avoid performance impact
+	# They can be enabled via environment variables at runtime (XDEBUG_ENABLED=1 and XHPROF_ENABLED=1)
+	# There is no native "docker-php-ext-disable", so we remove the ini files manually
+	rm -f "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"; \
+	rm -f "$PHP_INI_DIR/conf.d/docker-php-ext-xhprof.ini"
 
 # PHP tools (installed globally)
 ENV \
