@@ -250,14 +250,14 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.27 \
-	COMPOSER2_VERSION=2.7.8 \
+	COMPOSER2_VERSION=2.8.0 \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.11.0 \
 	# platformsh/legacy-cli
-	PLATFORMSH_CLI_VERSION=4.20.3 \
-	ACQUIA_CLI_VERSION=2.29.0 \
-	TERMINUS_VERSION=3.5.2 \
+	PLATFORMSH_CLI_VERSION=4.21.0 \
+	ACQUIA_CLI_VERSION=2.31.0 \
+	TERMINUS_VERSION=3.6.0 \
 	JQ_VERSION=1.7.1 \
 	YQ_VERSION=4.44.3
 RUN set -xe; \
@@ -337,8 +337,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.40.0 \
-	NODE_VERSION=20.16.0 \
+	NVM_VERSION=0.40.1 \
+	NODE_VERSION=20.17.0 \
 	# Yarn (Classic v1)
 	# https://github.com/yarnpkg/yarn/releases
 	YARN_VERSION=1.22.22
