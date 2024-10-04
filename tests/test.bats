@@ -49,7 +49,7 @@ _healthcheck_wait ()
 		# Give the container 30s to become ready
 		elapsed=$((elapsed + delay))
 		if ((elapsed > timeout)); then
-			echo "$container_name heathcheck failed"
+			echo "$container_name healthcheck failed"
 			exit 1
 		fi
 	done
