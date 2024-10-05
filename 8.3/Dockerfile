@@ -106,60 +106,12 @@ ENV NOTVISIBLE "in users profile"
 # PHP
 RUN set -xe; \
 	# Note: essential build tools (g++, gcc, make, etc) are included upstream as persistent packages.
-	buildDeps=" \
-		libc-client2007e-dev \
-		libfreetype6-dev \
-		libgpgme11-dev \
-		libicu-dev \
-		libjpeg62-turbo-dev \
-		libkrb5-dev \
-		libldap2-dev \
-		libmagickcore-dev \
-		libmagickwand-dev \
-		libmemcached-dev \
-		libmhash-dev \
-		libpng-dev \
-		libpq-dev \
-		libwebp-dev \
-		libssh2-1-dev \
-		libxpm-dev \
-		libxslt1-dev \
-		libzip-dev \
-		unixodbc-dev \
-	"; \
-	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		$buildDeps \
-		libc-client2007e \
-		libfreetype6 \
-		libgpgme11 \
-		libicu72 \
-		libjpeg62-turbo \
-		libldap-2.5-0 \
-		libmagickcore-6.q16-6-extra \
-		libmagickwand-6.q16-6 \
-		libmemcached11 \
-		libmemcachedutil2 \
-		libmhash2 \
-		libpng16-16 \
-		libpq5 \
-		libssh2-1 \
-		libxpm4 \
-		libxslt1.1 \
-		libzip4 \
-	;\
-	docker-php-ext-configure >/dev/null gd \
-		--with-freetype \
-		--with-jpeg \
-		--with-webp \
-		--with-xpm; \
-	PHP_OPENSSL=yes docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
-	# Using $(uname -m) (returns x86_64 / aarch64) vs ${TARGETARCH} (returns amd64 / arm64)
-	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/$(uname -m)-linux-gnu/; \
-	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
-	docker-php-ext-configure >/dev/null zip; \
-	\
-	docker-php-ext-install >/dev/null -j$(nproc) \
+	# Docker PHP Extension Installer
+	curl -sSLf "https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions" -o /usr/local/bin/install-php-extensions \
+		&& chmod +x /usr/local/bin/install-php-extensions; \
+	# Instal/enable all PHP extensions via mlocati/docker-php-extension-installer
+	install-php-extensions \
+		# Stock extensions from upstream image
 		bcmath \
 		bz2 \
 		calendar\
@@ -181,70 +133,27 @@ RUN set -xe; \
 		xsl \
 		zip \
 		sysvsem \
-	;\
-	pecl update-channels; \
-	pecl install >/dev/null </dev/null \
+		# Pecl extensions
 		apcu \
 		gnupg \
-		# imagick does not install on Debian 12 / PHP 8.3 via pecl (see below)
-		#imagick \
+		# imagick does not install on Debian 12 / PHP 8.3 from pecl
+		# Install imagick@master from source
+		# See https://github.com/mlocati/docker-php-extension-installer/pull/811#issuecomment-1906737373
+		imagick/imagick@master \
 		memcached \
 		redis \
 		ssh2 \
 		xdebug \
 		xhprof \
-	;\
-	# Install imagick@master using mlocati/docker-php-extension-installer
-	# https://github.com/mlocati/docker-php-extension-installer/pull/811#issuecomment-1906737373
-	curl -fsSL "https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions" -o /usr/local/bin/install-php-extensions; \
-	chmod +x /usr/local/bin/install-php-extensions; \
-	install-php-extensions imagick/imagick@master; \
-	# TODO: Use install-php-extensions across the board to install PHP extensions
-	\
-	docker-php-ext-enable \
-		apcu \
-		gnupg \
-		# imagick does not install on Debian 12 / PHP 8.3
-		#imagick \
-		memcached \
-		redis \
-		ssh2 \
-	;\
-	# Cleanup
-	docker-php-source delete; \
-	rm -rf /tmp/pear ~/.pearrc; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
-	apt-get clean; rm -rf /var/lib/apt/lists/*
-
-# MSSQL PHP client
-RUN set -xe; \
-	# Repo and key for msodbcsql18 (MS ODBC driver), required by pecl/sqlsrv and pecl/pdo_sqlsrv
-	curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list -o /etc/apt/sources.list.d/mssql.list; \
-	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg; \
-	\
-	buildDeps=" \
-		unixodbc-dev \
-	"; \
-	apt-get update >/dev/null; \
-	# Necessary for msodbcsql18 (MSSQL)
-	ACCEPT_EULA=Y \
-	apt-get -y --no-install-recommends install >/dev/null \
-		$buildDeps \
-		msodbcsql18 \
-	;\
-	pecl update-channels; \
-	pecl install >/dev/null </dev/null \
+		# MSSQL PHP client
 		pdo_sqlsrv \
 		sqlsrv \
 	;\
-	docker-php-ext-enable \
-		pdo_sqlsrv \
-		sqlsrv \
-	;\
-	# Cleanup
-	rm -rf /tmp/pear ~/.pearrc; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
-	apt-get clean; rm -rf /var/lib/apt/lists/*
+	# Disable xdebug and xhprof by default to avoid performance impact
+	# They can be enabled via environment variables at runtime (XDEBUG_ENABLED=1 and XHPROF_ENABLED=1)
+	# There is no native "docker-php-ext-disable", so we remove the ini files manually
+	rm -f "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"; \
+	rm -f "$PHP_INI_DIR/conf.d/docker-php-ext-xhprof.ini"
 
 # PHP tools (installed globally)
 ENV \
@@ -261,8 +170,6 @@ ENV \
 	JQ_VERSION=1.7.1 \
 	YQ_VERSION=4.44.3
 RUN set -xe; \
-	# Docker PHP Extension Installer
-	curl -sSLf "https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions" -o /usr/local/bin/install-php-extensions; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
 	# Composer 2.x
@@ -286,7 +193,7 @@ RUN set -xe; \
 	# Set Default Composer Version
 	ln -s /usr/local/bin/composer${COMPOSER_DEFAULT_VERSION} /usr/local/bin/composer; \
 	# Make all downloaded binaries executable in one shot
-	(cd /usr/local/bin && chmod +x install-php-extensions composer1 composer2 drush8 drupal wp platform acli terminus jq yq);
+	(cd /usr/local/bin && chmod +x composer1 composer2 drush8 drupal wp platform acli terminus jq yq);
 
 # Install Python 3 + pip from Debian repos
 RUN set -xe; \
