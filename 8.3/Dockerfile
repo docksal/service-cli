@@ -213,6 +213,15 @@ RUN set -xe; \
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
+# Upgrade SQLite for Drupal 11 testing.
+# @see https://www.drupal.org/project/drupal/issues/3346338
+RUN set -xe; \
+  echo "deb https://deb.debian.org/debian testing main" | tee /etc/apt/sources.list.d/testing.list; \
+  apt-get update >/dev/null; \
+  apt-get install -y -t testing sqlite3;\
+  # Cleanup
+  apt-get clean; rm -rf /var/lib/apt/lists/*
+
 # All further RUN commands will run as the "docker" user
 USER docker
 SHELL ["/bin/bash", "-c"]
