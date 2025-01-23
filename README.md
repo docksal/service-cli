@@ -22,10 +22,12 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
   - `php8.1-3.8`, `php8.1` - PHP 8.1
   - `php8.2-3.8`, `php8.2` - PHP 8.2
   - `php8.3-3.8`, `php8.3`, `latest` - PHP 8.3
+  - `php8.4-3.8`, `php8.4` - PHP 8.4
 - Development versions
   - `php8.1-edge` - PHP 8.1
   - `php8.2-edge` - PHP 8.2
   - `php8.3-edge` - PHP 8.3
+  - `php8.4-edge` - PHP 8.4
 
 ## PHP
 
