@@ -19,7 +19,7 @@ defaults:
 env:
   IMAGE: docksal/cli
   UPSTREAM_IMAGE: debian
-  LATEST_VERSION: "8.3"
+  LATEST_VERSION: "8.4"
   DOCKSAL_VERSION: develop
 
 jobs:
@@ -47,6 +47,11 @@ jobs:
             version: "8.3"
             runner: ubuntu-22.04
           -
+            platform: linux/amd64
+            arch: amd64
+            version: "8.4"
+            runner: ubuntu-22.04
+          -
             platform: linux/arm64
             arch: arm64
             version: "8.1"
@@ -61,7 +66,12 @@ jobs:
             arch: arm64
             version: "8.3"
             runner: ubuntu-22.04-arm
-
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "8.4"
+            runner: ubuntu-22.04-arm
+  
     env:
       ARCH: ${{ matrix.arch }}
       VERSION_PREFIX: php
@@ -129,6 +139,11 @@ jobs:
             version: "8.3"
             runner: ubuntu-22.04
           -
+            platform: linux/amd64
+            arch: amd64
+            version: "8.4"
+            runner: ubuntu-22.04
+          -
             platform: linux/arm64
             arch: arm64
             version: "8.1"
@@ -142,6 +157,11 @@ jobs:
             platform: linux/arm64
             arch: arm64
             version: "8.3"
+            runner: ubuntu-22.04-arm
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "8.4"
             runner: ubuntu-22.04-arm
 
     env:
