@@ -1,4 +1,4 @@
-FROM php:8.3.6-fpm-bookworm as cli
+FROM php:8.3.20-fpm-bookworm AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -136,10 +136,7 @@ RUN set -xe; \
 		# Pecl extensions
 		apcu \
 		gnupg \
-		# imagick does not install on Debian 12 / PHP 8.3 from pecl
-		# Install imagick@master from source
-		# See https://github.com/mlocati/docker-php-extension-installer/pull/811#issuecomment-1906737373
-		imagick/imagick@master \
+		imagick \
 		memcached \
 		redis \
 		ssh2 \
@@ -159,16 +156,16 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.27 \
-	COMPOSER2_VERSION=2.8.1 \
+	COMPOSER2_VERSION=2.8.8 \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.11.0 \
 	# platformsh/legacy-cli
-	PLATFORMSH_CLI_VERSION=4.21.0 \
-	ACQUIA_CLI_VERSION=2.31.0 \
-	TERMINUS_VERSION=3.6.0 \
+	PLATFORMSH_CLI_VERSION=4.23.0 \
+	ACQUIA_CLI_VERSION=2.41.1 \
+	TERMINUS_VERSION=3.6.2 \
 	JQ_VERSION=1.7.1 \
-	YQ_VERSION=4.44.3
+	YQ_VERSION=4.45.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -244,8 +241,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.40.1 \
-	NODE_VERSION=20.17.0 \
+	NVM_VERSION=0.40.2 \
+	NODE_VERSION=22.14.0 \
 	# Yarn (Classic v1)
 	# https://github.com/yarnpkg/yarn/releases
 	YARN_VERSION=1.22.22
@@ -328,7 +325,7 @@ HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]
 
 
 # Visual Studio Code Server flavor
-FROM cli as code-server
+FROM cli AS code-server
 
 # Run as docker, so we don't have to fix permissions
 USER docker
@@ -336,9 +333,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=4.23.1 \
-	VSCODE_GITLENS_VERSION=14.9.0 \
-	VSCODE_XDEBUG_VERSION=1.34.0 \
+	CODE_SERVER_VERSION=4.99.3 \
+	VSCODE_GITLENS_VERSION=17.0.3 \
+	VSCODE_XDEBUG_VERSION=1.36.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
