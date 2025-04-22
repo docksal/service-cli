@@ -163,7 +163,8 @@ ENV \
 	# platformsh/legacy-cli
 	PLATFORMSH_CLI_VERSION=4.23.0 \
 	ACQUIA_CLI_VERSION=2.41.1 \
-	TERMINUS_VERSION=3.6.2 \
+	# pantheon-systems/terminus added PHP 8.4 support in 4.0.0-alpha1
+	TERMINUS_VERSION=4.0.0-alpha2 \
 	JQ_VERSION=1.7.1 \
 	YQ_VERSION=4.45.1
 RUN set -xe; \
