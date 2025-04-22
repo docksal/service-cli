@@ -269,5 +269,6 @@ jobs:
             docker manifest push ${tag}
           done
           # Clean up intermediate arch-specific image tags (DockerHub only)
-          .github/scripts/docker-tag-delete.sh "${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-amd64"
-          .github/scripts/docker-tag-delete.sh "${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-arm64"
+          # TODO: DISABLED. DOES NOT WORK RELIABLY.
+          #.github/scripts/docker-tag-delete.sh "${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-amd64"
+          #.github/scripts/docker-tag-delete.sh "${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-arm64"
