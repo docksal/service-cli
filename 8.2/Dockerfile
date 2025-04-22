@@ -1,4 +1,4 @@
-FROM php:8.2.28-fpm-bookworm as cli
+FROM php:8.2.28-fpm-bookworm AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -325,7 +325,7 @@ HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]
 
 
 # Visual Studio Code Server flavor
-FROM cli as code-server
+FROM cli AS code-server
 
 # Run as docker, so we don't have to fix permissions
 USER docker
