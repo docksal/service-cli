@@ -136,10 +136,7 @@ RUN set -xe; \
 		# Pecl extensions
 		apcu \
 		gnupg \
-		# imagick does not install on Debian 12 / PHP 8.3 from pecl
-		# Install imagick@master from source
-		# See https://github.com/mlocati/docker-php-extension-installer/pull/811#issuecomment-1906737373
-		imagick/imagick@master \
+		imagick \
 		memcached \
 		redis \
 		ssh2 \
