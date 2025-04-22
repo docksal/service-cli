@@ -92,7 +92,7 @@ jobs:
       -
         # Build and cache image in the registry
         name: Build image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ${{ env.BUILD_DIR }}
           file: ${{ env.BUILD_DIR }}/Dockerfile
