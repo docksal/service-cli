@@ -25,8 +25,10 @@ RUN set -xe; \
 
 # Set en_US.UTF-8 as the default locale
 RUN set -xe; \
-	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-ENV LC_ALL en_US.utf8
+	echo "en_US.UTF-8 UTF-8" | tee -a /etc/locale.gen; \
+	locale-gen en_US.UTF-8; \
+	update-locale LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 
 # Additional packages
 RUN set -xe; \
@@ -101,7 +103,7 @@ RUN set -xe; \
 	# SSH login fix. Otherwise user is kicked off after login
 	sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd; \
 	echo "export VISIBLE=now" >> /etc/profile
-ENV NOTVISIBLE "in users profile"
+ENV NOTVISIBLE="in users profile"
 
 # PHP
 RUN set -xe; \
