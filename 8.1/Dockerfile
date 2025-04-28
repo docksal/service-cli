@@ -25,8 +25,10 @@ RUN set -xe; \
 
 # Set en_US.UTF-8 as the default locale
 RUN set -xe; \
-	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-ENV LC_ALL en_US.utf8
+	echo "en_US.UTF-8 UTF-8" | tee -a /etc/locale.gen; \
+	locale-gen en_US.UTF-8; \
+	update-locale LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 
 # Additional packages
 RUN set -xe; \
@@ -101,7 +103,7 @@ RUN set -xe; \
 	# SSH login fix. Otherwise user is kicked off after login
 	sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd; \
 	echo "export VISIBLE=now" >> /etc/profile
-ENV NOTVISIBLE "in users profile"
+ENV NOTVISIBLE="in users profile"
 
 # PHP
 RUN set -xe; \
@@ -159,8 +161,7 @@ ENV \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.11.0 \
-	# platformsh/legacy-cli
-	PLATFORMSH_CLI_VERSION=4.23.0 \
+	PLATFORMSH_CLI_VERSION=5.0.23 \
 	ACQUIA_CLI_VERSION=2.41.1 \
 	TERMINUS_VERSION=3.6.2 \
 	JQ_VERSION=1.7.1 \
@@ -177,7 +178,8 @@ RUN set -xe; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Platform.sh CLI
-	curl -fsSL "https://github.com/platformsh/legacy-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	curl -fsSL "https://github.com/platformsh/cli/releases/download/${PLATFORMSH_CLI_VERSION}/platform_${PLATFORMSH_CLI_VERSION}_linux_${TARGETARCH}.tar.gz" -o /tmp/platform.tar.gz; \
+	tar -xzf /tmp/platform.tar.gz -C /tmp && mv /tmp/platform /usr/local/bin/platform; rm -rf /tmp/*; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
@@ -209,6 +211,16 @@ RUN set -xe; \
 	;\
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
+
+# Install a newer SQLite version from Debian Trixie (testing) repo
+# Debian Bookworm (main) ships with sqlite v3.40. Drupal 11 requires SQLite v3.45+.
+# @see https://www.drupal.org/project/drupal/issues/3346338
+RUN set -xe; \
+	echo "deb https://deb.debian.org/debian testing main" | tee /etc/apt/sources.list.d/testing.list; \
+	apt-get update >/dev/null; \
+	apt-get install -y -t testing sqlite3;\
+	# Cleanup
+	apt-get clean; rm -rf /var/lib/apt/lists/*; rm -f /etc/apt/sources.list.d/testing.list
 
 # All further RUN commands will run as the "docker" user
 USER docker
