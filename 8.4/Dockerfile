@@ -162,8 +162,7 @@ ENV \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.11.0 \
-	# platformsh/legacy-cli
-	PLATFORMSH_CLI_VERSION=4.23.0 \
+	PLATFORMSH_CLI_VERSION=5.0.23 \
 	ACQUIA_CLI_VERSION=2.41.1 \
 	# pantheon-systems/terminus added PHP 8.4 support in 4.0.0-alpha1
 	TERMINUS_VERSION=4.0.0-alpha2 \
@@ -181,7 +180,8 @@ RUN set -xe; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Platform.sh CLI
-	curl -fsSL "https://github.com/platformsh/legacy-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	curl -fsSL "https://github.com/platformsh/cli/releases/download/${PLATFORMSH_CLI_VERSION}/platform_${PLATFORMSH_CLI_VERSION}_linux_${TARGETARCH}.tar.gz" -o /tmp/platform.tar.gz; \
+	tar -xzf /tmp/platform.tar.gz -C /tmp && mv /tmp/platform /usr/local/bin/platform; rm -rf /tmp/*; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
