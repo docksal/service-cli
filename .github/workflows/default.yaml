@@ -19,13 +19,13 @@ defaults:
 env:
   IMAGE: docksal/cli
   UPSTREAM_IMAGE: debian
-  LATEST_VERSION: "8.3"
+  LATEST_VERSION: "8.4"
   DOCKSAL_VERSION: develop
 
 jobs:
   build:
     name: "Build: ${{ matrix.version }}/${{ matrix.arch }}"
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.runner }}
 
     strategy:
       fail-fast: false # Don't cancel other jobs if one fails
@@ -35,27 +35,43 @@ jobs:
             platform: linux/amd64
             arch: amd64
             version: "8.1"
+            runner: ubuntu-22.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.2"
+            runner: ubuntu-22.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.3"
+            runner: ubuntu-22.04
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: "8.4"
+            runner: ubuntu-22.04
           -
             platform: linux/arm64
             arch: arm64
             version: "8.1"
+            runner: ubuntu-22.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.2"
+            runner: ubuntu-22.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.3"
-
+            runner: ubuntu-22.04-arm
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "8.4"
+            runner: ubuntu-22.04-arm
+  
     env:
       ARCH: ${{ matrix.arch }}
       VERSION_PREFIX: php
@@ -72,20 +88,6 @@ jobs:
           echo GIT_SHA7="${GITHUB_SHA:0:7}" | tee -a ${GITHUB_ENV}
           echo BUILD_DIR="${VERSION:-.}" | tee -a ${GITHUB_ENV}
           echo BUILD_IMAGE_TAG="${IMAGE}:${VERSION_PREFIX}${VERSION}-build" | tee -a ${GITHUB_ENV}
-          # Pull the host public SSH key at runtime instead of relying on a static value stored in secrets.
-          echo ARM64_HOST_SSH_CERT="$(ssh-keyscan -t rsa ${{ secrets.ARM64_HOST }} 2>/dev/null)" | tee -a ${GITHUB_ENV}
-      -
-        # Switch docker context to a remote arm64 host
-        # Used for building heavy images that take too long to build using QEMU + for native arm64 testing.
-        name: Switch to arm64 builder host
-        if: ${{ env.ARCH == 'arm64' }}
-        uses: docksal/actions/docker-context@main
-        with:
-          docker_host: "ssh://build-agent@${{ secrets.ARM64_HOST }}"
-          context_name: arm64-host
-          ssh_key: "${{ secrets.ARM64_HOST_SSH_KEY }}"
-          ssh_cert: "${{ env.ARM64_HOST_SSH_CERT }}"
-          use_context: true
       -
         name: Check Docker
         run: |
@@ -100,7 +102,7 @@ jobs:
       -
         # Build and cache image in the registry
         name: Build image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ${{ env.BUILD_DIR }}
           file: ${{ env.BUILD_DIR }}/Dockerfile
@@ -114,7 +116,7 @@ jobs:
 
   test:
     name: "Test: ${{ matrix.version }}/${{ matrix.arch }}"
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.runner }}
     needs: build
 
     strategy:
@@ -125,26 +127,42 @@ jobs:
             platform: linux/amd64
             arch: amd64
             version: "8.1"
+            runner: ubuntu-22.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.2"
+            runner: ubuntu-22.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.3"
+            runner: ubuntu-22.04
+          -
+            platform: linux/amd64
+            arch: amd64
+            version: "8.4"
+            runner: ubuntu-22.04
           -
             platform: linux/arm64
             arch: arm64
             version: "8.1"
+            runner: ubuntu-22.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.2"
+            runner: ubuntu-22.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.3"
+            runner: ubuntu-22.04-arm
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "8.4"
+            runner: ubuntu-22.04-arm
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -165,20 +183,6 @@ jobs:
           echo GIT_SHA7="${GITHUB_SHA:0:7}" | tee -a ${GITHUB_ENV}
           echo BUILD_DIR="${VERSION:-.}" | tee -a ${GITHUB_ENV}
           echo BUILD_IMAGE_TAG="${IMAGE}:${VERSION_PREFIX}${VERSION}-build" | tee -a ${GITHUB_ENV}
-          # Pull the host public SSH key at runtime instead of relying on a static value stored in secrets.
-          echo ARM64_HOST_SSH_CERT="$(ssh-keyscan -t rsa ${{ secrets.ARM64_HOST }} 2>/dev/null)" | tee -a ${GITHUB_ENV}
-      -
-        # Switch docker context to a remote arm64 host
-        # Used for building heavy images that take too long to build using QEMU + for native arm64 testing.
-        name: Switch to arm64 builder host
-        if: ${{ env.ARCH == 'arm64' }}
-        uses: docksal/actions/docker-context@main
-        with:
-          docker_host: "ssh://build-agent@${{ secrets.ARM64_HOST }}"
-          context_name: arm64-host
-          ssh_key: "${{ secrets.ARM64_HOST_SSH_KEY }}"
-          ssh_cert: "${{ env.ARM64_HOST_SSH_CERT }}"
-          use_context: true
       -
         name: Check Docker
         run: |
@@ -285,5 +289,6 @@ jobs:
             docker manifest push ${tag}
           done
           # Clean up intermediate arch-specific image tags (DockerHub only)
-          .github/scripts/docker-tag-delete.sh "${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-amd64"
-          .github/scripts/docker-tag-delete.sh "${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-arm64"
+          # TODO: DISABLED. DOES NOT WORK RELIABLY.
+          #.github/scripts/docker-tag-delete.sh "${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-amd64"
+          #.github/scripts/docker-tag-delete.sh "${{ env.BUILD_IMAGE_TAG }}-${{ env.GIT_SHA7 }}-arm64"

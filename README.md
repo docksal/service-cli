@@ -18,14 +18,16 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 
 ## Versions and image tag naming convention
 
-- Stable versions v3
-  - `php8.1-3.8`, `php8.1` - PHP 8.1
-  - `php8.2-3.8`, `php8.2` - PHP 8.2
-  - `php8.3-3.8`, `php8.3`, `latest` - PHP 8.3
-- Development versions
-  - `php8.1-edge` - PHP 8.1
-  - `php8.2-edge` - PHP 8.2
-  - `php8.3-edge` - PHP 8.3
+- Stable image versions
+  - `docksal/cli:php8.1-3.9`, `docksal/cli:php8.1` - PHP 8.1
+  - `docksal/cli:php8.2-3.9`, `docksal/cli:php8.2` - PHP 8.2
+  - `docksal/cli:php8.3-3.9`, `docksal/cli:php8.3` - PHP 8.3
+  - `docksal/cli:php8.4-3.9`, `docksal/cli:php8.4`, `docksal/cli:latest` - PHP 8.4
+- Development image versions
+  - `docksal/cli:php8.1-edge` - PHP 8.1
+  - `docksal/cli:php8.2-edge` - PHP 8.2
+  - `docksal/cli:php8.3-edge` - PHP 8.3
+  - `docksal/cli:php8.3-edge` - PHP 8.3
 
 ## PHP
 
@@ -38,8 +40,8 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 - wp-cli (Wordpress)
 
 This image uses the official `php-fpm` images from [Docker Hub](https://hub.docker.com/_/php/) as the base.
-This means that PHP and all modules are installed from source. Extra modules have to be installed in the same
-manner (installing them with `apt-get` won't work).
+
+Additional PHP extensions can be installed via the `install-php-extensions` tool ([mlocati/docker-php-extension-installer](https://github.com/mlocati/docker-php-extension-installer)).
 
 ### Available PHP database drivers
 
@@ -68,13 +70,13 @@ cli
 ## NodeJS
 
 - nvm
-- node v20.12.2 (following NodeJS LTS release cycle)
+- node v22.14.0 LTS (following NodeJS LTS release cycle)
 - yarn (classic v1)
 
 NodeJS is installed via `nvm` in the `docker` user's profile inside the image (`/home/docker/.nvm`).
 
-If you need a different version of node, use `nvm` to install it, e.g., `nvm install 21.7.3`.
-Then, use `nvm use 21.7.3` to use it in the current session or `nvm alias default 21.7.3` to use it by default.
+If you need a different version of node, use `nvm` to install it, e.g., `nvm install 23.11.0`.
+Then, use `nvm use 23.11.0` to use it in the current session or `nvm alias default 23.11.0` to use it by default.
 
 ## Python
 
@@ -97,9 +99,9 @@ This image comes with a system level installed Ruby v2.7.x from upstream Debian 
 
 ## Hosting provider tools
 
-- `acli` for Acquia Cloud APIv2 ([Acquia](https://docs.acquia.com/acquia-cli/))
-- `terminus` ([Pantheon](https://pantheon.io/features/terminus-command-line-interface))
-- `platform` ([Platform.sh](https://docs.platform.sh/development/cli.html))
+- `acli` for Acquia Cloud APIv2 ([Acquia](https://docs.acquia.com/acquia-cloud-platform/add-ons/acquia-cli/docs))
+- `terminus` ([Pantheon](https://pantheon.io/platform/command-line-interface-cli))
+- `platform` ([Platform.sh](https://docs.platform.sh/administration/cli.html))
 
 Also, see the [Secrets](#secrets) section below for more information on managing and using your hosting provider keys.
 

@@ -1,4 +1,4 @@
-FROM php:8.1.32-fpm-bookworm AS cli
+FROM php:8.4.6-fpm-bookworm AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -118,6 +118,7 @@ RUN set -xe; \
 		bz2 \
 		calendar\
 		exif \
+		ftp \
 		gd \
 		gettext \
 		imap \
@@ -163,7 +164,8 @@ ENV \
 	WPCLI_VERSION=2.11.0 \
 	PLATFORMSH_CLI_VERSION=5.0.23 \
 	ACQUIA_CLI_VERSION=2.41.1 \
-	TERMINUS_VERSION=3.6.2 \
+	# pantheon-systems/terminus added PHP 8.4 support in 4.0.0-alpha1
+	TERMINUS_VERSION=4.0.0-alpha2 \
 	JQ_VERSION=1.7.1 \
 	YQ_VERSION=4.45.1
 RUN set -xe; \

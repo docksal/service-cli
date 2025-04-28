@@ -1,4 +1,4 @@
-FROM php:8.3.6-fpm-bookworm as cli
+FROM php:8.3.20-fpm-bookworm AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -25,8 +25,10 @@ RUN set -xe; \
 
 # Set en_US.UTF-8 as the default locale
 RUN set -xe; \
-	localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-ENV LC_ALL en_US.utf8
+	echo "en_US.UTF-8 UTF-8" | tee -a /etc/locale.gen; \
+	locale-gen en_US.UTF-8; \
+	update-locale LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 
 # Additional packages
 RUN set -xe; \
@@ -101,65 +103,17 @@ RUN set -xe; \
 	# SSH login fix. Otherwise user is kicked off after login
 	sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd; \
 	echo "export VISIBLE=now" >> /etc/profile
-ENV NOTVISIBLE "in users profile"
+ENV NOTVISIBLE="in users profile"
 
 # PHP
 RUN set -xe; \
 	# Note: essential build tools (g++, gcc, make, etc) are included upstream as persistent packages.
-	buildDeps=" \
-		libc-client2007e-dev \
-		libfreetype6-dev \
-		libgpgme11-dev \
-		libicu-dev \
-		libjpeg62-turbo-dev \
-		libkrb5-dev \
-		libldap2-dev \
-		libmagickcore-dev \
-		libmagickwand-dev \
-		libmemcached-dev \
-		libmhash-dev \
-		libpng-dev \
-		libpq-dev \
-		libwebp-dev \
-		libssh2-1-dev \
-		libxpm-dev \
-		libxslt1-dev \
-		libzip-dev \
-		unixodbc-dev \
-	"; \
-	apt-get update >/dev/null; \
-	apt-get -y --no-install-recommends install >/dev/null \
-		$buildDeps \
-		libc-client2007e \
-		libfreetype6 \
-		libgpgme11 \
-		libicu72 \
-		libjpeg62-turbo \
-		libldap-2.5-0 \
-		libmagickcore-6.q16-6-extra \
-		libmagickwand-6.q16-6 \
-		libmemcached11 \
-		libmemcachedutil2 \
-		libmhash2 \
-		libpng16-16 \
-		libpq5 \
-		libssh2-1 \
-		libxpm4 \
-		libxslt1.1 \
-		libzip4 \
-	;\
-	docker-php-ext-configure >/dev/null gd \
-		--with-freetype \
-		--with-jpeg \
-		--with-webp \
-		--with-xpm; \
-	PHP_OPENSSL=yes docker-php-ext-configure >/dev/null imap --with-kerberos --with-imap-ssl; \
-	# Using $(uname -m) (returns x86_64 / aarch64) vs ${TARGETARCH} (returns amd64 / arm64)
-	docker-php-ext-configure >/dev/null ldap --with-libdir=lib/$(uname -m)-linux-gnu/; \
-	docker-php-ext-configure >/dev/null pgsql --with-pgsql=/usr/local/pgsql/; \
-	docker-php-ext-configure >/dev/null zip; \
-	\
-	docker-php-ext-install >/dev/null -j$(nproc) \
+	# Docker PHP Extension Installer
+	curl -sSLf "https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions" -o /usr/local/bin/install-php-extensions \
+		&& chmod +x /usr/local/bin/install-php-extensions; \
+	# Instal/enable all PHP extensions via mlocati/docker-php-extension-installer
+	install-php-extensions \
+		# Stock extensions from upstream image
 		bcmath \
 		bz2 \
 		calendar\
@@ -181,85 +135,38 @@ RUN set -xe; \
 		xsl \
 		zip \
 		sysvsem \
-	;\
-	pecl update-channels; \
-	pecl install >/dev/null </dev/null \
+		# Pecl extensions
 		apcu \
 		gnupg \
-		# imagick does not install on Debian 12 / PHP 8.3 via pecl (see below)
-		#imagick \
+		imagick \
 		memcached \
 		redis \
 		ssh2 \
 		xdebug \
 		xhprof \
-	;\
-	# Install imagick@master using mlocati/docker-php-extension-installer
-	# https://github.com/mlocati/docker-php-extension-installer/pull/811#issuecomment-1906737373
-	curl -fsSL "https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions" -o /usr/local/bin/install-php-extensions; \
-	chmod +x /usr/local/bin/install-php-extensions; \
-	install-php-extensions imagick/imagick@master; \
-	# TODO: Use install-php-extensions across the board to install PHP extensions
-	\
-	docker-php-ext-enable \
-		apcu \
-		gnupg \
-		# imagick does not install on Debian 12 / PHP 8.3
-		#imagick \
-		memcached \
-		redis \
-		ssh2 \
-	;\
-	# Cleanup
-	docker-php-source delete; \
-	rm -rf /tmp/pear ~/.pearrc; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
-	apt-get clean; rm -rf /var/lib/apt/lists/*
-
-# MSSQL PHP client
-RUN set -xe; \
-	# Repo and key for msodbcsql18 (MS ODBC driver), required by pecl/sqlsrv and pecl/pdo_sqlsrv
-	curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list -o /etc/apt/sources.list.d/mssql.list; \
-	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg; \
-	\
-	buildDeps=" \
-		unixodbc-dev \
-	"; \
-	apt-get update >/dev/null; \
-	# Necessary for msodbcsql18 (MSSQL)
-	ACCEPT_EULA=Y \
-	apt-get -y --no-install-recommends install >/dev/null \
-		$buildDeps \
-		msodbcsql18 \
-	;\
-	pecl update-channels; \
-	pecl install >/dev/null </dev/null \
+		# MSSQL PHP client
 		pdo_sqlsrv \
 		sqlsrv \
 	;\
-	docker-php-ext-enable \
-		pdo_sqlsrv \
-		sqlsrv \
-	;\
-	# Cleanup
-	rm -rf /tmp/pear ~/.pearrc; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps >/dev/null; \
-	apt-get clean; rm -rf /var/lib/apt/lists/*
+	# Disable xdebug and xhprof by default to avoid performance impact
+	# They can be enabled via environment variables at runtime (XDEBUG_ENABLED=1 and XHPROF_ENABLED=1)
+	# There is no native "docker-php-ext-disable", so we remove the ini files manually
+	rm -f "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini"; \
+	rm -f "$PHP_INI_DIR/conf.d/docker-php-ext-xhprof.ini"
 
 # PHP tools (installed globally)
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.27 \
-	COMPOSER2_VERSION=2.7.2 \
+	COMPOSER2_VERSION=2.8.8 \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
-	WPCLI_VERSION=2.10.0 \
-	# platformsh/legacy-cli
-	PLATFORMSH_CLI_VERSION=4.18.0 \
-	ACQUIA_CLI_VERSION=2.25.0 \
-	TERMINUS_VERSION=3.3.5 \
+	WPCLI_VERSION=2.11.0 \
+	PLATFORMSH_CLI_VERSION=5.0.23 \
+	ACQUIA_CLI_VERSION=2.41.1 \
+	TERMINUS_VERSION=3.6.2 \
 	JQ_VERSION=1.7.1 \
-	YQ_VERSION=4.43.1
+	YQ_VERSION=4.45.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -272,7 +179,8 @@ RUN set -xe; \
 	# Wordpress CLI
 	curl -fsSL "https://github.com/wp-cli/wp-cli/releases/download/v${WPCLI_VERSION}/wp-cli-${WPCLI_VERSION}.phar" -o /usr/local/bin/wp; \
 	# Platform.sh CLI
-	curl -fsSL "https://github.com/platformsh/legacy-cli/releases/download/v${PLATFORMSH_CLI_VERSION}/platform.phar" -o /usr/local/bin/platform; \
+	curl -fsSL "https://github.com/platformsh/cli/releases/download/${PLATFORMSH_CLI_VERSION}/platform_${PLATFORMSH_CLI_VERSION}_linux_${TARGETARCH}.tar.gz" -o /tmp/platform.tar.gz; \
+	tar -xzf /tmp/platform.tar.gz -C /tmp && mv /tmp/platform /usr/local/bin/platform; rm -rf /tmp/*; \
 	# Acquia CLI
 	curl -fsSL "https://github.com/acquia/cli/releases/download/${ACQUIA_CLI_VERSION}/acli.phar" -o /usr/local/bin/acli; \
 	# Pantheon Terminus
@@ -305,6 +213,16 @@ RUN set -xe; \
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
+# Install a newer SQLite version from Debian Trixie (testing) repo
+# Debian Bookworm (main) ships with sqlite v3.40. Drupal 11 requires SQLite v3.45+.
+# @see https://www.drupal.org/project/drupal/issues/3346338
+RUN set -xe; \
+	echo "deb https://deb.debian.org/debian testing main" | tee /etc/apt/sources.list.d/testing.list; \
+	apt-get update >/dev/null; \
+	apt-get install -y -t testing sqlite3;\
+	# Cleanup
+	apt-get clean; rm -rf /var/lib/apt/lists/*; rm -f /etc/apt/sources.list.d/testing.list
+
 # All further RUN commands will run as the "docker" user
 USER docker
 SHELL ["/bin/bash", "-c"]
@@ -335,8 +253,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.39.7 \
-	NODE_VERSION=20.12.2 \
+	NVM_VERSION=0.40.2 \
+	NODE_VERSION=22.14.0 \
 	# Yarn (Classic v1)
 	# https://github.com/yarnpkg/yarn/releases
 	YARN_VERSION=1.22.22
@@ -419,7 +337,7 @@ HEALTHCHECK --interval=5s --timeout=1s --retries=12 CMD ["/opt/healthcheck.sh"]
 
 
 # Visual Studio Code Server flavor
-FROM cli as code-server
+FROM cli AS code-server
 
 # Run as docker, so we don't have to fix permissions
 USER docker
@@ -427,9 +345,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=4.23.1 \
-	VSCODE_GITLENS_VERSION=14.9.0 \
-	VSCODE_XDEBUG_VERSION=1.34.0 \
+	CODE_SERVER_VERSION=4.99.3 \
+	VSCODE_GITLENS_VERSION=17.0.3 \
+	VSCODE_XDEBUG_VERSION=1.36.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
