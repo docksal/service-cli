@@ -35,42 +35,42 @@ jobs:
             platform: linux/amd64
             arch: amd64
             version: "8.1"
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.2"
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.3"
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.4"
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           -
             platform: linux/arm64
             arch: arm64
             version: "8.1"
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.2"
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.3"
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.4"
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
   
     env:
       ARCH: ${{ matrix.arch }}
@@ -127,42 +127,42 @@ jobs:
             platform: linux/amd64
             arch: amd64
             version: "8.1"
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.2"
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.3"
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           -
             platform: linux/amd64
             arch: amd64
             version: "8.4"
-            runner: ubuntu-22.04
+            runner: ubuntu-24.04
           -
             platform: linux/arm64
             arch: arm64
             version: "8.1"
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.2"
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.3"
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
           -
             platform: linux/arm64
             arch: arm64
             version: "8.4"
-            runner: ubuntu-22.04-arm
+            runner: ubuntu-24.04-arm
 
     env:
       ARCH: ${{ matrix.arch }}
@@ -172,7 +172,7 @@ jobs:
     steps:
       -
         name: Setup Bats
-        uses: bats-core/bats-action@2.0.0
+        uses: bats-core/bats-action@3.0.1
       -
         name: Checkout
         uses: actions/checkout@v4
@@ -214,7 +214,7 @@ jobs:
 
   push:
     name: "Push: ${{ matrix.version }}/multi"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     # Wait for test to either succeed or fail
     needs: test
@@ -226,6 +226,7 @@ jobs:
           - "8.1"
           - "8.2"
           - "8.3"
+          - "8.4"
 
     env:
       VERSION_PREFIX: php
