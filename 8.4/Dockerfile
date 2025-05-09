@@ -167,7 +167,7 @@ ENV \
 	# pantheon-systems/terminus added PHP 8.4 support in 4.0.0-alpha1
 	TERMINUS_VERSION=4.0.0-alpha2 \
 	JQ_VERSION=1.7.1 \
-	YQ_VERSION=4.45.1
+	YQ_VERSION=4.45.3
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
