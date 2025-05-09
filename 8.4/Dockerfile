@@ -164,8 +164,7 @@ ENV \
 	WPCLI_VERSION=2.12.0 \
 	PLATFORMSH_CLI_VERSION=5.0.23 \
 	ACQUIA_CLI_VERSION=2.41.1 \
-	# pantheon-systems/terminus added PHP 8.4 support in 4.0.0-alpha1
-	TERMINUS_VERSION=4.0.0-alpha2 \
+	TERMINUS_VERSION=4.0.0 \
 	JQ_VERSION=1.7.1 \
 	YQ_VERSION=4.45.3
 RUN set -xe; \
