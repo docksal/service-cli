@@ -1,4 +1,4 @@
-FROM php:8.2.28-fpm-bookworm AS cli
+FROM php:8.2.29-fpm-bookworm AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
