@@ -1,4 +1,4 @@
-FROM php:8.2.28-fpm-bookworm AS cli
+FROM php:8.2.29-fpm-bookworm AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -158,15 +158,15 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.27 \
-	COMPOSER2_VERSION=2.8.8 \
+	COMPOSER2_VERSION=2.8.12 \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
-	WPCLI_VERSION=2.11.0 \
-	PLATFORMSH_CLI_VERSION=5.0.23 \
-	ACQUIA_CLI_VERSION=2.41.1 \
-	TERMINUS_VERSION=3.6.2 \
-	JQ_VERSION=1.7.1 \
-	YQ_VERSION=4.45.1
+	WPCLI_VERSION=2.12.0 \
+	PLATFORMSH_CLI_VERSION=5.6.0 \
+	ACQUIA_CLI_VERSION=2.49.0 \
+	TERMINUS_VERSION=4.1.0 \
+	JQ_VERSION=1.8.1 \
+	YQ_VERSION=4.48.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -253,8 +253,8 @@ $HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibil
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.40.2 \
-	NODE_VERSION=22.14.0 \
+	NVM_VERSION=0.40.3 \
+	NODE_VERSION=22.20.0 \
 	# Yarn (Classic v1)
 	# https://github.com/yarnpkg/yarn/releases
 	YARN_VERSION=1.22.22
@@ -345,9 +345,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=4.99.3 \
-	VSCODE_GITLENS_VERSION=17.0.3 \
-	VSCODE_XDEBUG_VERSION=1.36.0 \
+	CODE_SERVER_VERSION=4.104.3 \
+	VSCODE_GITLENS_VERSION=17.6.1 \
+	VSCODE_XDEBUG_VERSION=1.37.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
