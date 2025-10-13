@@ -76,7 +76,7 @@ _healthcheck_wait ()
 
 	# Check all binaries in a single shot
 	run make exec -e CMD="type $(echo ${binaries} | xargs)"
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	### Cleanup ###
@@ -193,42 +193,42 @@ _healthcheck_wait ()
 
 	# Check Composer v1 version (legacy)
 	run docker exec -u docker "$NAME" bash -lc 'set -x; composer1 --version | grep "${COMPOSER_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Check Composer v2 version (default)
 	run docker exec -u docker "$NAME" bash -lc 'set -x; composer --version | grep "${COMPOSER2_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Check Drush 8 version (legacy)
 	run docker exec -u docker "$NAME" bash -lc 'set -x; drush8 --version | grep "${DRUSH_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Check Drupal Console version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; drupal --version | grep "${DRUPAL_CONSOLE_LAUNCHER_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Check Wordpress CLI version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; wp --version | grep "${WPCLI_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Check Terminus version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "${TERMINUS_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Check Platform CLI version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; platform --version | grep "${PLATFORMSH_CLI_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Check Acquia CLI version
 	run docker exec -u docker "$NAME" bash -lc 'set -x; acli --version | grep "${ACQUIA_CLI_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	### Cleanup ###
@@ -248,27 +248,27 @@ _healthcheck_wait ()
 
 	# nvm
 	run docker exec -u docker "$NAME" bash -lc 'nvm --version | grep "${NVM_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# nodejs
 	run docker exec -u docker "$NAME" bash -lc 'node --version | grep "${NODE_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# yarn
 	run docker exec -u docker "$NAME" bash -lc 'yarn --version | grep "${YARN_VERSION}"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Stock Ruby version in Debian 12 is 3.1.x
 	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "ruby 3.1"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Stock Python version in Debian 12 is 3.11.x
 	run docker exec -u docker "$NAME" bash -lc 'python3 --version 2>&1 | grep "Python 3.11"'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	# Check msmtp
@@ -303,7 +303,7 @@ _healthcheck_wait ()
 	unset output
 	# TODO: figure out how to properly use 'make exec' here (escape quotes)
 	run docker exec -u docker "${NAME}" bash -lc 'echo "${SECRET_SSH_PRIVATE_KEY}" | base64 -d | diff ${HOME}/.ssh/id_rsa -'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	unset output
 
 	### Cleanup ###
@@ -326,7 +326,7 @@ _healthcheck_wait ()
 	sleep 2
 
 	run docker exec -u docker "${NAME}" cat /tmp/test-startup.txt
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	[[ "${output}" =~ "I ran properly" ]]
 
 	### Cleanup ###
@@ -359,7 +359,7 @@ _healthcheck_wait ()
 
 	# Confirm authentication works
 	run docker exec -u docker "${NAME}" bash -lc 'platform auth:info --no-interaction'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	[[ ! "${output}" =~ "Invalid API token" ]]
 	[[ "${output}" =~ "developer@docksal.io" ]]
 	unset output
@@ -403,7 +403,7 @@ _healthcheck_wait ()
 
 	# Confirm we are logged in with the expected user
 	run docker exec -u docker "${NAME}" bash -lc 'terminus site:list'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	[[ ! "${output}" =~ "You are not logged in." ]]
 	unset output
 
@@ -411,7 +411,7 @@ _healthcheck_wait ()
 	# terminus auth:whoami is finicky/buggy and needs another command to run to create a session first.
 	# See https://github.com/docksal/service-cli/issues/258
 	run docker exec -u docker "${NAME}" bash -lc 'terminus auth:whoami'
-	[[ ${status} == 0 ]]
+	[ "$status" -eq 0 ]
 	[[ ! "${output}" =~ "You are not logged in." ]]
 	[[ "${output}" =~ "developer@docksal.io" ]]
 	unset output
