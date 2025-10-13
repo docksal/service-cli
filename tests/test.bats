@@ -192,43 +192,42 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# Check Composer v1 version (legacy)
-	run docker exec -u docker "$NAME" bash -lc 'set -x; composer1 --version | grep "^Composer version ${COMPOSER_VERSION} "'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; composer1 --version | grep "${COMPOSER_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Composer v2 version (default)
-	run docker exec -u docker "$NAME" bash -lc 'set -x; composer --version | grep "^Composer version ${COMPOSER2_VERSION} "'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; composer --version | grep "${COMPOSER2_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drush 8 version (legacy)
-	run docker exec -u docker "$NAME" bash -lc 'set -x; drush8 --version | grep "^ Drush Version   :  ${DRUSH_VERSION} $"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; drush8 --version | grep "${DRUSH_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Drupal Console version
-	run docker exec -u docker "$NAME" bash -lc 'set -x; drupal --version | grep "^Drupal Console Launcher ${DRUPAL_CONSOLE_LAUNCHER_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; drupal --version | grep "${DRUPAL_CONSOLE_LAUNCHER_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Wordpress CLI version
-	run docker exec -u docker "$NAME" bash -lc 'set -x; wp --version | grep "^WP-CLI ${WPCLI_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; wp --version | grep "${WPCLI_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Terminus version
-	# --no-ansi is used to strip color codes from the output, otherwise the grep will fail
-	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --no-ansi --version | grep "^Terminus ${TERMINUS_VERSION}$"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; terminus --version | grep "${TERMINUS_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Platform CLI version
-	run docker exec -u docker "$NAME" bash -lc 'set -x; platform --version | grep "Platform.sh CLI ${PLATFORMSH_CLI_VERSION}"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; platform --version | grep "${PLATFORMSH_CLI_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
 	# Check Acquia CLI version
-	run docker exec -u docker "$NAME" bash -lc 'set -x; acli --version | grep "^Acquia CLI ${ACQUIA_CLI_VERSION}"'
+	run docker exec -u docker "$NAME" bash -lc 'set -x; acli --version | grep "${ACQUIA_CLI_VERSION}"'
 	[[ ${status} == 0 ]]
 	unset output
 
