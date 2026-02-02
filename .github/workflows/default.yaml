@@ -34,11 +34,6 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: "8.1"
-            runner: ubuntu-24.04
-          -
-            platform: linux/amd64
-            arch: amd64
             version: "8.2"
             runner: ubuntu-24.04
           -
@@ -54,11 +49,7 @@ jobs:
           -
             platform: linux/arm64
             arch: arm64
-            version: "8.1"
-            runner: ubuntu-24.04-arm
-          -
-            platform: linux/arm64
-            arch: arm64
+
             version: "8.2"
             runner: ubuntu-24.04-arm
           -
@@ -126,11 +117,7 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: "8.1"
-            runner: ubuntu-24.04
-          -
-            platform: linux/amd64
-            arch: amd64
+
             version: "8.2"
             runner: ubuntu-24.04
           -
@@ -143,11 +130,6 @@ jobs:
             arch: amd64
             version: "8.4"
             runner: ubuntu-24.04
-          -
-            platform: linux/arm64
-            arch: arm64
-            version: "8.1"
-            runner: ubuntu-24.04-arm
           -
             platform: linux/arm64
             arch: arm64
@@ -223,7 +205,6 @@ jobs:
     strategy:
       matrix:
         version:
-          - "8.1"
           - "8.2"
           - "8.3"
           - "8.4"
