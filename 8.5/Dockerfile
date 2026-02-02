@@ -126,7 +126,6 @@ RUN set -xe; \
 		intl \
 		ldap \
 		mysqli \
-		# opcache \
 		pcntl \
 		pdo_mysql \
 		pdo_pgsql \
@@ -304,7 +303,7 @@ RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 COPY config/php/zz-php.ini /usr/local/etc/php/conf.d/zz-php.ini
 COPY config/php/xdebug.ini /opt/docker-php-ext-xdebug.ini
 COPY config/php/xhprof.ini /opt/docker-php-ext-xhprof.ini
-# COPY config/php/opcache.ini /opt/docker-php-ext-opcache.ini
+COPY config/php/opcache.ini /opt/docker-php-ext-opcache.ini
 COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
 ENV \
