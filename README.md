@@ -21,11 +21,13 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 - Stable image versions
   - `docksal/cli:php8.2-3.10`, `docksal/cli:php8.2` - PHP 8.2
   - `docksal/cli:php8.3-3.10`, `docksal/cli:php8.3` - PHP 8.3
-  - `docksal/cli:php8.4-3.10`, `docksal/cli:php8.4`, `docksal/cli:latest` - PHP 8.4
+  - `docksal/cli:php8.4-3.10`, `docksal/cli:php8.4` - PHP 8.4
+  - `docksal/cli:php8.5-3.10`, `docksal/cli:php8.5`, `docksal/cli:latest` - PHP 8.5
 - Development image versions
   - `docksal/cli:php8.2-edge` - PHP 8.2
   - `docksal/cli:php8.3-edge` - PHP 8.3
   - `docksal/cli:php8.4-edge` - PHP 8.4
+  - `docksal/cli:php8.5-edge` - PHP 8.5
 
 ## PHP
 
