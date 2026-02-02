@@ -25,6 +25,7 @@ imap
 intl
 json
 ldap
+lexbor
 libxml
 mbstring
 memcached
@@ -37,10 +38,10 @@ PDO
 pdo_mysql
 pdo_pgsql
 pdo_sqlite
-pdo_sqlsrv
 pgsql
 Phar
 posix
+random
 readline
 redis
 Reflection
@@ -51,11 +52,11 @@ sockets
 sodium
 SPL
 sqlite3
-sqlsrv
 ssh2
 standard
 sysvsem
 tokenizer
+uri
 xml
 xmlreader
 xmlwriter
@@ -93,6 +94,7 @@ imap
 intl
 json
 ldap
+lexbor
 libxml
 mbstring
 memcached
@@ -105,10 +107,10 @@ PDO
 pdo_mysql
 pdo_pgsql
 pdo_sqlite
-pdo_sqlsrv
 pgsql
 Phar
 posix
+random
 readline
 redis
 Reflection
@@ -119,11 +121,11 @@ sockets
 sodium
 SPL
 sqlite3
-sqlsrv
 ssh2
 standard
 sysvsem
 tokenizer
+uri
 xml
 xmlreader
 xmlwriter

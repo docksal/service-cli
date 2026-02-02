@@ -3,7 +3,7 @@
 
 IMAGE ?= docksal/cli
 VERSION_PREFIX ?= php
-VERSION ?= 8.1
+VERSION ?= 8.5
 BUILD_IMAGE_TAG ?= $(IMAGE):$(VERSION_PREFIX)$(VERSION)-build
 NAME = docksal-cli-$(VERSION)-$(GIT_SHA7)
 CWD = $(shell pwd)

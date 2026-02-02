@@ -1,7 +1,11 @@
-FROM php:8.1.33-fpm-bookworm AS cli
+# syntax=docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv (ignore false positives in ARG/ENV)
+
+FROM php:8.5.2-fpm-bookworm AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
+# SecretsUsedInArgOrEnv false positive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
@@ -118,13 +122,13 @@ RUN set -xe; \
 		bz2 \
 		calendar\
 		exif \
+		ftp \
 		gd \
 		gettext \
 		imap \
 		intl \
 		ldap \
 		mysqli \
-		opcache \
 		pcntl \
 		pdo_mysql \
 		pdo_pgsql \
@@ -143,9 +147,9 @@ RUN set -xe; \
 		ssh2 \
 		xdebug \
 		xhprof \
-		# MSSQL PHP client
-		pdo_sqlsrv \
-		sqlsrv \
+		# MSSQL PHP client - not available yet for PHP 8.5 via docker-php-extension-installer
+		# pdo_sqlsrv \
+		# sqlsrv \
 	;\
 	# Disable xdebug and xhprof by default to avoid performance impact
 	# They can be enabled via environment variables at runtime (XDEBUG_ENABLED=1 and XHPROF_ENABLED=1)
@@ -163,8 +167,11 @@ ENV \
 	WPCLI_VERSION=2.12.0 \
 	PLATFORMSH_CLI_VERSION=5.6.0 \
 	ACQUIA_CLI_VERSION=2.55.0 \
-	# Pin Terminus 3.6.2 for PHP 8.1
-	TERMINUS_VERSION=3.6.2 \
+	# Terminus does not yet support PHP 8.5 officially.
+	# This env var allows running it on newer PHP versions regardless.
+	# https://github.com/pantheon-systems/terminus/issues/2751
+	TERMINUS_ALLOW_UNSUPPORTED_NEWER_PHP=1 \
+	TERMINUS_VERSION=4.1.1 \
 	JQ_VERSION=1.8.1 \
 	YQ_VERSION=4.50.1
 RUN set -xe; \
@@ -304,6 +311,7 @@ COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
 ENV \
 	# ssh-agent proxy socket (requires docksal/ssh-agent)
+	# SecretsUsedInArgOrEnv false positive
 	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
 	# Set TERM so text editors/etc. can be used
 	TERM=xterm \
