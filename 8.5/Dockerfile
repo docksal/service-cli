@@ -1,8 +1,11 @@
+# syntax=docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv (ignore false positives in ARG/ENV)
+
 FROM php:8.5.2-fpm-bookworm AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
-# syntax directive: ignore=SecretsUsedInArgOrEnv (false positive check)
+# SecretsUsedInArgOrEnv false positive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
@@ -308,7 +311,7 @@ COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
 ENV \
 	# ssh-agent proxy socket (requires docksal/ssh-agent)
-	# syntax directive: ignore=SecretsUsedInArgOrEnv (false positive check)
+	# SecretsUsedInArgOrEnv false positive
 	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
 	# Set TERM so text editors/etc. can be used
 	TERM=xterm \
