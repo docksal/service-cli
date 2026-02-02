@@ -37,7 +37,6 @@ PDO
 pdo_mysql
 pdo_pgsql
 pdo_sqlite
-pdo_sqlsrv
 pgsql
 Phar
 posix
@@ -52,7 +51,6 @@ sockets
 sodium
 SPL
 sqlite3
-sqlsrv
 ssh2
 standard
 sysvsem
