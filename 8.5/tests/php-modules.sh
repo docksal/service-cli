@@ -25,6 +25,7 @@ imap
 intl
 json
 ldap
+lexbor
 libxml
 mbstring
 memcached
@@ -55,6 +56,7 @@ ssh2
 standard
 sysvsem
 tokenizer
+uri
 xml
 xmlreader
 xmlwriter
