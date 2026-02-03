@@ -172,7 +172,7 @@ ENV \
 	# This env var allows running it on newer PHP versions regardless.
 	# https://github.com/pantheon-systems/terminus/issues/2751
 	TERMINUS_ALLOW_UNSUPPORTED_NEWER_PHP=1 \
-	TERMINUS_VERSION=4.1.1 \
+	TERMINUS_VERSION=4.1.4 \
 	JQ_VERSION=1.8.1 \
 	YQ_VERSION=4.50.1
 RUN set -xe; \
