@@ -247,33 +247,33 @@ _healthcheck_wait ()
 	### Tests ###
 
 	# nvm
-	run docker exec -u docker "$NAME" bash -lc 'nvm --version | grep "${NVM_VERSION}"'
+	run docker exec -u docker "$NAME" bash -lc 'nvm --version | grep "^${NVM_VERSION}"'
 	[ "$status" -eq 0 ]
 	unset output
 
 	# nodejs
-	run docker exec -u docker "$NAME" bash -lc 'node --version | grep "${NODE_VERSION}"'
+	run docker exec -u docker "$NAME" bash -lc 'node --version | grep "^v${NODE_VERSION}"'
 	[ "$status" -eq 0 ]
 	unset output
 
 	# yarn
-	run docker exec -u docker "$NAME" bash -lc 'yarn --version | grep "${YARN_VERSION}"'
+	run docker exec -u docker "$NAME" bash -lc 'yarn --version | grep "^${YARN_VERSION}"'
 	[ "$status" -eq 0 ]
 	unset output
 
-	# Stock Ruby version in Debian 12 is 3.1.x
-	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "ruby 3.1"'
+	# Stock Ruby version in Debian 13 is 3.3.x
+	run docker exec -u docker "$NAME" bash -lc 'ruby --version | grep "^ruby 3.3"'
 	[ "$status" -eq 0 ]
 	unset output
 
-	# Stock Python version in Debian 12 is 3.11.x
-	run docker exec -u docker "$NAME" bash -lc 'python3 --version 2>&1 | grep "Python 3.11"'
+	# Stock Python version in Debian 13 is 3.13.x
+	run docker exec -u docker "$NAME" bash -lc 'python3 --version 2>&1 | grep "^Python 3.13"'
 	[ "$status" -eq 0 ]
 	unset output
 
 	# Check msmtp
-	run docker exec -u docker "$NAME" which msmtp
-	echo "$output" | grep "/usr/bin/msmtp"
+	run docker exec -u docker "$NAME" bash -lc 'which msmtp | grep "^/usr/bin/msmtp"'
+	[ "$status" -eq 0 ]
 	unset output
 
 	### Cleanup ###

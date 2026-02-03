@@ -6,7 +6,7 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 
 ## Features
 
-- Based on the official php-fpm Debian 12 (bookworm) images 
+- Based on the official php-fpm Debian 13 (trixie) images 
 - php/php-fpm (w/ xdebug), nodejs (via nvm), python, ruby
 - Framework specific tools for Drupal and Wordpress
 - Miscellaneous cli tools for day to day web development
