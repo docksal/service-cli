@@ -80,11 +80,11 @@ Then, use `nvm use 23.11.0` to use it in the current session or `nvm alias defau
 
 ## Python
 
-This image comes with a system level installed Python v3.9.x from upstream Debian 11.
+This image comes with a system-level installed Python v3.13.x from upstream Debian 13.
 
 ## Ruby
 
-This image comes with a system level installed Ruby v2.7.x from upstream Debian 11.
+This image comes with a system-level installed Ruby v3.3.x from upstream Debian 13.
 
 ## Notable console tools
 
