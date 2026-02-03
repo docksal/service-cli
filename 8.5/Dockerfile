@@ -241,13 +241,13 @@ RUN set -e; \
 	# Set allow-plugins. See https://getcomposer.org/allow-plugins
 	composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true; \
 	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp; \
-	# Don't fix the indentation or installed_paths will not be set correctly
+	# IMPORTANT: Do NOT fix the indentation or installed_paths will not be set correctly
 	phpcs --config-set installed_paths \
-		$HOME/.config/composer/vendor/drupal/coder/coder_sniffer/,\
-		$HOME/.config/composer/vendor/wp-coding-standards/wpcs/,\
-		$HOME/.config/composer/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,\
-		$HOME/.config/composer/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,\
-		$HOME/.config/composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat; \
+$HOME/.config/composer/vendor/drupal/coder/coder_sniffer/,\
+$HOME/.config/composer/vendor/wp-coding-standards/wpcs/,\
+$HOME/.config/composer/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,\
+$HOME/.config/composer/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,\
+$HOME/.config/composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat; \
 	# Cleanup
 	composer clear-cache
 

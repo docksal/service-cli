@@ -163,12 +163,12 @@ _healthcheck_wait ()
 
 	# Check xdebug was enabled
 	run make exec -e CMD='php -m'
-	echo "$output" | grep -e "^xdebug$"
+	echo "$output" | grep -E "^xdebug$"
 	unset output
 
 	# Check xdebug was enabled
 	run make exec -e CMD='php -m'
-	echo "$output" | grep -e "^xhprof$"
+	echo "$output" | grep -E "^xhprof$"
 	unset output
 
 	# Check PHP CLI overrides
@@ -488,12 +488,12 @@ _healthcheck_wait ()
 	run docker exec -u docker "$NAME" bash -lc "phpcs -i | sed 's/,//g'"
 	# The trailing space below allows comparing all values the same way: " <value> " (needed for the last value to match).
 	output="${output} "
-	[[ "${output}" =~ " Drupal " ]]
-	[[ "${output}" =~ " DrupalPractice " ]]
-	[[ "${output}" =~ " WordPress " ]] # Includes WordPress-Core, WordPress-Docs and WordPress-Extra
-	[[ "${output}" =~ " PHPCompatibility " ]]
-	[[ "${output}" =~ " PHPCompatibilityWP " ]]
-	[[ "${output}" =~ " PHPCompatibilityParagonieRandomCompat " ]]
+	echo "$output" | grep " Drupal "
+	echo "$output" | grep " DrupalPractice "
+	echo "$output" | grep " WordPress " # Includes WordPress-Core, WordPress-Docs and WordPress-Extra
+	echo "$output" | grep " PHPCompatibility "
+	echo "$output" | grep " PHPCompatibilityWP "
+	echo "$output" | grep " PHPCompatibilityParagonieRandomCompat "
 	unset output
 
 	### Cleanup ###
