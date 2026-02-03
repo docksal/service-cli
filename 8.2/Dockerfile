@@ -1,7 +1,11 @@
-FROM php:8.2.29-fpm-bookworm AS cli
+# syntax=docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv (ignore false positives in ARG/ENV)
+
+FROM php:8.2.30-fpm-trixie AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
+# SecretsUsedInArgOrEnv false positive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 # Prevent services autoload (http://jpetazzo.github.io/2013/10/06/policy-rc-d-do-not-start-services-automatically/)
@@ -60,6 +64,7 @@ RUN set -xe; \
 		procps \
 		pv \
 		rsync \
+		sqlite3 \
 		sudo \
 		supervisor \
 		unzip \
@@ -97,7 +102,7 @@ RUN set -xe; \
 # Configure sshd (for use PHPStorm's remote interpreters and tools integrations)
 # http://docs.docker.com/examples/running_ssh_service/
 RUN set -xe; \
-	mkdir /var/run/sshd; \
+	mkdir -p /var/run/sshd; \
 	echo 'docker:docker' | chpasswd; \
 	sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config; \
 	# SSH login fix. Otherwise user is kicked off after login
@@ -158,15 +163,15 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.27 \
-	COMPOSER2_VERSION=2.8.12 \
+	COMPOSER2_VERSION=2.9.3 \
 	DRUSH_VERSION=8.4.12 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.12.0 \
 	PLATFORMSH_CLI_VERSION=5.6.0 \
-	ACQUIA_CLI_VERSION=2.49.0 \
-	TERMINUS_VERSION=4.1.0 \
+	ACQUIA_CLI_VERSION=2.55.0 \
+	TERMINUS_VERSION=4.1.1 \
 	JQ_VERSION=1.8.1 \
-	YQ_VERSION=4.48.1
+	YQ_VERSION=4.50.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -213,16 +218,6 @@ RUN set -xe; \
 	# Cleanup
 	apt-get clean; rm -rf /var/lib/apt/lists/*
 
-# Install a newer SQLite version from Debian Trixie (testing) repo
-# Debian Bookworm (main) ships with sqlite v3.40. Drupal 11 requires SQLite v3.45+.
-# @see https://www.drupal.org/project/drupal/issues/3346338
-RUN set -xe; \
-	echo "deb https://deb.debian.org/debian testing main" | tee /etc/apt/sources.list.d/testing.list; \
-	apt-get update >/dev/null; \
-	apt-get install -y -t testing sqlite3;\
-	# Cleanup
-	apt-get clean; rm -rf /var/lib/apt/lists/*; rm -f /etc/apt/sources.list.d/testing.list
-
 # All further RUN commands will run as the "docker" user
 USER docker
 SHELL ["/bin/bash", "-c"]
@@ -234,49 +229,48 @@ RUN set -e; \
 	# Add composer bin project level and global directories to PATH
 	# Project level comes first and thus takes precedence over the global one
 	echo -e "\n"'export PATH="$PATH:${PROJECT_ROOT:-/var/www}/vendor/bin"' >> $HOME/.profile; \
+	echo -e "\n"'export PATH="$PATH:$HOME/.config/composer/vendor/bin"' >> $HOME/.profile; \
+	# Legacy composer global directory (for backward compatibility)
 	echo -e "\n"'export PATH="$PATH:$HOME/.composer/vendor/bin"' >> $HOME/.profile; \
 	# Reload updated PATH from profile to make composer/etc. visible below
-	. $HOME/.profile; \
+	source $HOME/.profile; \
 	# Drupal Coder & WP Coding Standards w/ a matching version of PHP_CodeSniffer
 	# Set allow-plugins. See https://getcomposer.org/allow-plugins
 	composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true; \
 	composer global require drupal/coder wp-coding-standards/wpcs phpcompatibility/phpcompatibility-wp; \
-	# Don't fix the indentation or installed_paths will not be set correctly
+	# IMPORTANT: Do NOT fix the indentation or installed_paths will not be set correctly
 	phpcs --config-set installed_paths \
-$HOME/.composer/vendor/drupal/coder/coder_sniffer/,\
-$HOME/.composer/vendor/wp-coding-standards/wpcs/,\
-$HOME/.composer/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,\
-$HOME/.composer/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,\
-$HOME/.composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat; \
+$HOME/.config/composer/vendor/drupal/coder/coder_sniffer/,\
+$HOME/.config/composer/vendor/wp-coding-standards/wpcs/,\
+$HOME/.config/composer/vendor/phpcompatibility/php-compatibility/PHPCompatibility/,\
+$HOME/.config/composer/vendor/phpcompatibility/phpcompatibility-wp/PHPCompatibilityWP,\
+$HOME/.config/composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCompatibilityParagonieRandomCompat; \
 	# Cleanup
 	composer clear-cache
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.40.3 \
-	NODE_VERSION=22.20.0 \
-	# Yarn (Classic v1)
-	# https://github.com/yarnpkg/yarn/releases
+	NVM_VERSION=0.40.4 \
+	NODE_VERSION=24.13.0 \
+	# yarn v1 (classic) https://github.com/yarnpkg/yarn/releases
 	YARN_VERSION=1.22.22
 # Don't use -x here, as the output may be excessive
 RUN set -e; \
-	# NVM and a defaut Node.js version
+	# NVM and a default Node.js version
 	export PROFILE="$HOME/.profile"; \
-	curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash >/dev/null; \
-	# Reload profile to load nvm (needed by Yarn installation below)
-	. $HOME/.profile; \
-	# Yarn (Classic v1)
-	# Installing via npm to allow fore override with never versions via corepack
-	npm install -g yarn@${YARN_VERSION}; \
-	# Enable corepack (allows installing project level yarn v2+ via yarn)
-	corepack enable
+	curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh | bash; \
+	# Load nvm right away (needed by Yarn installation below)
+	source $HOME/.profile; \
+	# Enable corepack and install yarn v1 (classic) globally
+	corepack enable; \
+	corepack install -g yarn@${YARN_VERSION}
 
 ## Ruby bundler
 ## Don't use -x here, as the output may be excessive
 RUN set -e; \
 	# Export ruby gem bin path
 	echo 'export PATH=$PATH:$(ruby -r rubygems -e "puts Gem.user_dir")/bin' >> $HOME/.profile; \
-	. $HOME/.profile; \
+	source $HOME/.profile; \
 	gem install --user-install bundler; \
 	# Have bundler install gems in the current directory (./.bundle) by default
 	echo -e "\n"'export BUNDLE_PATH=.bundle' >> $HOME/.profile
@@ -304,6 +298,7 @@ COPY config/php/zz-php-fpm.conf /usr/local/etc/php-fpm.d/zz-php-fpm.conf
 
 ENV \
 	# ssh-agent proxy socket (requires docksal/ssh-agent)
+	# SecretsUsedInArgOrEnv false positive
 	SSH_AUTH_SOCK=/.ssh-agent/proxy-socket \
 	# Set TERM so text editors/etc. can be used
 	TERM=xterm \
@@ -345,9 +340,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=4.104.3 \
-	VSCODE_GITLENS_VERSION=17.6.1 \
-	VSCODE_XDEBUG_VERSION=1.37.0 \
+	CODE_SERVER_VERSION=4.108.2 \
+	VSCODE_GITLENS_VERSION=17.9.0 \
+	VSCODE_XDEBUG_VERSION=1.40.0 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server

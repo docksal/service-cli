@@ -19,7 +19,7 @@ defaults:
 env:
   IMAGE: docksal/cli
   UPSTREAM_IMAGE: debian
-  LATEST_VERSION: "8.4"
+  LATEST_VERSION: "8.5"
   DOCKSAL_VERSION: develop
 
 jobs:
@@ -34,11 +34,6 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: "8.1"
-            runner: ubuntu-24.04
-          -
-            platform: linux/amd64
-            arch: amd64
             version: "8.2"
             runner: ubuntu-24.04
           -
@@ -52,10 +47,10 @@ jobs:
             version: "8.4"
             runner: ubuntu-24.04
           -
-            platform: linux/arm64
-            arch: arm64
-            version: "8.1"
-            runner: ubuntu-24.04-arm
+            platform: linux/amd64
+            arch: amd64
+            version: "8.5"
+            runner: ubuntu-24.04
           -
             platform: linux/arm64
             arch: arm64
@@ -70,6 +65,11 @@ jobs:
             platform: linux/arm64
             arch: arm64
             version: "8.4"
+            runner: ubuntu-24.04-arm
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "8.5"
             runner: ubuntu-24.04-arm
   
     env:
@@ -126,11 +126,7 @@ jobs:
           -
             platform: linux/amd64
             arch: amd64
-            version: "8.1"
-            runner: ubuntu-24.04
-          -
-            platform: linux/amd64
-            arch: amd64
+
             version: "8.2"
             runner: ubuntu-24.04
           -
@@ -144,10 +140,10 @@ jobs:
             version: "8.4"
             runner: ubuntu-24.04
           -
-            platform: linux/arm64
-            arch: arm64
-            version: "8.1"
-            runner: ubuntu-24.04-arm
+            platform: linux/amd64
+            arch: amd64
+            version: "8.5"
+            runner: ubuntu-24.04
           -
             platform: linux/arm64
             arch: arm64
@@ -162,6 +158,11 @@ jobs:
             platform: linux/arm64
             arch: arm64
             version: "8.4"
+            runner: ubuntu-24.04-arm
+          -
+            platform: linux/arm64
+            arch: arm64
+            version: "8.5"
             runner: ubuntu-24.04-arm
 
     env:
@@ -223,10 +224,10 @@ jobs:
     strategy:
       matrix:
         version:
-          - "8.1"
           - "8.2"
           - "8.3"
           - "8.4"
+          - "8.5"
 
     env:
       VERSION_PREFIX: php

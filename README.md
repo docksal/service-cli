@@ -6,7 +6,7 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 
 ## Features
 
-- Based on the official php-fpm Debian 12 (bookworm) images 
+- Based on the official php-fpm Debian 13 (trixie) images 
 - php/php-fpm (w/ xdebug), nodejs (via nvm), python, ruby
 - Framework specific tools for Drupal and Wordpress
 - Miscellaneous cli tools for day to day web development
@@ -19,15 +19,15 @@ This image(s) is part of the [Docksal](https://docksal.io) image library.
 ## Versions and image tag naming convention
 
 - Stable image versions
-  - `docksal/cli:php8.1-3.9`, `docksal/cli:php8.1` - PHP 8.1
-  - `docksal/cli:php8.2-3.9`, `docksal/cli:php8.2` - PHP 8.2
-  - `docksal/cli:php8.3-3.9`, `docksal/cli:php8.3` - PHP 8.3
-  - `docksal/cli:php8.4-3.9`, `docksal/cli:php8.4`, `docksal/cli:latest` - PHP 8.4
+  - `docksal/cli:php8.2-3.11`, `docksal/cli:php8.2` - PHP 8.2
+  - `docksal/cli:php8.3-3.11`, `docksal/cli:php8.3` - PHP 8.3
+  - `docksal/cli:php8.4-3.11`, `docksal/cli:php8.4` - PHP 8.4
+  - `docksal/cli:php8.5-3.11`, `docksal/cli:php8.5`, `docksal/cli:latest` - PHP 8.5
 - Development image versions
-  - `docksal/cli:php8.1-edge` - PHP 8.1
   - `docksal/cli:php8.2-edge` - PHP 8.2
   - `docksal/cli:php8.3-edge` - PHP 8.3
-  - `docksal/cli:php8.3-edge` - PHP 8.3
+  - `docksal/cli:php8.4-edge` - PHP 8.4
+  - `docksal/cli:php8.5-edge` - PHP 8.5
 
 ## PHP
 
@@ -70,7 +70,7 @@ cli
 ## NodeJS
 
 - nvm
-- node v22.20.0 LTS (following NodeJS LTS release cycle)
+- node v24.13.0 LTS (following NodeJS LTS release cycle)
 - yarn (classic v1)
 
 NodeJS is installed via `nvm` in the `docker` user's profile inside the image (`/home/docker/.nvm`).
@@ -80,11 +80,11 @@ Then, use `nvm use 23.11.0` to use it in the current session or `nvm alias defau
 
 ## Python
 
-This image comes with a system level installed Python v3.9.x from upstream Debian 11.
+This image comes with a system-level installed Python v3.13.x from upstream Debian 13.
 
 ## Ruby
 
-This image comes with a system level installed Ruby v2.7.x from upstream Debian 11.
+This image comes with a system-level installed Ruby v3.3.x from upstream Debian 13.
 
 ## Notable console tools
 
