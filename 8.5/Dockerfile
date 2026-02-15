@@ -167,7 +167,7 @@ ENV \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.12.0 \
 	PLATFORMSH_CLI_VERSION=5.6.0 \
-	ACQUIA_CLI_VERSION=2.55.0 \
+	ACQUIA_CLI_VERSION=2.58.0 \
 	# Terminus does not yet support PHP 8.5 officially.
 	# This env var allows running it on newer PHP versions regardless.
 	# https://github.com/pantheon-systems/terminus/issues/2751
