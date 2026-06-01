@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # check=skip=SecretsUsedInArgOrEnv (ignore false positives in ARG/ENV)
 
-FROM php:8.3.30-fpm-trixie AS cli
+FROM php:8.3.31-fpm-trixie AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
