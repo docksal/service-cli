@@ -148,9 +148,9 @@ RUN set -xe; \
 		ssh2 \
 		xdebug \
 		xhprof \
-		# MSSQL PHP client - not available yet for PHP 8.5 via docker-php-extension-installer
-		# pdo_sqlsrv \
-		# sqlsrv \
+		# MSSQL PHP client
+		pdo_sqlsrv \
+		sqlsrv \
 	;\
 	# Disable xdebug and xhprof by default to avoid performance impact
 	# They can be enabled via environment variables at runtime (XDEBUG_ENABLED=1 and XHPROF_ENABLED=1)
