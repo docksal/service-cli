@@ -87,7 +87,7 @@ RUN set -xe; \
 # TODO: Replace gosu with sudo/su in startup.sh
 ENV \
 	GOSU_VERSION=1.13 \
-	GOMPLATE_VERSION=5.1.0
+	GOMPLATE_VERSION=5.3.0
 RUN set -xe; \
 	# Install gosu and give access to the docker user primary group to use it.
 	# gosu is used instead of sudo to start the main container process (pid 1) in a docker friendly way.
@@ -162,15 +162,15 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.28 \
-	COMPOSER2_VERSION=2.10.0 \
+	COMPOSER2_VERSION=2.10.3 \
 	DRUSH_VERSION=8.5.0 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.12.0 \
 	PLATFORMSH_CLI_VERSION=5.9.0 \
-	ACQUIA_CLI_VERSION=2.61.3 \
-	TERMINUS_VERSION=4.3.0 \
-	JQ_VERSION=1.8.1 \
-	YQ_VERSION=4.53.2
+	ACQUIA_CLI_VERSION=4.2.1 \
+	TERMINUS_VERSION=4.3.3 \
+	JQ_VERSION=1.8.2 \
+	YQ_VERSION=4.54.1
 RUN set -xe; \
 	# Composer 1.x
 	curl -fsSL "https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar" -o /usr/local/bin/composer1; \
@@ -249,8 +249,8 @@ $HOME/.config/composer/vendor/phpcompatibility/phpcompatibility-paragonie/PHPCom
 
 # Node.js (installed as user)
 ENV \
-	NVM_VERSION=0.40.4 \
-	NODE_VERSION=24.16.0 \
+	NVM_VERSION=0.40.8 \
+	NODE_VERSION=24.22.1 \
 	# yarn v1 (classic) https://github.com/yarnpkg/yarn/releases
 	YARN_VERSION=1.22.22
 # Don't use -x here, as the output may be excessive
@@ -339,9 +339,9 @@ USER docker
 ARG HOME=/home/docker
 
 ENV \
-	CODE_SERVER_VERSION=4.122.0 \
-	VSCODE_GITLENS_VERSION=2026.6.10649 \
-	VSCODE_XDEBUG_VERSION=1.40.1 \
+	CODE_SERVER_VERSION=4.141.0 \
+	VSCODE_GITLENS_VERSION=2026.10.200514 \
+	VSCODE_XDEBUG_VERSION=1.40.2 \
 	VSCODE_HOME="${HOME}/code-server"
 
 # Install code-server
