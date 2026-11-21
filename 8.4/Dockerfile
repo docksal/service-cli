@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # check=skip=SecretsUsedInArgOrEnv (ignore false positives in ARG/ENV)
 
-FROM php:8.4.27-fpm-trixie AS cli
+FROM php:8.4.28-fpm-trixie AS cli
 
 ARG TARGETARCH
 ARG DEBIAN_FRONTEND=noninteractive
@@ -163,7 +163,7 @@ RUN set -xe; \
 ENV \
 	COMPOSER_DEFAULT_VERSION=2 \
 	COMPOSER_VERSION=1.10.28 \
-	COMPOSER2_VERSION=2.10.3 \
+	COMPOSER2_VERSION=2.11.2 \
 	DRUSH_VERSION=8.5.0 \
 	DRUPAL_CONSOLE_LAUNCHER_VERSION=1.9.7 \
 	WPCLI_VERSION=2.12.0 \
